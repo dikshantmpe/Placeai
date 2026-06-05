@@ -73,6 +73,7 @@ export default function DailyChallenge() {
   };
 
   if (loading) return <div style={{ padding: "2rem" }}>Loading today's challenge...</div>;
+  if (!challenge) return <div style={{ padding: "2rem" }}>⏳ Waking up server, please wait 30 seconds and refresh...</div>;
 
   const bothDone = dsaDone && quizDone;
 
