@@ -9,10 +9,6 @@ const menuItems = [
   { icon: "🧠", label: "Aptitude Quiz", path: "/quiz" },
   { icon: "🏢", label: "Company Questions", path: "/company" },
   { icon: "🔥", label: "Daily Challenge", path: "/daily" },
-  { icon: "📊", label: "Progress", path: "/dashboard" },
-  { icon: "🔖", label: "Bookmarks", path: "/dashboard" },
-  { icon: "🏆", label: "Achievements", path: "/dashboard" },
-  { icon: "⚙️", label: "Settings", path: "/dashboard" },
 ];
 
 export default function Sidebar({ user }) {
