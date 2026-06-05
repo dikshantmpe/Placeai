@@ -37,7 +37,7 @@ export default function DailyChallenge() {
     setQuizDone(savedQuiz);
 
     // Fetch today's challenge
-    axios.get("http://localhost:5000/api/daily")
+    axios.get("https://placeai-sqjj.onrender.com/api/daily")
       .then(res => { setChallenge(res.data); setLoading(false); })
       .catch(err => console.error(err));
   }, []);

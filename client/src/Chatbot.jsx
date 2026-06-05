@@ -32,7 +32,7 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/chatbot", {
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/chatbot", {
         messages: newMessages.map(m => ({ role: m.role, content: m.content }))
       });
       setMessages([...newMessages, { role: "assistant", content: res.data.reply }]);

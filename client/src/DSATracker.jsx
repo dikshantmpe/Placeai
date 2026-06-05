@@ -8,13 +8,13 @@ export default function DSATracker() {
   const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/problems")
+    axios.get("https://placeai-sqjj.onrender.com/api/problems")
       .then(res => setProblems(res.data))
       .catch(err => console.error(err));
   }, []);
 
   const toggleStatus = async (id) => {
-    const res = await axios.put(`http://localhost:5000/api/problems/${id}`);
+    const res = await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`);
     setProblems(problems.map(p => p._id === id ? res.data : p));
   };
 

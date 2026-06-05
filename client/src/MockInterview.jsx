@@ -20,7 +20,7 @@ export default function MockInterview() {
     const firstMessage = [{ role: "user", content: "Hello, I am ready for the interview." }];
 
     try {
-      const res = await axios.post("http://localhost:5000/api/interview/chat", {
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/interview/chat", {
         messages: firstMessage,
         role,
         difficulty
@@ -46,7 +46,7 @@ export default function MockInterview() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/interview/chat", {
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/interview/chat", {
         messages: newMessages,
         role,
         difficulty

@@ -16,8 +16,8 @@ export default function Login({ setUser }) {
     setLoading(true);
     try {
       const url = isRegister
-        ? "http://localhost:5000/api/auth/register"
-        : "http://localhost:5000/api/auth/login";
+        ? "https://placeai-sqjj.onrender.com/api/auth/register"
+        : "https://placeai-sqjj.onrender.com/api/auth/login";
 
       const res = await axios.post(url, form);
       localStorage.setItem("token", res.data.token);
@@ -36,7 +36,7 @@ export default function Login({ setUser }) {
       const result = await signInWithPopup(auth, googleProvider);
       const { displayName, email, photoURL } = result.user;
 
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
         name: displayName, email, avatar: photoURL
       });
 

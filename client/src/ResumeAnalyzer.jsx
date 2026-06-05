@@ -13,7 +13,7 @@ export default function ResumeAnalyzer() {
     setLoading(true);
     setFeedback("");
     try {
-      const res = await axios.post("http://localhost:5000/api/resume/analyze", formData);
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/resume/analyze", formData);
       setFeedback(res.data.feedback);
     } catch (err) {
       alert("Error analyzing resume. Try again.");

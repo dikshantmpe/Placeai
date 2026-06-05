@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/dashboard")
+    axios.get("https://placeai-sqjj.onrender.com/api/dashboard")
       .then(res => { setData(res.data); setLoading(false); })
       .catch(err => console.error(err));
   }, []);

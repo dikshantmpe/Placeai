@@ -17,8 +17,8 @@ export default function CompanyQuestions() {
 
   const fetchQuestions = async () => {
     const url = company === "All"
-      ? "http://localhost:5000/api/company"
-      : `http://localhost:5000/api/company?company=${company}`;
+      ? "https://placeai-sqjj.onrender.com/api/company"
+      : `https://placeai-sqjj.onrender.com/api/company?company=${company}`;
     const res = await axios.get(url);
     setQuestions(res.data);
   };
@@ -27,7 +27,7 @@ export default function CompanyQuestions() {
 
   const handleSubmit = async () => {
     if (!form.question.trim()) return alert("Please enter a question!");
-    await axios.post("http://localhost:5000/api/company", form);
+    await axios.post("https://placeai-sqjj.onrender.com/api/company", form);
     setShowForm(false);
     setForm({ company: "Google", round: "DSA", question: "", difficulty: "Medium" });
     fetchQuestions();

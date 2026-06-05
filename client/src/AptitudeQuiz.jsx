@@ -19,7 +19,7 @@ export default function AptitudeQuiz() {
   }, [timeLeft, quizStarted, quizDone]);
 
   const startQuiz = async () => {
-    const res = await axios.get("http://localhost:5000/api/quiz");
+    const res = await axios.get("https://placeai-sqjj.onrender.com/api/quiz");
     setQuestions(res.data);
     setQuizStarted(true);
     setQuizDone(false);
