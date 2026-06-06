@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { auth, googleProvider } from "./firebase";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithRedirect } from "firebase/auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -39,7 +39,7 @@ export default function Login({ setUser }) {
 const handleGoogle = async () => {
   setError("");
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    await signInWithRedirect(auth, googleProvider);
     const { displayName, email, photoURL } = result.user;
     const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
       name: displayName, email, avatar: photoURL
