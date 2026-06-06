@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-export default function RightSidebar() {
+export default function RightSidebar({ user }) {
   const [timeLeft, setTimeLeft] = useState("");
   const [dsaProgress, setDsaProgress] = useState({ done: 0, total: 0, percent: 0 });
   const streak = parseInt(localStorage.getItem("streak") || "0");
@@ -47,7 +47,50 @@ export default function RightSidebar() {
       borderLeft: "1px solid #1a1a1a", position: "fixed",
       right: 0, top: 0, zIndex: 100, overflowY: "auto",
       display: "flex", flexDirection: "column", gap: "0"
-    }}>
+    }}>{/* Top Bar */}
+<div style={{
+  padding: "16px", borderBottom: "1px solid #1a1a1a",
+  display: "flex", alignItems: "center", justifyContent: "space-between",
+  position: "sticky", top: 0, background: "#0d0d0d", zIndex: 10
+}}>
+  {/* Notification Bell */}
+  <div style={{ position: "relative", cursor: "pointer" }}>
+    <div style={{
+      width: "36px", height: "36px", borderRadius: "10px",
+      background: "#111", border: "1px solid #1f1f1f",
+      display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px"
+    }}>🔔</div>
+    <div style={{
+      position: "absolute", top: "-4px", right: "-4px",
+      width: "16px", height: "16px", borderRadius: "50%",
+      background: "#dc2626", fontSize: "9px", color: "white",
+      display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700"
+    }}>3</div>
+  </div>
+
+  {/* Profile */}
+  <Link to="/profile" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
+    <div style={{ textAlign: "right" }}>
+      <p style={{ margin: 0, fontSize: "13px", fontWeight: "600", color: "white" }}>
+        {user?.name?.split(" ")[0] || "User"}
+      </p>
+      <p style={{ margin: 0, fontSize: "11px", color: "#555" }}>View Profile</p>
+    </div>
+    {user?.avatar
+      ? <img src={user.avatar} alt="avatar"
+          style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover",
+            border: "2px solid #dc2626" }} />
+      : <div style={{
+          width: "36px", height: "36px", borderRadius: "50%",
+          background: "#dc2626", color: "white", fontSize: "13px", fontWeight: "700",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: "2px solid #dc262655"
+        }}>
+          {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"}
+        </div>
+    }
+  </Link>
+</div>
       <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: "16px" }}>
 
         {/* Your Progress */}

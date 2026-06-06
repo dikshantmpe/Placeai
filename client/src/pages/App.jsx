@@ -50,7 +50,7 @@ export default function App() {
             </Routes>
             <Chatbot />
           </div>
-          <RightSidebar />
+          <RightSidebar user={user} />
         </div>
       )}
     </BrowserRouter>

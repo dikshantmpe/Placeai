@@ -36,29 +36,6 @@ export default function Sidebar({ user }) {
         </span>
       </div>
 
-      {/* User profile */}
-      {user && (
-        <div onClick={() => navigate("/profile")} style={{
-          padding: "12px 16px", borderBottom: "1px solid #1f1f1f",
-          display: "flex", alignItems: "center", gap: "10px", cursor: "pointer"
-        }}>
-          {user.avatar
-            ? <img src={user.avatar} alt="avatar"
-                style={{ width: "32px", height: "32px", borderRadius: "50%" }} />
-            : <div style={{
-                width: "32px", height: "32px", borderRadius: "50%",
-                background: "#dc2626", color: "white", fontSize: "12px",
-                fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center"
-              }}>
-                {getInitials(user.name)}
-              </div>
-          }
-          <div>
-            <div style={{ fontSize: "13px", fontWeight: "600", color: "white" }}>{user.name}</div>
-            <div style={{ fontSize: "11px", color: "#666" }}>View Profile</div>
-          </div>
-        </div>
-      )}
 
       {/* Menu */}
       <div style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
