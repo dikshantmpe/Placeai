@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import visionImg from "../assets/vision.jpg";
 
 const menuItems = [
+  { icon: "🏠", label: "Home", path: "/" },
   { icon: "⊞", label: "Dashboard", path: "/dashboard" },
   { icon: "⟨/⟩", label: "DSA Tracker", path: "/dsa" },
   { icon: "📄", label: "Resume Analyzer", path: "/resume" },
