@@ -12,6 +12,7 @@ import Chatbot from "../Chatbot";
 import Login from "../Login";
 import Profile from "../Profile";
 import Home from "../Home";
+import RightSidebar from "../components/RightSidebar";
 
 function ProtectedRoute({ user, children }) {
   if (!user) return <Navigate to="/login" replace />;
@@ -33,7 +34,7 @@ export default function App() {
       ) : (
         <div style={{ display: "flex", minHeight: "100vh", background: "#0a0a0a" }}>
           <Sidebar user={user} />
-          <div style={{ marginLeft: "220px", flex: 1, minHeight: "100vh", overflowY: "auto" }}>
+          <div style={{ marginLeft: "220px", marginRight: "280px", flex: 1, minHeight: "100vh", overflowY: "auto" }}>
             <Routes>
               <Route path="/" element={<Home user={user} />} />
               <Route path="/login" element={<Navigate to="/" />} />
@@ -49,6 +50,7 @@ export default function App() {
             </Routes>
             <Chatbot />
           </div>
+          <RightSidebar />
         </div>
       )}
     </BrowserRouter>
