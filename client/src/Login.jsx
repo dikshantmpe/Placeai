@@ -149,22 +149,28 @@ export default function Login({ setUser }) {
         </div>
       </div>
 
-      {/* ── ROBOT IMAGE — CENTER ── */}
-      <div style={{
-        position: "absolute", bottom: 0,
-        left: "50%", transform: "translateX(-50%)",
-        zIndex: 5, pointerEvents: "none",
-        display: "flex", alignItems: "flex-end", justifyContent: "center"
-      }}>
-        <img src={robotImg} alt="AI Robot"
-          style={{
-            height: "85vh", maxHeight: "700px",
-            objectFit: "contain", objectPosition: "bottom",
-            filter: "drop-shadow(0 0 40px rgba(220,38,38,0.5)) drop-shadow(0 0 80px rgba(220,38,38,0.2))",
-            animation: "float 4s ease-in-out infinite"
-          }}
-        />
-      </div>
+      {/* ── ROBOT IMAGE — between left and right ── */}
+<div style={{
+  width: "380px", flexShrink: 0,
+  display: "flex", alignItems: "flex-end", justifyContent: "center",
+  position: "relative", overflow: "hidden"
+}}>
+  <div style={{
+    position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)",
+    width: "400px", height: "400px",
+    background: "radial-gradient(circle, rgba(220,38,38,0.3) 0%, transparent 65%)",
+    borderRadius: "50%", pointerEvents: "none"
+  }} />
+  <img src={robotImg} alt="AI Robot"
+    style={{
+      height: "90vh", maxHeight: "750px",
+      objectFit: "contain", objectPosition: "bottom",
+      filter: "drop-shadow(0 0 50px rgba(220,38,38,0.6)) drop-shadow(0 0 100px rgba(220,38,38,0.3))",
+      animation: "float 4s ease-in-out infinite",
+      position: "relative", zIndex: 2
+    }}
+  />
+</div>
 
       {/* ── RIGHT PANEL — FLOATING CARD ── */}
       <div style={{
