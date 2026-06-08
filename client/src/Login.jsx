@@ -6,10 +6,10 @@ import { useNavigate } from "react-router-dom";
 import robotImg from "./assets/robot.png";
 
 const features = [
-  { icon: "⚡", title: "AI-Powered Tools", desc: "Resume Analyzer, Mock Interviews and more." },
-  { icon: "📊", title: "Track & Improve", desc: "Smart progress tracking across all modules." },
-  { icon: "🔥", title: "Daily Challenges", desc: "Build consistency with daily DSA & Aptitude challenges." },
-  { icon: "🏢", title: "Company Insights", desc: "Access company-wise questions and interview experiences." },
+  { icon: "◈", title: "AI-Powered Tools", desc: "Resume Analyzer, Mock Interviews and more." },
+  { icon: "◎", title: "Track & Improve", desc: "Smart progress tracking across all modules." },
+  { icon: "✦", title: "Daily Challenges", desc: "Build consistency with daily DSA & Aptitude challenges." },
+  { icon: "⊞", title: "Company Insights", desc: "Access company-wise questions and interview experiences." },
 ];
 
 export default function Login({ setUser }) {
@@ -60,36 +60,57 @@ export default function Login({ setUser }) {
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0a0a0a",
+      minHeight: "100vh", background: "#080808",
       display: "flex", overflow: "hidden", position: "relative"
     }}>
 
-      {/* ── LEFT PANEL ── */}
+      {/* ── LEFT PANEL — full width behind robot ── */}
       <div style={{
-        flex: 1, padding: "3rem", display: "flex", flexDirection: "column",
-        justifyContent: "space-between", position: "relative", overflow: "hidden"
+        flex: 1, position: "relative", overflow: "hidden",
+        display: "flex", flexDirection: "column", justifyContent: "space-between",
+        padding: "2.5rem 3rem"
       }}>
+
         {/* Grid overlay */}
         <div style={{
-          position: "absolute", inset: 0, opacity: 0.03,
+          position: "absolute", inset: 0, opacity: 0.025,
           backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-          backgroundSize: "40px 40px", pointerEvents: "none"
-        }} />
-        {/* Red glow behind robot */}
-        <div style={{
-          position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)",
-          width: "500px", height: "500px",
-          background: "radial-gradient(circle, rgba(220,38,38,0.25) 0%, transparent 65%)",
-          borderRadius: "50%", pointerEvents: "none"
+          backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0
         }} />
 
-        {/* Logo */}
-        <div style={{ position: "relative", zIndex: 2 }}>
+        {/* Robot image — positioned center-right of left panel */}
+        <div style={{
+          position: "absolute", bottom: 0, right: "-40px",
+          height: "100%", zIndex: 1, pointerEvents: "none",
+          display: "flex", alignItems: "flex-end"
+        }}>
+          {/* Red glow behind robot */}
+          <div style={{
+            position: "absolute", bottom: "10%", left: "50%",
+            transform: "translateX(-50%)",
+            width: "500px", height: "500px",
+            background: "radial-gradient(circle, rgba(220,38,38,0.35) 0%, transparent 65%)",
+            borderRadius: "50%", pointerEvents: "none", zIndex: 0
+          }} />
+          <img src={robotImg} alt="AI Robot" style={{
+            height: "92vh", maxHeight: "780px",
+            objectFit: "contain", objectPosition: "bottom",
+            filter: "drop-shadow(0 0 60px rgba(220,38,38,0.6))",
+            animation: "float 4s ease-in-out infinite",
+            position: "relative", zIndex: 2
+          }} />
+        </div>
+
+        {/* Content — above robot */}
+        <div style={{ position: "relative", zIndex: 3 }}>
+          {/* Logo */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "2.5rem" }}>
-            <div style={{ width: "36px", height: "36px", borderRadius: "10px",
+            <div style={{
+              width: "34px", height: "34px", borderRadius: "8px",
               background: "#dc2626", display: "flex", alignItems: "center",
-              justifyContent: "center", fontSize: "18px" }}>🎯</div>
-            <span style={{ fontSize: "18px", fontWeight: "700" }}>
+              justifyContent: "center", fontSize: "16px", color: "white", fontWeight: "700"
+            }}>P</div>
+            <span style={{ fontSize: "17px", fontWeight: "700" }}>
               PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
             </span>
           </div>
@@ -98,30 +119,39 @@ export default function Login({ setUser }) {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.3)",
-            padding: "6px 14px", borderRadius: "20px", fontSize: "12px",
+            padding: "5px 12px", borderRadius: "20px", fontSize: "12px",
             color: "#dc2626", fontWeight: "600", marginBottom: "1.2rem"
           }}>
-            🎯 Your AI Placement Partner
+            · Your AI Placement Partner
           </div>
 
-          <h1 style={{ fontSize: "40px", fontWeight: "800", lineHeight: "1.2", marginBottom: "1rem" }}>
+          <h1 style={{
+            fontSize: "44px", fontWeight: "800", lineHeight: "1.15",
+            marginBottom: "1rem", maxWidth: "420px"
+          }}>
             Prepare Smarter.<br />
             <span style={{ color: "#dc2626" }}>Get Placed Faster.</span>
           </h1>
-          <p style={{ color: "#666", fontSize: "14px", lineHeight: "1.7", maxWidth: "360px", marginBottom: "2rem" }}>
+
+          <p style={{
+            color: "#666", fontSize: "14px", lineHeight: "1.7",
+            maxWidth: "380px", marginBottom: "2rem"
+          }}>
             All-in-one platform to track your progress, analyze your resume, practice interviews, and ace every placement challenge.
           </p>
 
           {/* Features */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxWidth: "340px" }}>
             {features.map((f, i) => (
               <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                <div style={{ width: "32px", height: "32px", borderRadius: "8px",
-                  background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.2)",
+                <div style={{
+                  width: "34px", height: "34px", borderRadius: "8px",
+                  background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.25)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "14px", flexShrink: 0 }}>{f.icon}</div>
+                  fontSize: "15px", color: "#dc2626", flexShrink: 0
+                }}>{f.icon}</div>
                 <div>
-                  <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px" }}>{f.title}</p>
+                  <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px", color: "#eee" }}>{f.title}</p>
                   <p style={{ margin: 0, color: "#555", fontSize: "12px" }}>{f.desc}</p>
                 </div>
               </div>
@@ -131,12 +161,13 @@ export default function Login({ setUser }) {
 
         {/* Testimonial */}
         <div style={{
-          position: "relative", zIndex: 2,
+          position: "relative", zIndex: 3,
           background: "rgba(255,255,255,0.03)", border: "1px solid #1f1f1f",
-          borderRadius: "14px", padding: "14px 18px",
-          display: "flex", alignItems: "center", gap: "12px"
+          borderRadius: "12px", padding: "14px 18px",
+          display: "flex", alignItems: "center", gap: "12px",
+          maxWidth: "420px"
         }}>
-          <span style={{ fontSize: "24px", color: "#dc2626", opacity: 0.5 }}>"</span>
+          <span style={{ fontSize: "22px", color: "#dc2626", opacity: 0.5, lineHeight: 1, flexShrink: 0 }}>"</span>
           <div style={{ flex: 1 }}>
             <p style={{ margin: "0 0 6px", color: "#aaa", fontSize: "12px", lineHeight: "1.6" }}>
               PlacePrep AI helped me crack my dream company with confidence!
@@ -149,61 +180,46 @@ export default function Login({ setUser }) {
         </div>
       </div>
 
-      {/* ── ROBOT IMAGE — between left and right ── */}
-<div style={{
-  width: "380px", flexShrink: 0,
-  display: "flex", alignItems: "flex-end", justifyContent: "center",
-  position: "relative", overflow: "hidden"
-}}>
-  <div style={{
-    position: "absolute", bottom: "0", left: "50%", transform: "translateX(-50%)",
-    width: "400px", height: "400px",
-    background: "radial-gradient(circle, rgba(220,38,38,0.3) 0%, transparent 65%)",
-    borderRadius: "50%", pointerEvents: "none"
-  }} />
-  <img src={robotImg} alt="AI Robot"
-    style={{
-      height: "90vh", maxHeight: "750px",
-      objectFit: "contain", objectPosition: "bottom",
-      filter: "drop-shadow(0 0 50px rgba(220,38,38,0.6)) drop-shadow(0 0 100px rgba(220,38,38,0.3))",
-      animation: "float 4s ease-in-out infinite",
-      position: "relative", zIndex: 2
-    }}
-  />
-</div>
-
-      {/* ── RIGHT PANEL — FLOATING CARD ── */}
+      {/* ── RIGHT PANEL — floating dark card ── */}
       <div style={{
-        width: "420px", flexShrink: 0,
+        width: "480px", flexShrink: 0, position: "relative", zIndex: 10,
+        background: "rgba(10,10,10,0.92)",
+        backdropFilter: "blur(24px)",
+        borderLeft: "1px solid #1a1a1a",
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "2rem", position: "relative", zIndex: 10
+        padding: "2.5rem"
       }}>
+        {/* Subtle red corner glow */}
         <div style={{
-          width: "100%", maxWidth: "380px",
-          background: "rgba(13,13,13,0.85)",
-          backdropFilter: "blur(20px)",
-          border: "1px solid rgba(220,38,38,0.2)",
-          borderRadius: "20px", padding: "2rem",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(220,38,38,0.1)",
-        }}>
-          <h2 style={{ fontSize: "26px", fontWeight: "800", margin: "0 0 6px" }}>
-            Welcome Back 👋
+          position: "absolute", top: "10%", right: "10%",
+          width: "200px", height: "200px",
+          background: "radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 70%)",
+          borderRadius: "50%", pointerEvents: "none"
+        }} />
+
+        <div style={{ width: "100%", maxWidth: "360px", position: "relative", zIndex: 1 }}>
+
+          <h2 style={{ fontSize: "30px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
+            Welcome Back
           </h2>
-          <p style={{ color: "#555", fontSize: "13px", margin: "0 0 24px", lineHeight: "1.6" }}>
-            <span style={{ color: "#dc2626", fontWeight: "600" }}>
+          <p style={{ color: "#555", fontSize: "13px", margin: "0 0 6px" }}>
+            <span style={{ color: "#dc2626", fontWeight: "700" }}>
               {isRegister ? "Sign Up" : "Login"}
-            </span> to Continue — Access your personalized dashboard.
+            </span>{" "}to Continue
+          </p>
+          <p style={{ color: "#444", fontSize: "12px", margin: "0 0 24px", lineHeight: "1.6" }}>
+            Access your personalized dashboard and continue your placement journey.
           </p>
 
           {/* Google Button */}
           <button onClick={handleGoogle} style={{
             width: "100%", padding: "12px", background: "transparent", color: "white",
-            borderRadius: "10px", border: "1px solid #dc262655", cursor: "pointer",
+            borderRadius: "10px", border: "1px solid #dc262644", cursor: "pointer",
             fontSize: "13px", fontWeight: "600", display: "flex",
             alignItems: "center", justifyContent: "center", gap: "10px",
             marginBottom: "16px", transition: "all 0.2s"
           }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(220,38,38,0.08)"}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(220,38,38,0.07)"}
             onMouseLeave={e => e.currentTarget.style.background = "transparent"}
           >
             <svg width="16" height="16" viewBox="0 0 48 48">
@@ -218,14 +234,14 @@ export default function Login({ setUser }) {
           {/* Divider */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
             <div style={{ flex: 1, height: "1px", background: "#1f1f1f" }} />
-            <span style={{ color: "#444", fontSize: "11px" }}>or</span>
+            <span style={{ color: "#333", fontSize: "11px" }}>or</span>
             <div style={{ flex: 1, height: "1px", background: "#1f1f1f" }} />
           </div>
 
           {/* Name field */}
           {isRegister && (
             <div style={{ marginBottom: "12px" }}>
-              <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px" }}>Full Name</label>
+              <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Full Name</label>
               <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
                 placeholder="Enter your name" style={{ width: "100%" }} />
             </div>
@@ -233,9 +249,9 @@ export default function Login({ setUser }) {
 
           {/* Email */}
           <div style={{ marginBottom: "12px" }}>
-            <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px" }}>Email Address</label>
+            <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Email Address</label>
             <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#444", fontSize: "13px" }}>✉</span>
+              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#333", fontSize: "13px" }}>✉</span>
               <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
                 onKeyDown={handleKey} placeholder="Enter your email" type="email"
                 style={{ width: "100%", paddingLeft: "34px" }} />
@@ -244,18 +260,18 @@ export default function Login({ setUser }) {
 
           {/* Password */}
           <div style={{ marginBottom: "8px" }}>
-            <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px" }}>Password</label>
+            <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Password</label>
             <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#444", fontSize: "13px" }}>🔒</span>
+              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#333", fontSize: "13px" }}>⊕</span>
               <input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
                 onKeyDown={handleKey} placeholder="Enter your password"
                 type={showPassword ? "text" : "password"}
                 style={{ width: "100%", paddingLeft: "34px", paddingRight: "40px" }} />
               <button onClick={() => setShowPassword(!showPassword)} style={{
                 position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
-                background: "transparent", border: "none", cursor: "pointer", color: "#444", fontSize: "13px"
+                background: "transparent", border: "none", cursor: "pointer", color: "#333", fontSize: "14px"
               }}>
-                {showPassword ? "🙈" : "👁"}
+                {showPassword ? "◎" : "◉"}
               </button>
             </div>
           </div>
@@ -263,7 +279,7 @@ export default function Login({ setUser }) {
           {/* Remember me */}
           {!isRegister && (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", color: "#888" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", color: "#666" }}>
                 <input type="checkbox" style={{ accentColor: "#dc2626" }} />
                 Remember me
               </label>
@@ -272,25 +288,29 @@ export default function Login({ setUser }) {
           )}
 
           {error && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid #ef444433",
+            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid #ef444422",
               borderRadius: "8px", padding: "8px 12px", marginBottom: "12px" }}>
-              <p style={{ color: "#ef4444", fontSize: "12px", margin: 0 }}>⚠️ {error}</p>
+              <p style={{ color: "#ef4444", fontSize: "12px", margin: 0 }}>! {error}</p>
             </div>
           )}
 
           {/* Submit */}
           <button onClick={handleSubmit} disabled={loading} style={{
-            width: "100%", padding: "12px", background: "#dc2626", color: "white",
+            width: "100%", padding: "13px", background: "#dc2626", color: "white",
             borderRadius: "10px", border: "none", cursor: loading ? "not-allowed" : "pointer",
             fontSize: "14px", fontWeight: "700", marginBottom: "16px",
             display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-            boxShadow: "0 4px 20px rgba(220,38,38,0.4)", opacity: loading ? 0.7 : 1
-          }}>
-            {loading ? "Please wait..." : isRegister ? "Create Account" : "Login →"}
+            boxShadow: "0 4px 24px rgba(220,38,38,0.35)", opacity: loading ? 0.7 : 1,
+            transition: "opacity 0.2s, box-shadow 0.2s"
+          }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = "0 6px 30px rgba(220,38,38,0.5)"}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 24px rgba(220,38,38,0.35)"}
+          >
+            {loading ? "Please wait..." : isRegister ? "Create Account" : "Login  →"}
           </button>
 
           {/* Toggle */}
-          <p style={{ textAlign: "center", color: "#555", fontSize: "12px", margin: "0 0 14px" }}>
+          <p style={{ textAlign: "center", color: "#444", fontSize: "12px", margin: "0 0 16px" }}>
             {isRegister ? "Already have an account? " : "Don't have an account? "}
             <span onClick={() => { setIsRegister(!isRegister); setError(""); }}
               style={{ color: "#dc2626", cursor: "pointer", fontWeight: "600" }}>
@@ -299,8 +319,8 @@ export default function Login({ setUser }) {
           </p>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-            <span style={{ color: "#333", fontSize: "11px" }}>🛡</span>
-            <span style={{ color: "#444", fontSize: "11px" }}>
+            <span style={{ color: "#2a2a2a", fontSize: "14px" }}>◈</span>
+            <span style={{ color: "#333", fontSize: "11px" }}>
               Your data is <span style={{ color: "#22c55e" }}>secure</span> with us
             </span>
           </div>
@@ -309,8 +329,8 @@ export default function Login({ setUser }) {
 
       <style>{`
         @keyframes float {
-          0%, 100% { transform: translateX(-50%) translateY(0px); }
-          50% { transform: translateX(-50%) translateY(-15px); }
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
         }
       `}</style>
     </div>
