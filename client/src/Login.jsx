@@ -162,7 +162,7 @@ export default function Login({ setUser }) {
         </div>
       </div>
       <div className="hello-world">
-  <span className="typing-text">HELLO WORLD</span>
+<span className="typing-text">{"> HELLO WORLD"}</span>
   <span className="cursor">_</span>
 </div>
       {/* ── RIGHT PANEL — floating dark card ── */}
@@ -384,12 +384,21 @@ padding: "3rem"
 
 .hello-world {
   position: absolute;
-  bottom: 60px;
+
   left: 70px;
+  bottom: 180px;
+
   z-index: 5;
 
   font-family: "Courier New", monospace;
-  font-size: 32px;
+  font-size: 42px;
+  font-weight: 700;
+
+  color: rgba(220,38,38,0.9);
+
+  display: flex;
+  align-items: center;
+}
   font-weight: 700;
   color: #dc2626;
 
