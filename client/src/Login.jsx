@@ -154,7 +154,7 @@ export default function Login({ setUser }) {
                 }}>{f.icon}</div>
                 <div>
                   <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px", color: "#eee" }}>{f.title}</p>
-                  <p style={{ margin: 0, color: "#555", fontSize: "12px" }}>{f.desc}</p>
+                  <p style={{ margin: 0, color: "#777", fontSize: "12px" }}>{f.desc}</p>
                 </div>
               </div>
             ))}
