@@ -160,8 +160,7 @@ export default function Login({ setUser }) {
             ))}
           </div>
         </div>
-
-
+      </div>
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div className="right-panel" style={{
         width: "520px",
