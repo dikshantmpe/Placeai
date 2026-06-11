@@ -59,13 +59,14 @@ export default function Login({ setUser }) {
   const handleKey = (e) => { if (e.key === "Enter") handleSubmit(); };
 
   return (
-    <div style={{
-      minHeight: "100vh", background: "#080808",
+    <div className="login-page" style={{
+       minHeight: "100vh",
+      background: "#080808",
       display: "flex", overflow: "hidden", position: "relative"
     }}>
 
       {/* ── LEFT PANEL — full width behind robot ── */}
-      <div style={{
+      <div className="left-panel" style={{
         flex: 1, position: "relative", overflow: "hidden",
         display: "flex", flexDirection: "column", justifyContent: "space-between",
         padding: "3rem 4.5rem"
@@ -92,7 +93,9 @@ export default function Login({ setUser }) {
             background: "radial-gradient(circle, rgba(220,38,38,0.35) 0%, transparent 65%)",
             borderRadius: "50%", pointerEvents: "none", zIndex: 0
           }} />
-          <img src={robotImg} alt="AI Robot" style={{
+          <img 
+          className="robot-image"
+          src={robotImg} alt="AI Robot" style={{
             height: "92vh", maxHeight: "780px",
             objectFit: "contain", objectPosition: "bottom",
             filter: "drop-shadow(0 0 60px rgba(220,38,38,0.6))",
@@ -125,14 +128,14 @@ export default function Login({ setUser }) {
             · Your AI Placement Partner
           </div>
 
-          <h1 style={{
+          <h1 className="hero-title" style={{
             fontSize: "64px",fontWeight: "800",lineHeight: "1.05",marginBottom: "1.2rem",maxWidth: "620px"
           }}>
             Prepare Smarter.<br />
             <span style={{ color: "#dc2626" }}>Get Placed Faster.</span>
           </h1>
 
-          <p style={{
+          <p className="hero-description" style={{
             color: "#666", fontSize: "14px", lineHeight: "1.7",
             maxWidth: "520px", marginBottom: "2rem"
           }}>
@@ -159,7 +162,7 @@ export default function Login({ setUser }) {
         </div>
 
         {/* Testimonial */}
-        <div style={{
+        <div className="testimonial" style={{
           position: "relative", zIndex: 3,
           background: "rgba(255,255,255,0.03)", border: "1px solid #1f1f1f",
           borderRadius: "12px", padding: "14px 18px",
@@ -180,7 +183,7 @@ export default function Login({ setUser }) {
       </div>
 
       {/* ── RIGHT PANEL — floating dark card ── */}
-      <div style={{
+      <div className="right-panel" style={{
         width: "520px",
 flexShrink: 0,
 position: "relative",
@@ -343,11 +346,57 @@ padding: "3rem"
       </div>
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-12px); }
-        }
-      `}</style>
+  @keyframes float {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @media (max-width: 768px) {
+
+    .login-page {
+      flex-direction: column !important;
+    }
+
+    .left-panel {
+      width: 100% !important;
+      padding: 1.5rem !important;
+      min-height: auto !important;
+    }
+
+    .right-panel {
+      width: calc(100% - 32px) !important;
+      margin: 16px !important;
+      padding: 1.5rem !important;
+      border-radius: 20px !important;
+    }
+
+    .robot-image {
+      display: none !important;
+    }
+
+    .hero-title {
+      font-size: 42px !important;
+      max-width: 100% !important;
+    }
+
+    .hero-description {
+      max-width: 100% !important;
+    }
+
+    .testimonial {
+      display: none !important;
+    }
+  }
+    @keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+`}</style>
     </div>
   );
 }
