@@ -81,7 +81,7 @@ export default function Login({ setUser }) {
 
         {/* Robot image — positioned center-right of left panel */}
         <div style={{
-          position: "absolute", bottom: 0, right: "120px",
+          position: "absolute", bottom: 0, right: "-120x",
           height: "100%", zIndex: 1, pointerEvents: "none",
           display: "flex", alignItems: "flex-end"
         }}>
