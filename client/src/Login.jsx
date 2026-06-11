@@ -405,12 +405,14 @@ padding: "3rem"
   display: flex;
   align-items: center;
 }
-
 .typing-text {
+  display: inline-block;
   overflow: hidden;
   white-space: nowrap;
+
   width: 0;
-  animation: typing 2.2s steps(11, end) forwards;
+
+  animation: typing 2.5s steps(13, end) forwards;
 }
 
 .cursor {
@@ -423,7 +425,7 @@ padding: "3rem"
     width: 0;
   }
   to {
-    width: 11ch;
+    width: 13ch;
   }
 }
 
