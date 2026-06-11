@@ -68,7 +68,7 @@ export default function Login({ setUser }) {
       <div style={{
         flex: 1, position: "relative", overflow: "hidden",
         display: "flex", flexDirection: "column", justifyContent: "space-between",
-        padding: "2.5rem 3rem"
+        padding: "3rem 4.5rem"
       }}>
 
         {/* Grid overlay */}
@@ -80,7 +80,7 @@ export default function Login({ setUser }) {
 
         {/* Robot image — positioned center-right of left panel */}
         <div style={{
-          position: "absolute", bottom: 0, right: "-40px",
+          position: "absolute", bottom: 0, right: "120px",
           height: "100%", zIndex: 1, pointerEvents: "none",
           display: "flex", alignItems: "flex-end"
         }}>
@@ -126,8 +126,7 @@ export default function Login({ setUser }) {
           </div>
 
           <h1 style={{
-            fontSize: "44px", fontWeight: "800", lineHeight: "1.15",
-            marginBottom: "1rem", maxWidth: "420px"
+            fontSize: "64px",fontWeight: "800",lineHeight: "1.05",marginBottom: "1.2rem",maxWidth: "620px"
           }}>
             Prepare Smarter.<br />
             <span style={{ color: "#dc2626" }}>Get Placed Faster.</span>
@@ -135,7 +134,7 @@ export default function Login({ setUser }) {
 
           <p style={{
             color: "#666", fontSize: "14px", lineHeight: "1.7",
-            maxWidth: "380px", marginBottom: "2rem"
+            maxWidth: "520px", marginBottom: "2rem"
           }}>
             All-in-one platform to track your progress, analyze your resume, practice interviews, and ace every placement challenge.
           </p>
@@ -182,12 +181,28 @@ export default function Login({ setUser }) {
 
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div style={{
-        width: "480px", flexShrink: 0, position: "relative", zIndex: 10,
-        background: "rgba(10,10,10,0.92)",
-        backdropFilter: "blur(24px)",
-        borderLeft: "1px solid #1a1a1a",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "2.5rem"
+        width: "520px",
+flexShrink: 0,
+position: "relative",
+zIndex: 10,
+
+marginRight: "60px",
+marginTop: "40px",
+marginBottom: "40px",
+
+background: "rgba(8,8,8,0.92)",
+backdropFilter: "blur(30px)",
+
+border: "1px solid rgba(220,38,38,0.15)",
+borderRadius: "28px",
+
+boxShadow: "0 0 80px rgba(0,0,0,0.7)",
+
+display: "flex",
+alignItems: "center",
+justifyContent: "center",
+
+padding: "3rem"
       }}>
         {/* Subtle red corner glow */}
         <div style={{
@@ -199,7 +214,7 @@ export default function Login({ setUser }) {
 
         <div style={{ width: "100%", maxWidth: "360px", position: "relative", zIndex: 1 }}>
 
-          <h2 style={{ fontSize: "30px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
+          <h2 style={{ fontSize: "48px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
             Welcome Back
           </h2>
           <p style={{ color: "#555", fontSize: "13px", margin: "0 0 6px" }}>
