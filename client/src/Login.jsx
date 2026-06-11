@@ -161,26 +161,6 @@ export default function Login({ setUser }) {
           </div>
         </div>
 
-        {/* Testimonial */}
-        <div className="testimonial" style={{
-          position: "relative", zIndex: 3,
-          background: "rgba(255,255,255,0.03)", border: "1px solid #1f1f1f",
-          borderRadius: "12px", padding: "14px 18px",
-          display: "flex", alignItems: "center", gap: "12px",
-          maxWidth: "420px"
-        }}>
-          <span style={{ fontSize: "22px", color: "#dc2626", opacity: 0.5, lineHeight: 1, flexShrink: 0 }}>"</span>
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: "0 0 6px", color: "#aaa", fontSize: "12px", lineHeight: "1.6" }}>
-              PlacePrep AI helped me crack my dream company with confidence!
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ color: "#f59e0b", fontSize: "11px" }}>★★★★★</span>
-              <span style={{ color: "#555", fontSize: "11px" }}>— Ananya, SDE Intern</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div className="right-panel" style={{
