@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import robotImg from "../assets/robot-businessman.png";
 
 const modules = [
   { icon: "⟨/⟩", label: "DSA Tracker", desc: "Track your progress on DSA sheets and improve problem-solving skills.", path: "/dsa", action: "Start Practicing", color: "#dc2626" },
@@ -92,27 +93,9 @@ export default function Home({ user }) {
         </div>
 
         {/* Right side robot/AI visual */}
-        <div style={{
-          position: "relative", zIndex: 1, display: "flex", flexDirection: "column",
-          alignItems: "center", gap: "12px", marginRight: "2rem"
-        }}>
-          <div style={{
-            width: "120px", height: "120px", borderRadius: "50%",
-            background: "radial-gradient(circle, #dc2626 0%, #7c1d1d 60%, transparent 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "60px", boxShadow: "0 0 60px rgba(220,38,38,0.5)",
-            border: "2px solid rgba(220,38,38,0.3)"
-          }}>
-            🤖
-          </div>
-          <div style={{
-            background: "rgba(220,38,38,0.15)", border: "1px solid rgba(220,38,38,0.3)",
-            borderRadius: "10px", padding: "8px 16px", fontSize: "12px", color: "#dc2626", fontWeight: "600"
-          }}>
-            AI-Powered ✨
-          </div>
-        </div>
-      </div>
+       <div className="hero-robot">
+       <img src={robotImg} alt="AI Assistant" />
+       </div>
 
       {/* Stats Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "2rem" }}>
@@ -205,6 +188,29 @@ export default function Home({ user }) {
           0%, 100% { opacity: 0.6; transform: translateY(-50%) scale(1); }
           50% { opacity: 1; transform: translateY(-50%) scale(1.1); }
         }
+          .hero-robot{
+  position:absolute;
+  right:80px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:2;
+}
+
+.hero-robot img{
+  width:280px;
+  height:auto;
+  object-fit:contain;
+
+  filter:
+    drop-shadow(0 0 25px rgba(220,38,38,.35))
+    drop-shadow(0 0 50px rgba(220,38,38,.2));
+
+  transition:0.3s ease;
+}
+
+.hero-robot img:hover{
+  transform:scale(1.04);
+}
       `}</style>
     </div>
   );
