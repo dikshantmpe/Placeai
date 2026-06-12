@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { auth, googleProvider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import axios from "axios";
@@ -184,11 +183,14 @@ useEffect(() => {
   fontFamily: '"Courier New", monospace', fontSize: "42px", fontWeight: "700",
   color: "#dc2626", letterSpacing: "2px"
 }}>
-  <span>{typedText}</span>
+  <span>{"> "}{typedText}</span>
   <span style={{
-    marginLeft: "4px", animation: "blink 0.8s infinite",
-    display: "inline-block"
-  }}>_</span>
+  marginLeft: "4px",
+  animation: "blink 0.8s infinite",
+  display: "inline-block"
+}}>
+  _
+</span>
 </div>
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div className="right-panel" style={{
@@ -357,6 +359,19 @@ padding: "3rem"
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
+  }
+
+  .hello-world {
+    position: absolute;
+    left: 70px;
+    bottom: 180px;
+    z-index: 5;
+
+    font-family: "Courier New", monospace;
+    font-size: 42px;
+    font-weight: 700;
+    color: #dc2626;
+    letter-spacing: 2px;
   }
 
   @keyframes blink {
