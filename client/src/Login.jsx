@@ -334,16 +334,6 @@ padding: "3rem"
     50% { transform: translateY(-12px); }
   }
 
-  @keyframes typing {
-    0% { width: 0; }
-    100% { width: 12ch; }
-  }
-
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-
   .hello-world {
     position: absolute;
     left: 70px;
@@ -353,28 +343,33 @@ padding: "3rem"
     font-size: 42px;
     font-weight: 700;
     color: #dc2626;
-    display: flex;
-    align-items: center;
+    letter-spacing: 2px;
   }
 
   .typing-text {
+    display: inline-block;
     overflow: hidden;
     white-space: nowrap;
-    border-right: 2px solid #dc2626;
-    animation: typing 2.5s steps(12, end) forwards;
+    border-right: 3px solid #dc2626;
+    padding-right: 8px;
+    animation: typing 2.8s steps(13, end) 1 forwards;
+  }
+
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 180px; }
   }
 
   .cursor {
-    margin-left: 2px;
-    animation: blink 0.7s infinite;
     display: inline-block;
+    margin-left: 2px;
+    color: #dc2626;
+    font-weight: 900;
+    animation: blink 0.7s infinite 2.8s;
   }
 
-  @media (max-width: 768px) {
-    .hello-world {
-      left: 20px !important;
-      bottom: 120px !important;
-      font-size: 28px !important;
-    }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
   }
 `}</style>
