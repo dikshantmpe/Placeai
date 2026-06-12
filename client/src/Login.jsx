@@ -163,19 +163,7 @@ export default function Login({ setUser }) {
         </div>
       </div>
       {/* HELLO WORLD TYPING */}
-<div style={{
-  position: "absolute", left: "70px", bottom: "180px", zIndex: 5,
-  fontFamily: '"Courier New", monospace', fontSize: "42px", fontWeight: "700",
-  color: "#dc2626", letterSpacing: "2px"
-}}>
-  <span>{"> "}{typedText}</span>
-  <span style={{
-  marginLeft: "4px",
-  animation: "blink 0.8s infinite",
-  display: "inline-block"
-}}>
-  _
-</span>
+<div className="hello-world">
 </div>
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div className="right-panel" style={{
@@ -339,19 +327,39 @@ padding: "3rem"
           </div>
         </div>
       </div>
-    <style>{`
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+    .hello-world {
+  position: absolute;
+  left: 70px;
+  bottom: 180px;
+  font-family: "Courier New", monospace;
+  font-size: 42px;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.typing-text {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 4px solid #dc2626;
+
+  width: 0;
+  animation:
+    typing 3s steps(13, end) forwards,
+    blink 0.8s infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 13ch;
+  }
 }
 
 @keyframes blink {
-  0%, 50% {
-    opacity: 1;
-  }
-
-  51%, 100% {
-    opacity: 0;
+  50% {
+    border-color: transparent;
   }
 }
-`}</style>
