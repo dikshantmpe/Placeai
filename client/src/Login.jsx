@@ -330,12 +330,69 @@ padding: "3rem"
 
       <style>{`
   @keyframes float {
-    0%,100% { transform: translateY(0px); }
-    50% { transform: translateY(-12px); }
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  /* HELLO WORLD TYPING ANIMATION */
+  .hello-world {
+    position: absolute;
+    left: 70px;
+    bottom: 180px;
+    z-index: 5;
+
+    font-family: "Courier New", monospace;
+    font-size: 42px;
+    font-weight: 700;
+    color: #dc2626;
+
+    display: flex;
+    align-items: center;
+    overflow: visible;
+    white-space: nowrap;
+  }
+
+  .typing-text {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 3s steps(12, end) forwards;
+    border-right: 3px solid #dc2626;
+    padding-right: 8px;
+    animation: typing 3s steps(12, end) forwards, blink 0.8s infinite 3s;
+  }
+
+  .cursor {
+    display: inline-block;
+    margin-left: 4px;
+    animation: blink 0.8s infinite;
+    font-weight: 700;
+    color: #dc2626;
+  }
+
+  @keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 12ch;
+    }
+  }
+
+  @keyframes blink {
+    0%, 50% {
+      opacity: 1;
+    }
+    51%, 100% {
+      opacity: 0;
+    }
   }
 
   @media (max-width: 768px) {
-
     .login-page {
       flex-direction: column !important;
     }
@@ -366,65 +423,10 @@ padding: "3rem"
       max-width: 100% !important;
     }
 
-    .testimonial {
-      display: none !important;
+    .hello-world {
+      left: 20px !important;
+      bottom: 120px !important;
+      font-size: 24px !important;
     }
   }
-    @keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-/* HELLO WORLD */
-
-.hello-world {
-  position: absolute;
-  left: 70px;
-  bottom: 180px;
-  z-index: 5;
-
-  font-family: "Courier New", monospace;
-  font-size: 42px;
-  font-weight: 700;
-  color: #dc2626;
-
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-
-.typing-text {
-  display: inline-block;
-  overflow: hidden;
-  white-space: nowrap;
-  width: 0;
-  animation: typing 2.5s steps(13, end) forwards;
-}
-
-.cursor {
-  margin-left: 4px;
-  animation: blink 0.8s infinite;
-}
-
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 13ch;
-  }
-}
-
-@keyframes blink {
-  0%, 50% {
-    opacity: 1;
-  }
-  51%, 100% {
-    opacity: 0;
-  }
-}
+`}</style>
