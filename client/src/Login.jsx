@@ -347,7 +347,8 @@ padding: "3rem"
   overflow:hidden;
   white-space:nowrap;
   width:0;
-  animation:typing 3s steps(13,end) forwards;
+  border-right:3px solid #dc2626;
+  animation:typing 3s steps(12,end) forwards;
 }
 
 .cursor{
@@ -359,8 +360,9 @@ padding: "3rem"
   from{
     width:0;
   }
+
   to{
-    width:13ch;
+    width:12ch;
   }
 }
 
