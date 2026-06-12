@@ -330,103 +330,51 @@ padding: "3rem"
 
       <style>{`
   @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-12px);
-    }
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
   }
 
-  /* HELLO WORLD TYPING ANIMATION */
+  @keyframes typing {
+    0% { width: 0; }
+    100% { width: 12ch; }
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
   .hello-world {
     position: absolute;
     left: 70px;
     bottom: 180px;
     z-index: 5;
-
     font-family: "Courier New", monospace;
     font-size: 42px;
     font-weight: 700;
     color: #dc2626;
-
     display: flex;
     align-items: center;
-    overflow: visible;
-    white-space: nowrap;
   }
 
   .typing-text {
-    display: inline-block;
     overflow: hidden;
     white-space: nowrap;
-    animation: typing 3s steps(12, end) forwards;
-    border-right: 3px solid #dc2626;
-    padding-right: 8px;
-    animation: typing 3s steps(12, end) forwards, blink 0.8s infinite 3s;
+    border-right: 2px solid #dc2626;
+    animation: typing 2.5s steps(12, end) forwards;
   }
 
   .cursor {
+    margin-left: 2px;
+    animation: blink 0.7s infinite;
     display: inline-block;
-    margin-left: 4px;
-    animation: blink 0.8s infinite;
-    font-weight: 700;
-    color: #dc2626;
-  }
-
-  @keyframes typing {
-    from {
-      width: 0;
-    }
-    to {
-      width: 12ch;
-    }
-  }
-
-  @keyframes blink {
-    0%, 50% {
-      opacity: 1;
-    }
-    51%, 100% {
-      opacity: 0;
-    }
   }
 
   @media (max-width: 768px) {
-    .login-page {
-      flex-direction: column !important;
-    }
-
-    .left-panel {
-      width: 100% !important;
-      padding: 1.5rem !important;
-      min-height: auto !important;
-    }
-
-    .right-panel {
-      width: calc(100% - 32px) !important;
-      margin: 16px !important;
-      padding: 1.5rem !important;
-      border-radius: 20px !important;
-    }
-
-    .robot-image {
-      display: none !important;
-    }
-
-    .hero-title {
-      font-size: 42px !important;
-      max-width: 100% !important;
-    }
-
-    .hero-description {
-      max-width: 100% !important;
-    }
-
     .hello-world {
       left: 20px !important;
       bottom: 120px !important;
-      font-size: 24px !important;
+      font-size: 28px !important;
     }
   }
 `}</style>
