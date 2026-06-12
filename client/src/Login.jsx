@@ -19,6 +19,22 @@ export default function Login({ setUser }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [typedText, setTypedText] = useState("");
+const fullText = "HELLO WORLD";
+
+useEffect(() => {
+  let index = 0;
+  const interval = setInterval(() => {
+    if (index < fullText.length) {
+      setTypedText(fullText.slice(0, index + 1));
+      index++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 180);
+
+  return () => clearInterval(interval);
+}, []);
 
   const handleSubmit = async () => {
     setError("");
@@ -161,9 +177,17 @@ export default function Login({ setUser }) {
           </div>
         </div>
       </div>
-      <div className="hello-world">
-  <span className="typing-text">HELLO WORLD!</span>
-  <span className="cursor">|</span>
+      {/* HELLO WORLD TYPING */}
+<div style={{
+  position: "absolute", left: "70px", bottom: "180px", zIndex: 5,
+  fontFamily: '"Courier New", monospace', fontSize: "42px", fontWeight: "700",
+  color: "#dc2626", letterSpacing: "2px"
+}}>
+  <span>{typedText}</span>
+  <span style={{
+    marginLeft: "4px", animation: "blink 0.8s infinite",
+    display: "inline-block"
+  }}>_</span>
 </div>
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div className="right-panel" style={{
@@ -332,40 +356,6 @@ padding: "3rem"
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
-  }
-
-  .hello-world {
-    position: absolute;
-    left: 70px;
-    bottom: 180px;
-    z-index: 5;
-    font-family: "Courier New", monospace;
-    font-size: 42px;
-    font-weight: 700;
-    color: #dc2626;
-    letter-spacing: 2px;
-  }
-
-  .typing-text {
-    display: inline-block;
-    overflow: hidden;
-    white-space: nowrap;
-    border-right: 3px solid #dc2626;
-    padding-right: 8px;
-    animation: typing 2.8s steps(13, end) 1 forwards;
-  }
-
-  @keyframes typing {
-    from { width: 0; }
-    to { width: 180px; }
-  }
-
-  .cursor {
-    display: inline-block;
-    margin-left: 2px;
-    color: #dc2626;
-    font-weight: 900;
-    animation: blink 0.7s infinite 2.8s;
   }
 
   @keyframes blink {
