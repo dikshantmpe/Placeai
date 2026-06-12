@@ -4,6 +4,7 @@ import { signInWithPopup } from "firebase/auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import robotImg from "./assets/robot.png";
+import { useState, useEffect } from "react";
 
 const features = [
   { icon: "◈", title: "AI-Powered Tools", desc: "Resume Analyzer, Mock Interviews and more." },
