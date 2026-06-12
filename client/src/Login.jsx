@@ -34,8 +34,6 @@ export default function Login({ setUser }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [typedText, setTypedText] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
   const navigate = useNavigate();
 
   const fullText = "HELLO WORLD";
@@ -318,36 +316,6 @@ export default function Login({ setUser }) {
             ))}
           </div>
         </div>
-
-        {/* HELLO WORLD typing — bottom left */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 3,
-            fontFamily: '"Courier New", monospace',
-            fontSize: "38px",
-            fontWeight: "700",
-            color: "#dc2626",
-            letterSpacing: "3px",
-            display: "flex",
-            alignItems: "center",
-            gap: "2px",
-            marginBottom: "1rem",
-          }}
-        >
-          <span style={{ color: "#dc262688", marginRight: "12px" }}>&gt;</span>
-          <span>{typedText}</span>
-          <span
-            style={{
-              opacity: showCursor ? 1 : 0,
-              transition: "opacity 0.1s",
-              marginLeft: "2px",
-            }}
-          >
-            _
-          </span>
-        </div>
-      </div>
 
       {/* RIGHT PANEL */}
       <div
