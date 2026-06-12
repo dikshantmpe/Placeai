@@ -1,9 +1,9 @@
+import { useState, useEffect } from "react";
 import { auth, googleProvider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import robotImg from "./assets/robot.png";
-import { useState, useEffect } from "react";
 
 const features = [
   { icon: "◈", title: "AI-Powered Tools", desc: "Resume Analyzer, Mock Interviews and more." },
@@ -18,8 +18,32 @@ export default function Login({ setUser }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [typedText, setTypedText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
   const navigate = useNavigate();
-  
+
+  const fullText = "HELLO WORLD";
+
+  useEffect(() => {
+    let index = 0;
+    setTypedText("");
+    const typingInterval = setInterval(() => {
+      if (index < fullText.length) {
+        setTypedText(fullText.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 150);
+    return () => clearInterval(typingInterval);
+  }, []);
+
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 500);
+    return () => clearInterval(blinkInterval);
+  }, []);
 
   const handleSubmit = async () => {
     setError("");
@@ -60,14 +84,13 @@ export default function Login({ setUser }) {
   const handleKey = (e) => { if (e.key === "Enter") handleSubmit(); };
 
   return (
-    <div className="login-page" style={{
-       minHeight: "100vh",
-      background: "#080808",
+    <div style={{
+      minHeight: "100vh", background: "#080808",
       display: "flex", overflow: "hidden", position: "relative"
     }}>
 
-      {/* ── LEFT PANEL — full width behind robot ── */}
-      <div className="left-panel" style={{
+      {/* LEFT PANEL */}
+      <div style={{
         flex: 1, position: "relative", overflow: "hidden",
         display: "flex", flexDirection: "column", justifyContent: "space-between",
         padding: "3rem 4.5rem"
@@ -80,13 +103,12 @@ export default function Login({ setUser }) {
           backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0
         }} />
 
-        {/* Robot image — positioned center-right of left panel */}
+        {/* Robot */}
         <div style={{
           position: "absolute", bottom: 0, right: "-20px",
           height: "100%", zIndex: 1, pointerEvents: "none",
           display: "flex", alignItems: "flex-end"
         }}>
-          {/* Red glow behind robot */}
           <div style={{
             position: "absolute", bottom: "10%", left: "50%",
             transform: "translateX(-50%)",
@@ -94,9 +116,7 @@ export default function Login({ setUser }) {
             background: "radial-gradient(circle, rgba(220,38,38,0.35) 0%, transparent 65%)",
             borderRadius: "50%", pointerEvents: "none", zIndex: 0
           }} />
-          <img 
-          className="robot-image"
-          src={robotImg} alt="AI Robot" style={{
+          <img src={robotImg} alt="AI Robot" style={{
             height: "92vh", maxHeight: "780px",
             objectFit: "contain", objectPosition: "bottom",
             filter: "drop-shadow(0 0 60px rgba(220,38,38,0.6))",
@@ -105,7 +125,7 @@ export default function Login({ setUser }) {
           }} />
         </div>
 
-        {/* Content — above robot */}
+        {/* Top content */}
         <div style={{ position: "relative", zIndex: 3 }}>
           {/* Logo */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "2.5rem" }}>
@@ -129,16 +149,17 @@ export default function Login({ setUser }) {
             · Your AI Placement Partner
           </div>
 
-          <h1 className="hero-title" style={{
-            fontSize: "64px",fontWeight: "800",lineHeight: "1.05",marginBottom: "1.2rem",maxWidth: "620px"
+          <h1 style={{
+            fontSize: "64px", fontWeight: "800", lineHeight: "1.05",
+            marginBottom: "1.2rem", maxWidth: "520px"
           }}>
             Prepare Smarter.<br />
             <span style={{ color: "#dc2626" }}>Get Placed Faster.</span>
           </h1>
 
-          <p className="hero-description" style={{
-            color: "#666", fontSize: "14px", lineHeight: "1.7",
-            maxWidth: "520px", marginBottom: "2rem"
+          <p style={{
+            color: "#666", fontSize: "15px", lineHeight: "1.7",
+            maxWidth: "420px", marginBottom: "2rem"
           }}>
             All-in-one platform to track your progress, analyze your resume, practice interviews, and ace every placement challenge.
           </p>
@@ -155,57 +176,48 @@ export default function Login({ setUser }) {
                 }}>{f.icon}</div>
                 <div>
                   <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px", color: "#eee" }}>{f.title}</p>
-                  <p style={{ margin: 0, color: "#777", fontSize: "12px" }}>{f.desc}</p>
+                  <p style={{ margin: 0, color: "#555", fontSize: "12px" }}>{f.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
-      {/* HELLO WORLD TYPING */}
-<div className="hello-world">
-  <span className="typing-text">{"> HELLO WORLD"}</span>
-  <span className="cursor">_</span>
-</div>
-      {/* ── RIGHT PANEL — floating dark card ── */}
-      <div className="right-panel" style={{
-        width: "520px",
-flexShrink: 0,
-position: "relative",
-zIndex: 10,
 
-marginRight: "60px",
-marginTop: "40px",
-marginBottom: "40px",
-
-background: "rgba(8,8,8,0.92)",
-backdropFilter: "blur(30px)",
-
-border: "1px solid rgba(220,38,38,0.15)",
-borderRadius: "28px",
-
-boxShadow: "0 0 80px rgba(0,0,0,0.7)",
-
-display: "flex",
-alignItems: "center",
-justifyContent: "center",
-
-padding: "3rem"
-      }}>
-        {/* Subtle red corner glow */}
+        {/* HELLO WORLD typing — bottom left */}
         <div style={{
-          position: "absolute", top: "10%", right: "10%",
-          width: "200px", height: "200px",
-          background: "radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 70%)",
-          borderRadius: "50%", pointerEvents: "none"
-        }} />
+          position: "relative", zIndex: 3,
+          fontFamily: '"Courier New", monospace',
+          fontSize: "38px", fontWeight: "700",
+          color: "#dc2626", letterSpacing: "3px",
+          display: "flex", alignItems: "center", gap: "2px",
+          marginBottom: "1rem"
+        }}>
+          <span style={{ color: "#dc262688", marginRight: "12px" }}>&gt;</span>
+          <span>{typedText}</span>
+          <span style={{
+            opacity: showCursor ? 1 : 0,
+            transition: "opacity 0.1s",
+            marginLeft: "2px"
+          }}>_</span>
+        </div>
+      </div>
 
+      {/* RIGHT PANEL */}
+      <div style={{
+        width: "520px", flexShrink: 0, position: "relative", zIndex: 10,
+        marginRight: "60px", marginTop: "40px", marginBottom: "40px",
+        background: "rgba(8,8,8,0.92)", backdropFilter: "blur(30px)",
+        border: "1px solid rgba(220,38,38,0.15)", borderRadius: "28px",
+        boxShadow: "0 0 80px rgba(0,0,0,0.7)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "3rem"
+      }}>
         <div style={{ width: "100%", maxWidth: "360px", position: "relative", zIndex: 1 }}>
 
-          <h2 style={{ fontSize: "48px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
+          <h2 style={{ fontSize: "36px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
             Welcome Back
           </h2>
-          <p style={{ color: "#555", fontSize: "13px", margin: "0 0 6px" }}>
+          <p style={{ color: "#555", fontSize: "13px", margin: "0 0 4px" }}>
             <span style={{ color: "#dc2626", fontWeight: "700" }}>
               {isRegister ? "Sign Up" : "Login"}
             </span>{" "}to Continue
@@ -304,9 +316,9 @@ padding: "3rem"
             fontSize: "14px", fontWeight: "700", marginBottom: "16px",
             display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
             boxShadow: "0 4px 24px rgba(220,38,38,0.35)", opacity: loading ? 0.7 : 1,
-            transition: "opacity 0.2s, box-shadow 0.2s"
+            transition: "box-shadow 0.2s"
           }}
-            onMouseEnter={e => e.currentTarget.style.boxShadow = "0 6px 30px rgba(220,38,38,0.5)"}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.boxShadow = "0 6px 30px rgba(220,38,38,0.5)"; }}
             onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 24px rgba(220,38,38,0.35)"}
           >
             {loading ? "Please wait..." : isRegister ? "Create Account" : "Login  →"}
@@ -322,56 +334,19 @@ padding: "3rem"
           </p>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-            <span style={{ color: "#2a2a2a", fontSize: "14px" }}>◈</span>
             <span style={{ color: "#333", fontSize: "11px" }}>
               Your data is <span style={{ color: "#22c55e" }}>secure</span> with us
             </span>
           </div>
         </div>
       </div>
-  <style>{`
-.hello-world{
-  position:absolute;
-  left:70px;
-  bottom:180px;
-  font-family:"Courier New", monospace;
-  font-size:42px;
-  font-weight:700;
-  color:#dc2626;
-  display:flex;
-  align-items:center;
-}
 
-.typing-text{
-  display:inline-block;
-  overflow:hidden;
-  white-space:nowrap;
-  width:0;
-  border-right:3px solid #dc2626;
-  animation:typing 3s steps(12,end) forwards;
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
+        }
+      `}</style>
+    </div>
+  );
 }
-
-.cursor{
-  margin-left:4px;
-  animation:blink .8s infinite;
-}
-
-@keyframes typing{
-  from{
-    width:0;
-  }
-
-  to{
-    width:12ch;
-  }
-}
-
-@keyframes blink{
-  0%,50%{
-    opacity:1;
-  }
-  51%,100%{
-    opacity:0;
-  }
-}
-`}</style>
