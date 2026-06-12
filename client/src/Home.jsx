@@ -92,10 +92,20 @@ export default function Home({ user }) {
           </div>
         </div>
 
-        {/* Right side robot/AI visual */}
-       <div className="hero-robot">
-       <img src={robotImg} alt="AI Assistant" />
-       </div>
+        {/* Robot businessman */}
+        <div className="hero-robot">
+          <img src={robotImg} alt="AI Assistant" />
+          <div style={{
+            position: "absolute", bottom: "-10px", left: "50%", transform: "translateX(-50%)",
+            background: "rgba(220,38,38,0.15)", border: "1px solid rgba(220,38,38,0.3)",
+            borderRadius: "20px", padding: "6px 16px", fontSize: "13px",
+            color: "#dc2626", fontWeight: "600", whiteSpace: "nowrap"
+          }}>
+            AI-Powered ✨
+          </div>
+        </div>
+
+      </div>
 
       {/* Stats Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "2rem" }}>
@@ -188,29 +198,32 @@ export default function Home({ user }) {
           0%, 100% { opacity: 0.6; transform: translateY(-50%) scale(1); }
           50% { opacity: 1; transform: translateY(-50%) scale(1.1); }
         }
-          .hero-robot{
-  position:absolute;
-  right:80px;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:2;
-}
 
-.hero-robot img{
-  width:280px;
-  height:auto;
-  object-fit:contain;
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
 
-  filter:
-    drop-shadow(0 0 25px rgba(220,38,38,.35))
-    drop-shadow(0 0 50px rgba(220,38,38,.2));
+        .hero-robot {
+          position: absolute;
+          right: 60px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 2;
+        }
 
-  transition:0.3s ease;
-}
+        .hero-robot img {
+          width: 260px;
+          height: auto;
+          object-fit: contain;
+          filter: drop-shadow(0 0 30px rgba(220,38,38,0.3)) drop-shadow(0 0 60px rgba(220,38,38,0.15));
+          animation: float 4s ease-in-out infinite;
+          transition: 0.3s ease;
+        }
 
-.hero-robot img:hover{
-  transform:scale(1.04);
-}
+        .hero-robot img:hover {
+          transform: scale(1.04);
+        }
       `}</style>
     </div>
   );
