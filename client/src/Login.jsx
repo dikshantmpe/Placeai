@@ -19,22 +19,7 @@ export default function Login({ setUser }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [typedText, setTypedText] = useState("");
-const fullText = "HELLO WORLD";
-
-useEffect(() => {
-  let index = 0;
-  const interval = setInterval(() => {
-    if (index < fullText.length) {
-      setTypedText(fullText.slice(0, index + 1));
-      index++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 180);
-
-  return () => clearInterval(interval);
-}, []);
+  
 
   const handleSubmit = async () => {
     setError("");
@@ -354,28 +339,14 @@ padding: "3rem"
           </div>
         </div>
       </div>
+    <style>{`
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
 
-      <style>{`
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-12px); }
-  }
-
-  .hello-world {
-    position: absolute;
-    left: 70px;
-    bottom: 180px;
-    z-index: 5;
-
-    font-family: "Courier New", monospace;
-    font-size: 42px;
-    font-weight: 700;
-    color: #dc2626;
-    letter-spacing: 2px;
-  }
-
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
 `}</style>
