@@ -162,9 +162,9 @@ export default function Login({ setUser }) {
         </div>
       </div>
       <div className="hello-world">
-      <span className="typing-text">{"> HELLO WORLD"}</span>
-      <span className="cursor">_</span>
-      </div>
+  <span className="typing-text">HELLO WORLD!</span>
+  <span className="cursor">|</span>
+</div>
       {/* ── RIGHT PANEL — floating dark card ── */}
       <div className="right-panel" style={{
         width: "520px",
@@ -384,33 +384,26 @@ padding: "3rem"
 
 .hello-world {
   position: absolute;
-
   left: 70px;
   bottom: 180px;
-
   z-index: 5;
 
   font-family: "Courier New", monospace;
   font-size: 42px;
   font-weight: 700;
-
-  color: rgba(220,38,38,0.9);
-
-  display: flex;
-  align-items: center;
-}
-  font-weight: 700;
   color: #dc2626;
 
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
+
 .typing-text {
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
   width: 0;
-  animation: typing 2.5s steps(20, end) forwards;
+  animation: typing 2.5s steps(13, end) forwards;
 }
 
 .cursor {
@@ -423,7 +416,7 @@ padding: "3rem"
     width: 0;
   }
   to {
-    width: 100%;
+    width: 13ch;
   }
 }
 
@@ -431,12 +424,7 @@ padding: "3rem"
   0%, 50% {
     opacity: 1;
   }
-
   51%, 100% {
     opacity: 0;
   }
-}
-`}</style>
-    </div>
-  );
 }
