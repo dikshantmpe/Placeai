@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import robotImg from "../assets/robot-businessman.png";
 
 const modules = [
   { icon: "⟨/⟩", label: "DSA Tracker", desc: "Track your progress on DSA sheets and improve problem-solving skills.", path: "/dsa", action: "Start Practicing", color: "#dc2626" },
@@ -90,22 +89,7 @@ export default function Home({ user }) {
               </button>
             </Link>
           </div>
-        </div>
-
-        {/* Robot businessman */}
-        <div className="hero-robot">
-          <img src={robotImg} alt="AI Assistant" />
-          <div style={{
-            position: "absolute", bottom: "-10px", left: "50%", transform: "translateX(-50%)",
-            background: "rgba(220,38,38,0.15)", border: "1px solid rgba(220,38,38,0.3)",
-            borderRadius: "20px", padding: "6px 16px", fontSize: "13px",
-            color: "#dc2626", fontWeight: "600", whiteSpace: "nowrap"
-          }}>
-            AI-Powered ✨
-          </div>
-        </div>
-
-      </div>
+        </div> 
 
       {/* Stats Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "2rem" }}>
