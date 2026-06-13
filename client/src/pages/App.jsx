@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import DSATracker from "../DSATracker";
 import ResumeAnalyzer from "../ResumeAnalyzer";
@@ -25,6 +25,18 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) setSidebarOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <BrowserRouter>
       {!user ? (
@@ -33,8 +45,79 @@ export default function App() {
         </Routes>
       ) : (
         <div style={{ display: "flex", minHeight: "100vh", background: "#0a0a0a" }}>
-          <Sidebar user={user} />
-          <div style={{ marginLeft: "220px", marginRight: "280px", flex: 1, minHeight: "100vh", overflowY: "auto" }}>
+
+          {/* Mobile overlay when sidebar open */}
+          {isMobile && sidebarOpen && (
+            <div onClick={() => setSidebarOpen(false)} style={{
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+              zIndex: 40, backdropFilter: "blur(2px)"
+            }} />
+          )}
+
+          {/* Mobile top bar */}
+          {isMobile && (
+            <div style={{
+              position: "fixed", top: 0, left: 0, right: 0, height: "56px",
+              background: "#0d0d0d", borderBottom: "1px solid #1a1a1a",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "0 16px", zIndex: 50
+            }}>
+              {/* Hamburger */}
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
+                background: "transparent", border: "none", cursor: "pointer",
+                display: "flex", flexDirection: "column", gap: "5px", padding: "4px"
+              }}>
+                <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#dc2626" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
+                <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#dc2626" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
+                <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#dc2626" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
+              </button>
+
+              {/* Logo */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div style={{
+                  width: "28px", height: "28px", borderRadius: "8px",
+                  background: "#dc2626", display: "flex", alignItems: "center",
+                  justifyContent: "center", fontSize: "14px"
+                }}>🎯</div>
+                <span style={{ fontSize: "15px", fontWeight: "700" }}>
+                  PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
+                </span>
+              </div>
+
+              {/* Profile avatar */}
+              {user?.avatar
+                ? <img src={user.avatar} alt="avatar" style={{
+                    width: "32px", height: "32px", borderRadius: "50%",
+                    border: "2px solid #dc2626", objectFit: "cover"
+                  }} />
+                : <div style={{
+                    width: "32px", height: "32px", borderRadius: "50%",
+                    background: "#dc2626", color: "white", fontSize: "12px",
+                    fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center"
+                  }}>
+                    {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"}
+                  </div>
+              }
+            </div>
+          )}
+
+          {/* Sidebar */}
+          <div style={{
+            position: isMobile ? "fixed" : "fixed",
+            left: isMobile ? (sidebarOpen ? "0" : "-240px") : "0",
+            top: 0, bottom: 0, zIndex: 45,
+            transition: "left 0.3s ease"
+          }}>
+            <Sidebar user={user} onNavigate={() => isMobile && setSidebarOpen(false)} />
+          </div>
+
+          {/* Main content */}
+          <div style={{
+            marginLeft: isMobile ? "0" : "220px",
+            marginRight: isMobile ? "0" : "280px",
+            marginTop: isMobile ? "56px" : "0",
+            flex: 1, minHeight: "100vh", overflowY: "auto"
+          }}>
             <Routes>
               <Route path="/" element={<Home user={user} />} />
               <Route path="/login" element={<Navigate to="/" />} />
@@ -50,7 +133,10 @@ export default function App() {
             </Routes>
             <Chatbot />
           </div>
-          <RightSidebar user={user} />
+
+          {/* Right sidebar — hidden on mobile */}
+          {!isMobile && <RightSidebar user={user} />}
+
         </div>
       )}
     </BrowserRouter>

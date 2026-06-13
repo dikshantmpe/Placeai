@@ -12,12 +12,8 @@ const menuItems = [
   { icon: "🔥", label: "Daily Challenge", path: "/daily" },
 ];
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user, onNavigate }) {
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const getInitials = (name) =>
-    name ? name.split(" ").map((n) => n[0]).join("").toUpperCase() : "?";
 
   return (
     <div style={{
@@ -37,16 +33,13 @@ export default function Sidebar({ user }) {
         </span>
       </div>
 
-
       {/* Menu */}
       <div style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
         {menuItems.map((item) => {
-          const active = location.pathname === item.path && item.path !== "/dashboard"
-            ? true
-            : location.pathname === item.path && item.label === "Dashboard";
           const isActive = location.pathname === item.path;
           return (
-            <Link key={item.path + item.label} to={item.path}>
+            <Link key={item.path + item.label} to={item.path}
+              onClick={() => onNavigate?.()}>
               <div style={{
                 display: "flex", alignItems: "center", gap: "12px",
                 padding: "10px 12px", borderRadius: "8px", marginBottom: "2px",
@@ -55,8 +48,8 @@ export default function Sidebar({ user }) {
                 cursor: "pointer", fontSize: "14px", fontWeight: isActive ? "600" : "400",
                 transition: "all 0.2s"
               }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "#1a1a1a"; e.currentTarget.style.color = "white"; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#888"; }}
+                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "#1a1a1a"; e.currentTarget.style.color = "white"; }}}
+                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#888"; }}}
               >
                 <span style={{ fontSize: "15px", minWidth: "20px", textAlign: "center" }}>{item.icon}</span>
                 {item.label}
@@ -87,7 +80,7 @@ export default function Sidebar({ user }) {
         </button>
       </div>
 
-      {/* Login/Logout */}
+      {/* Logout */}
       <div style={{
         padding: "12px 16px", borderTop: "1px solid #1f1f1f",
         display: "flex", alignItems: "center", justifyContent: "space-between"
@@ -95,6 +88,7 @@ export default function Sidebar({ user }) {
         {user ? (
           <button onClick={() => {
             localStorage.removeItem("user");
+            localStorage.removeItem("token");
             window.location.href = "/";
           }} style={{
             background: "transparent", border: "1px solid #333",
@@ -104,7 +98,7 @@ export default function Sidebar({ user }) {
             Logout
           </button>
         ) : (
-          <Link to="/login" style={{ width: "100%" }}>
+          <Link to="/login" style={{ width: "100%" }} onClick={() => onNavigate?.()}>
             <button style={{
               width: "100%", background: "#dc2626", color: "white",
               border: "none", borderRadius: "8px", padding: "8px",
