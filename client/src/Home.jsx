@@ -89,7 +89,8 @@ export default function Home({ user }) {
               </button>
             </Link>
           </div>
-        </div> 
+        </div>
+      </div>
 
       {/* Stats Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "2rem" }}>
@@ -181,32 +182,6 @@ export default function Home({ user }) {
         @keyframes pulse {
           0%, 100% { opacity: 0.6; transform: translateY(-50%) scale(1); }
           50% { opacity: 1; transform: translateY(-50%) scale(1.1); }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-
-        .hero-robot {
-          position: absolute;
-          right: 60px;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 2;
-        }
-
-        .hero-robot img {
-          width: 260px;
-          height: auto;
-          object-fit: contain;
-          filter: drop-shadow(0 0 30px rgba(220,38,38,0.3)) drop-shadow(0 0 60px rgba(220,38,38,0.15));
-          animation: float 4s ease-in-out infinite;
-          transition: 0.3s ease;
-        }
-
-        .hero-robot img:hover {
-          transform: scale(1.04);
         }
       `}</style>
     </div>
