@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import visionImg from "../assets/vision.jpg";
 
 const menuItems = [
@@ -12,26 +12,29 @@ const menuItems = [
   { icon: "🔥", label: "Daily Challenge", path: "/daily" },
 ];
 
-export default function Sidebar({ user, onNavigate }) {
+export default function Sidebar({ user, onNavigate, isMobile }) {
   const location = useLocation();
 
   return (
     <div style={{
       width: "220px", minHeight: "100vh", background: "#111111",
       borderRight: "1px solid #1f1f1f", display: "flex",
-      flexDirection: "column", position: "fixed", left: 0, top: 0, zIndex: 199
+      flexDirection: "column", position: "relative", zIndex: 400
     }}>
-      {/* Logo */}
-      <div style={{
-        padding: "20px 16px", borderBottom: "1px solid #1f1f1f",
-        display: "flex", alignItems: "center", gap: "10px"
-      }}>
-        <img src={visionImg} alt="logo"
-          style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "2px solid #dc2626" }} />
-        <span style={{ fontSize: "18px", fontWeight: "700", color: "white" }}>
-          PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
-        </span>
-      </div>
+
+      {/* Logo — hide on mobile since topbar has it */}
+      {!isMobile && (
+        <div style={{
+          padding: "20px 16px", borderBottom: "1px solid #1f1f1f",
+          display: "flex", alignItems: "center", gap: "10px"
+        }}>
+          <img src={visionImg} alt="logo"
+            style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "2px solid #dc2626" }} />
+          <span style={{ fontSize: "18px", fontWeight: "700", color: "white" }}>
+            PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
+          </span>
+        </div>
+      )}
 
       {/* Menu */}
       <div style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
@@ -83,7 +86,6 @@ export default function Sidebar({ user, onNavigate }) {
       {/* Logout */}
       <div style={{
         padding: "12px 16px", borderTop: "1px solid #1f1f1f",
-        display: "flex", alignItems: "center", justifyContent: "space-between"
       }}>
         {user ? (
           <button onClick={() => {
