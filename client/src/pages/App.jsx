@@ -50,7 +50,7 @@ export default function App() {
           {isMobile && sidebarOpen && (
             <div onClick={() => setSidebarOpen(false)} style={{
               position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
-              zIndex: 40, backdropFilter: "blur(2px)"
+              zIndex: 200, backdropFilter: "blur(2px)"
             }} />
           )}
 
@@ -105,7 +105,7 @@ export default function App() {
           <div style={{
             position: isMobile ? "fixed" : "fixed",
             left: isMobile ? (sidebarOpen ? "0" : "-240px") : "0",
-            top: 0, bottom: 0, zIndex: 45,
+            top: 0, bottom: 0, zIndex: 199,
             transition: "left 0.3s ease"
           }}>
             <Sidebar user={user} onNavigate={() => isMobile && setSidebarOpen(false)} />

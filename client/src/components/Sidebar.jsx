@@ -19,7 +19,7 @@ export default function Sidebar({ user, onNavigate }) {
     <div style={{
       width: "220px", minHeight: "100vh", background: "#111111",
       borderRight: "1px solid #1f1f1f", display: "flex",
-      flexDirection: "column", position: "fixed", left: 0, top: 0, zIndex: 100
+      flexDirection: "column", position: "fixed", left: 0, top: 0, zIndex: 199
     }}>
       {/* Logo */}
       <div style={{
