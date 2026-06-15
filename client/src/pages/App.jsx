@@ -14,11 +14,6 @@ import Profile from "../Profile";
 import Home from "../Home";
 import RightSidebar from "../components/RightSidebar";
 
-function ProtectedRoute({ user, children }) {
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
-}
-
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
@@ -46,23 +41,14 @@ export default function App() {
       ) : (
         <div style={{ display: "flex", minHeight: "100vh", background: "#0a0a0a" }}>
 
-          {/* Mobile overlay when sidebar open */}
-          {isMobile && sidebarOpen && (
-            <div onClick={() => setSidebarOpen(false)} style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
-              zIndex: 200, backdropFilter: "blur(2px)"
-            }} />
-          )}
-
-          {/* Mobile top bar */}
+          {/* Mobile top bar — always on top */}
           {isMobile && (
             <div style={{
               position: "fixed", top: 0, left: 0, right: 0, height: "56px",
               background: "#0d0d0d", borderBottom: "1px solid #1a1a1a",
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "0 16px", zIndex: 50
+              padding: "0 16px", zIndex: 500
             }}>
-              {/* Hamburger */}
               <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
                 background: "transparent", border: "none", cursor: "pointer",
                 display: "flex", flexDirection: "column", gap: "5px", padding: "4px"
@@ -72,7 +58,6 @@ export default function App() {
                 <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#dc2626" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
               </button>
 
-              {/* Logo */}
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <div style={{
                   width: "28px", height: "28px", borderRadius: "8px",
@@ -84,7 +69,6 @@ export default function App() {
                 </span>
               </div>
 
-              {/* Profile avatar */}
               {user?.avatar
                 ? <img src={user.avatar} alt="avatar" style={{
                     width: "32px", height: "32px", borderRadius: "50%",
@@ -101,14 +85,26 @@ export default function App() {
             </div>
           )}
 
+          {/* Dark overlay when sidebar open on mobile */}
+          {isMobile && sidebarOpen && (
+            <div onClick={() => setSidebarOpen(false)} style={{
+              position: "fixed", inset: 0,
+              background: "rgba(0,0,0,0.7)",
+              zIndex: 300, backdropFilter: "blur(2px)"
+            }} />
+          )}
+
           {/* Sidebar */}
           <div style={{
-            position: isMobile ? "fixed" : "fixed",
+            position: "fixed",
             left: isMobile ? (sidebarOpen ? "0" : "-240px") : "0",
-            top: 0, bottom: 0, zIndex: 199,
-            transition: "left 0.3s ease"
+            top: isMobile ? "56px" : "0",
+            bottom: 0,
+            zIndex: 400,
+            transition: "left 0.3s ease",
+            overflowY: "auto"
           }}>
-            <Sidebar user={user} onNavigate={() => isMobile && setSidebarOpen(false)} />
+            <Sidebar user={user} onNavigate={() => setSidebarOpen(false)} isMobile={isMobile} />
           </div>
 
           {/* Main content */}
@@ -134,7 +130,7 @@ export default function App() {
             <Chatbot />
           </div>
 
-          {/* Right sidebar — hidden on mobile */}
+          {/* Right sidebar — desktop only */}
           {!isMobile && <RightSidebar user={user} />}
 
         </div>
