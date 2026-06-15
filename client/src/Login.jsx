@@ -59,18 +59,10 @@ export default function Login({ setUser }) {
   const handleKey = (e) => { if (e.key === "Enter") handleSubmit(); };
 
   return (
-    <div style={{
-      minHeight: "100vh", background: "#080808",
-      display: "flex", overflow: "hidden", position: "relative"
-    }}>
+    <div className="login-page">
 
-      {/* LEFT PANEL */}
-      <div style={{
-        flex: 1, position: "relative", overflow: "hidden",
-        display: "flex", flexDirection: "column", justifyContent: "flex-start",
-        padding: "3rem 4.5rem"
-      }}>
-
+      {/* LEFT PANEL — desktop only */}
+      <div className="login-left">
         {/* Grid overlay */}
         <div style={{
           position: "absolute", inset: 0, opacity: 0.025,
@@ -160,19 +152,23 @@ export default function Login({ setUser }) {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
-      <div style={{
-        width: "520px", flexShrink: 0, position: "relative", zIndex: 10,
-        marginRight: "60px", marginTop: "40px", marginBottom: "40px",
-        background: "rgba(8,8,8,0.92)", backdropFilter: "blur(30px)",
-        border: "1px solid rgba(220,38,38,0.15)", borderRadius: "28px",
-        boxShadow: "0 0 80px rgba(0,0,0,0.7)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "3rem"
-      }}>
-        <div style={{ width: "100%", maxWidth: "360px", position: "relative", zIndex: 1 }}>
+      {/* RIGHT PANEL — login form */}
+      <div className="login-right">
+        <div className="login-form-inner">
 
-          <h2 style={{ fontSize: "36px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
+          {/* Mobile Logo */}
+          <div className="mobile-logo">
+            <div style={{
+              width: "34px", height: "34px", borderRadius: "8px",
+              background: "#dc2626", display: "flex", alignItems: "center",
+              justifyContent: "center", fontSize: "16px", color: "white", fontWeight: "700"
+            }}>P</div>
+            <span style={{ fontSize: "17px", fontWeight: "700" }}>
+              PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
+            </span>
+          </div>
+
+          <h2 style={{ fontSize: "28px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
             Welcome Back
           </h2>
           <p style={{ color: "#555", fontSize: "13px", margin: "0 0 4px" }}>
@@ -180,7 +176,7 @@ export default function Login({ setUser }) {
               {isRegister ? "Sign Up" : "Login"}
             </span>{" "}to Continue
           </p>
-          <p style={{ color: "#444", fontSize: "12px", margin: "0 0 24px", lineHeight: "1.6" }}>
+          <p style={{ color: "#444", fontSize: "12px", margin: "0 0 20px", lineHeight: "1.6" }}>
             Access your personalized dashboard and continue your placement journey.
           </p>
 
@@ -190,7 +186,7 @@ export default function Login({ setUser }) {
             borderRadius: "10px", border: "1px solid #dc262644", cursor: "pointer",
             fontSize: "13px", fontWeight: "600", display: "flex",
             alignItems: "center", justifyContent: "center", gap: "10px",
-            marginBottom: "16px", transition: "all 0.2s"
+            marginBottom: "14px", transition: "all 0.2s"
           }}
             onMouseEnter={e => e.currentTarget.style.background = "rgba(220,38,38,0.07)"}
             onMouseLeave={e => e.currentTarget.style.background = "transparent"}
@@ -205,7 +201,7 @@ export default function Login({ setUser }) {
           </button>
 
           {/* Divider */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
             <div style={{ flex: 1, height: "1px", background: "#1f1f1f" }} />
             <span style={{ color: "#333", fontSize: "11px" }}>or</span>
             <div style={{ flex: 1, height: "1px", background: "#1f1f1f" }} />
@@ -271,19 +267,15 @@ export default function Login({ setUser }) {
           <button onClick={handleSubmit} disabled={loading} style={{
             width: "100%", padding: "13px", background: "#dc2626", color: "white",
             borderRadius: "10px", border: "none", cursor: loading ? "not-allowed" : "pointer",
-            fontSize: "14px", fontWeight: "700", marginBottom: "16px",
+            fontSize: "14px", fontWeight: "700", marginBottom: "14px",
             display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
             boxShadow: "0 4px 24px rgba(220,38,38,0.35)", opacity: loading ? 0.7 : 1,
-            transition: "box-shadow 0.2s"
-          }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.boxShadow = "0 6px 30px rgba(220,38,38,0.5)"; }}
-            onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 24px rgba(220,38,38,0.35)"}
-          >
-            {loading ? "Please wait..." : isRegister ? "Create Account" : "Login  →"}
+          }}>
+            {loading ? "Please wait..." : isRegister ? "Create Account" : "Login →"}
           </button>
 
           {/* Toggle */}
-          <p style={{ textAlign: "center", color: "#444", fontSize: "12px", margin: "0 0 16px" }}>
+          <p style={{ textAlign: "center", color: "#444", fontSize: "12px", margin: "0 0 14px" }}>
             {isRegister ? "Already have an account? " : "Don't have an account? "}
             <span onClick={() => { setIsRegister(!isRegister); setError(""); }}
               style={{ color: "#dc2626", cursor: "pointer", fontWeight: "600" }}>
@@ -303,6 +295,83 @@ export default function Login({ setUser }) {
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-12px); }
+        }
+
+        .login-page {
+          min-height: 100vh;
+          background: #080808;
+          display: flex;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .login-left {
+          flex: 1;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          padding: 3rem 4.5rem;
+        }
+
+        .login-right {
+          width: 520px;
+          flex-shrink: 0;
+          position: relative;
+          z-index: 10;
+          margin: 40px 60px 40px 0;
+          background: rgba(8,8,8,0.92);
+          backdrop-filter: blur(30px);
+          border: 1px solid rgba(220,38,38,0.15);
+          border-radius: 28px;
+          box-shadow: 0 0 80px rgba(0,0,0,0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2.5rem;
+        }
+
+        .login-form-inner {
+          width: 100%;
+          max-width: 360px;
+        }
+
+        .mobile-logo {
+          display: none;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+          .login-page {
+            flex-direction: column;
+            overflow-y: auto;
+          }
+
+          .login-left {
+            display: none;
+          }
+
+          .login-right {
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            padding: 2rem 1.5rem;
+            align-items: flex-start;
+            padding-top: 3rem;
+          }
+
+          .login-form-inner {
+            max-width: 100%;
+          }
+
+          .mobile-logo {
+            display: flex;
+          }
         }
       `}</style>
     </div>
