@@ -48,16 +48,49 @@ export default function AptitudeQuiz() {
     return `${m}:${s < 10 ? "0" + s : s}`;
   };
 
+  const styles = `
+    .quiz-container {
+      padding: 1.5rem;
+      max-width: 700px;
+    }
+    .quiz-cats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 1.5rem;
+    }
+    .quiz-info-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 768px) {
+      .quiz-container { padding: 1rem; }
+      .quiz-cats-grid { gap: 8px; }
+      .quiz-info-row { gap: 8px; }
+    }
+  `;
+
   // Start Screen
   if (!quizStarted && !quizDone) return (
-    <div style={{ padding: "2rem", maxWidth: "700px" }}>
-      <div style={{ marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "24px", fontWeight: "700", margin: "0 0 6px" }}>Aptitude Quiz</h2>
-        <p style={{ color: "#555", margin: 0, fontSize: "14px" }}>20 random questions — Quant, Logical & Verbal. 10 minutes timer.</p>
+    <div className="quiz-container">
+      <style>{styles}</style>
+
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h2 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 6px" }}>Aptitude Quiz</h2>
+        <p style={{ color: "#555", margin: 0, fontSize: "13px" }}>20 random questions — Quant, Logical & Verbal. 10 minutes timer.</p>
       </div>
 
       {/* Category Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "2rem" }}>
+      <div className="quiz-cats-grid">
         {[
           { cat: "Quant", desc: "Numbers, percentages, ratios", color: "#dc2626" },
           { cat: "Logical", desc: "Patterns, sequences, puzzles", color: "#7c3aed" },
@@ -65,17 +98,17 @@ export default function AptitudeQuiz() {
         ].map(({ cat, desc, color }) => (
           <div key={cat} style={{
             background: "#111", border: "1px solid #1f1f1f",
-            borderRadius: "14px", padding: "20px", textAlign: "center"
+            borderRadius: "14px", padding: "16px", textAlign: "center"
           }}>
-            <div style={{ fontSize: "32px", marginBottom: "10px" }}>{categoryIcon[cat]}</div>
-            <p style={{ fontWeight: "700", color, margin: "0 0 6px", fontSize: "15px" }}>{cat}</p>
-            <p style={{ color: "#555", fontSize: "12px", margin: 0, lineHeight: "1.5" }}>{desc}</p>
+            <div style={{ fontSize: "28px", marginBottom: "8px" }}>{categoryIcon[cat]}</div>
+            <p style={{ fontWeight: "700", color, margin: "0 0 4px", fontSize: "14px" }}>{cat}</p>
+            <p style={{ color: "#555", fontSize: "11px", margin: 0, lineHeight: "1.5" }}>{desc}</p>
           </div>
         ))}
       </div>
 
       {/* Info Row */}
-      <div style={{ display: "flex", gap: "12px", marginBottom: "2rem" }}>
+      <div className="quiz-info-row">
         {[
           { icon: "❓", label: "20 Questions" },
           { icon: "⏱", label: "10 Minutes" },
@@ -110,18 +143,19 @@ export default function AptitudeQuiz() {
       : { label: "Keep Practicing! 💪", color: "#ef4444" };
 
     return (
-      <div style={{ padding: "2rem", maxWidth: "700px" }}>
-        <h2 style={{ fontSize: "24px", fontWeight: "700", margin: "0 0 1.5rem" }}>Quiz Results</h2>
+      <div className="quiz-container">
+        <style>{styles}</style>
+        <h2 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 1.25rem" }}>Quiz Results</h2>
 
         {/* Score Card */}
         <div style={{
           background: "#111", border: `1px solid ${grade.color}33`,
-          borderRadius: "16px", padding: "2rem", textAlign: "center", marginBottom: "1.5rem"
+          borderRadius: "16px", padding: "1.5rem", textAlign: "center", marginBottom: "1.25rem"
         }}>
-          <div style={{ fontSize: "56px", fontWeight: "800", color: grade.color, marginBottom: "8px" }}>
-            {score}<span style={{ fontSize: "28px", color: "#333" }}>/{answers.length}</span>
+          <div style={{ fontSize: "52px", fontWeight: "800", color: grade.color, marginBottom: "8px" }}>
+            {score}<span style={{ fontSize: "24px", color: "#333" }}>/{answers.length}</span>
           </div>
-          <p style={{ color: grade.color, fontWeight: "600", fontSize: "16px", margin: "0 0 16px" }}>
+          <p style={{ color: grade.color, fontWeight: "600", fontSize: "15px", margin: "0 0 14px" }}>
             {grade.label}
           </p>
           <div style={{ background: "#1f1f1f", borderRadius: "8px", height: "8px", maxWidth: "300px", margin: "0 auto" }}>
@@ -131,24 +165,24 @@ export default function AptitudeQuiz() {
         </div>
 
         {/* Answer Review */}
-        <h3 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "1rem", color: "#aaa" }}>Answer Review</h3>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "1.5rem" }}>
+        <h3 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "1rem", color: "#aaa" }}>Answer Review</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "1.25rem" }}>
           {answers.map((a, i) => {
             const correct = a.selected === a.question.answer;
             return (
               <div key={i} style={{
                 background: "#111", border: `1px solid ${correct ? "#22c55e33" : "#ef444433"}`,
-                borderRadius: "12px", padding: "16px"
+                borderRadius: "12px", padding: "14px"
               }}>
-                <p style={{ fontWeight: "500", margin: "0 0 10px", fontSize: "14px", color: "#ddd" }}>
+                <p style={{ fontWeight: "500", margin: "0 0 8px", fontSize: "13px", color: "#ddd", lineHeight: "1.5" }}>
                   <span style={{ color: "#555", marginRight: "8px" }}>Q{i + 1}.</span>
                   {a.question.question}
                 </p>
-                <p style={{ margin: "4px 0", color: "#22c55e", fontSize: "13px" }}>
+                <p style={{ margin: "4px 0", color: "#22c55e", fontSize: "12px" }}>
                   ✅ {a.question.options[a.question.answer]}
                 </p>
                 {!correct && (
-                  <p style={{ margin: "4px 0", color: "#ef4444", fontSize: "13px" }}>
+                  <p style={{ margin: "4px 0", color: "#ef4444", fontSize: "12px" }}>
                     ❌ Your answer: {a.selected !== null ? a.question.options[a.selected] : "Not answered"}
                   </p>
                 )}
@@ -172,67 +206,67 @@ export default function AptitudeQuiz() {
   const progress = ((current + 1) / questions.length) * 100;
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "700px" }}>
+    <div className="quiz-container">
+      <style>{styles}</style>
 
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+      <div className="quiz-header">
         <span style={{ fontSize: "13px", color: "#555" }}>
           Question <span style={{ color: "white", fontWeight: "600" }}>{current + 1}</span> of {questions.length}
         </span>
         <span style={{
           background: timeLeft < 60 ? "rgba(239,68,68,0.15)" : "rgba(220,38,38,0.1)",
           color: timeLeft < 60 ? "#ef4444" : "#dc2626",
-          padding: "6px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "15px",
+          padding: "5px 12px", borderRadius: "8px", fontWeight: "700", fontSize: "14px",
           border: `1px solid ${timeLeft < 60 ? "#ef444433" : "#dc262633"}`
         }}>
           ⏱ {formatTime()}
         </span>
         <span style={{
-          fontSize: "11px", background: "#1f1f1f", padding: "5px 12px",
+          fontSize: "11px", background: "#1f1f1f", padding: "5px 10px",
           borderRadius: "6px", color: "#888", border: "1px solid #2a2a2a"
         }}>
-          {categoryIcon[q.category]} {q.category} ·{" "}
-          <span style={{ color: diffColor[q.difficulty] }}>{q.difficulty}</span>
+          {categoryIcon[q.category]} {q.category} · <span style={{ color: diffColor[q.difficulty] }}>{q.difficulty}</span>
         </span>
       </div>
 
       {/* Progress Bar */}
-      <div style={{ background: "#1f1f1f", borderRadius: "8px", height: "4px", marginBottom: "1.5rem" }}>
+      <div style={{ background: "#1f1f1f", borderRadius: "8px", height: "4px", marginBottom: "1.25rem" }}>
         <div style={{ width: `${progress}%`, background: "#dc2626", height: "4px", borderRadius: "8px", transition: "width 0.3s" }} />
       </div>
 
       {/* Question */}
       <div style={{
         background: "#111", border: "1px solid #1f1f1f",
-        borderRadius: "14px", padding: "1.5rem", marginBottom: "1.5rem"
+        borderRadius: "14px", padding: "1.25rem", marginBottom: "1.25rem"
       }}>
-        <p style={{ fontSize: "16px", fontWeight: "500", margin: 0, lineHeight: "1.7", color: "#fff" }}>{q.question}</p>
+        <p style={{ fontSize: "15px", fontWeight: "500", margin: 0, lineHeight: "1.7", color: "#fff" }}>{q.question}</p>
       </div>
 
       {/* Options */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "1.5rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "1.25rem" }}>
         {q.options.map((opt, i) => {
           const isCorrect = selected !== null && i === q.answer;
           const isWrong = selected === i && i !== q.answer;
           const isNeutral = selected === null;
           return (
             <div key={i} onClick={() => handleSelect(i)} style={{
-              padding: "14px 18px", borderRadius: "12px", cursor: selected !== null ? "default" : "pointer",
-              border: `2px solid ${isCorrect ? "#22c55e" : isWrong ? "#ef4444" : isNeutral ? "#1f1f1f" : "#1f1f1f"}`,
+              padding: "12px 16px", borderRadius: "12px", cursor: selected !== null ? "default" : "pointer",
+              border: `2px solid ${isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#1f1f1f"}`,
               background: isCorrect ? "rgba(34,197,94,0.1)" : isWrong ? "rgba(239,68,68,0.1)" : "#111",
-              transition: "all 0.2s", display: "flex", alignItems: "center", gap: "12px"
+              transition: "all 0.2s", display: "flex", alignItems: "center", gap: "10px"
             }}>
               <span style={{
-                width: "28px", height: "28px", borderRadius: "8px", flexShrink: 0,
+                width: "26px", height: "26px", borderRadius: "8px", flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "12px", fontWeight: "700",
+                fontSize: "11px", fontWeight: "700",
                 background: isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#1f1f1f",
                 color: isCorrect || isWrong ? "white" : "#555",
                 border: `1px solid ${isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#2a2a2a"}`
               }}>
                 {["A", "B", "C", "D"][i]}
               </span>
-              <span style={{ fontSize: "14px", color: isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#ccc" }}>
+              <span style={{ fontSize: "13px", color: isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#ccc", lineHeight: "1.5" }}>
                 {opt}
               </span>
             </div>
