@@ -1,30 +1,43 @@
-const express = require("express");
-const router = express.Router();
-const Question = require("../models/Question");
+const router = require("express").Router();
+const axios = require("axios");
 
 router.get("/", async (req, res) => {
   try {
-    // Get questions by category to ensure variety
-    const quant = await Question.aggregate([
-      { $match: { category: "Quant" } },
-      { $sample: { size: 7 } }
-    ]);
-    const logical = await Question.aggregate([
-      { $match: { category: "Logical" } },
-      { $sample: { size: 7 } }
-    ]);
-    const verbal = await Question.aggregate([
-      { $match: { category: "Verbal" } },
-      { $sample: { size: 6 } }
-    ]);
+    const response = await axios.post("https://api.x.ai/v1/chat/completions", {
+      model: "grok-beta",
+      messages: [
+        {
+          role: "user",
+          content: `Generate 20 random aptitude quiz questions in JSON format. Include a mix of:
+- 7 Quant questions (percentages, ratios, numbers)
+- 7 Logical questions (patterns, sequences, puzzles)
+- 6 Verbal questions (grammar, comprehension)
 
-    // Combine and shuffle
-    const combined = [...quant, ...logical, ...verbal];
-    const shuffled = combined.sort(() => Math.random() - 0.5);
+Each question should have:
+- question: string
+- category: "Quant" | "Logical" | "Verbal"
+- difficulty: "Easy" | "Medium" | "Hard"
+- options: array of 4 strings
+- answer: number (0-3, index of correct option)
 
-    res.json(shuffled);
+Make questions DIFFERENT EVERY TIME. Return ONLY valid JSON array, no markdown, no explanation.`
+        }
+      ]
+    }, {
+      headers: {
+        "Authorization": `Bearer ${process.env.XAI_API_KEY}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const content = response.data.choices[0].message.content;
+    const jsonText = content.replace(/```json\n?|\n?```/g, "").trim();
+    const questions = JSON.parse(jsonText);
+
+    res.json(questions);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch questions" });
+    console.error("Quiz generation error:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to generate quiz questions" });
   }
 });
 
