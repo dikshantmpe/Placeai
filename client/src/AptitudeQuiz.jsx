@@ -21,7 +21,10 @@ export default function AptitudeQuiz() {
   }, [timeLeft, quizStarted, quizDone]);
 
   const startQuiz = async () => {
-    const res = await axios.get("https://placeai-sqjj.onrender.com/api/quiz");
+    const timestamp = Date.now();
+    const res = await axios.get(`https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`, {
+      headers: { "Cache-Control": "no-cache" }
+    });
     setQuestions(res.data);
     setQuizStarted(true);
     setQuizDone(false);
