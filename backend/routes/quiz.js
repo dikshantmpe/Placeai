@@ -84,7 +84,10 @@ Requirements:
         timeout: 30000
       }
     );
-
+     console.log("=================================");
+console.log("FULL COHERE RESPONSE");
+console.log(JSON.stringify(response.data, null, 2));
+console.log("=================================");
     console.log(
       "Cohere response:",
       JSON.stringify(response.data, null, 2)
