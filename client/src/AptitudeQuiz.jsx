@@ -12,6 +12,8 @@ export default function AptitudeQuiz() {
   const [timeLeft, setTimeLeft] = useState(600);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizDone, setQuizDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!quizStarted || quizDone) return;
@@ -21,16 +23,40 @@ export default function AptitudeQuiz() {
   }, [timeLeft, quizStarted, quizDone]);
 
   const startQuiz = async () => {
-    const timestamp = Date.now();
-    const res = await axios.get(`https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`, {
-      headers: { "Cache-Control": "no-cache" }
-    });
-    setQuestions(res.data);
-    setQuizStarted(true);
-    setQuizDone(false);
-    setCurrent(0);
-    setAnswers([]);
-    setTimeLeft(600);
+    try {
+      setLoading(true);
+      setError("");
+      console.log("Fetching quiz questions...");
+
+      const timestamp = Date.now();
+      const res = await axios.get(
+        `https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`,
+        {
+          headers: { "Cache-Control": "no-cache" },
+          timeout: 30000
+        }
+      );
+
+      console.log("Questions received:", res.data);
+
+      if (!res.data || !Array.isArray(res.data) || res.data.length === 0) {
+        setError("Invalid questions received. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      setQuestions(res.data);
+      setQuizStarted(true);
+      setQuizDone(false);
+      setCurrent(0);
+      setAnswers([]);
+      setTimeLeft(600);
+      setLoading(false);
+    } catch (err) {
+      console.error("Quiz error:", err);
+      setError(`Failed to load quiz: ${err.message}`);
+      setLoading(false);
+    }
   };
 
   const handleSelect = (index) => { if (selected !== null) return; setSelected(index); };
@@ -92,6 +118,19 @@ export default function AptitudeQuiz() {
         <p style={{ color: "#555", margin: 0, fontSize: "13px" }}>20 random questions — Quant, Logical & Verbal. 10 minutes timer.</p>
       </div>
 
+      {/* Error Alert */}
+      {error && (
+        <div style={{
+          background: "rgba(239,68,68,0.1)",
+          border: "1px solid rgba(239,68,68,0.3)",
+          borderRadius: "12px",
+          padding: "12px 16px",
+          marginBottom: "1.5rem"
+        }}>
+          <p style={{ color: "#ef4444", margin: 0, fontSize: "13px" }}>⚠️ {error}</p>
+        </div>
+      )}
+
       {/* Category Cards */}
       <div className="quiz-cats-grid">
         {[
@@ -127,12 +166,23 @@ export default function AptitudeQuiz() {
         ))}
       </div>
 
-      <button onClick={startQuiz} style={{
-        background: "#dc2626", color: "white", padding: "14px 32px", width: "100%",
-        borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "15px",
-        fontWeight: "600", boxShadow: "0 4px 20px rgba(220,38,38,0.3)"
-      }}>
-        🚀 Start Quiz
+      <button 
+        onClick={startQuiz} 
+        disabled={loading}
+        style={{
+          background: loading ? "#9ca3af" : "#dc2626",
+          color: "white", 
+          padding: "14px 32px", 
+          width: "100%",
+          borderRadius: "10px", 
+          border: "none", 
+          cursor: loading ? "not-allowed" : "pointer", 
+          fontSize: "15px",
+          fontWeight: "600", 
+          boxShadow: "0 4px 20px rgba(220,38,38,0.3)",
+          opacity: loading ? 0.7 : 1
+        }}>
+        {loading ? "⏳ Loading questions..." : "🚀 Start Quiz"}
       </button>
     </div>
   );
@@ -194,7 +244,7 @@ export default function AptitudeQuiz() {
           })}
         </div>
 
-        <button onClick={() => { setQuizDone(false); setAnswers([]); }} style={{
+        <button onClick={() => { setQuizDone(false); setAnswers([]; setError(""); }} style={{
           background: "#dc2626", color: "white", padding: "12px 32px", width: "100%",
           borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: "600"
         }}>
@@ -251,7 +301,6 @@ export default function AptitudeQuiz() {
         {q.options.map((opt, i) => {
           const isCorrect = selected !== null && i === q.answer;
           const isWrong = selected === i && i !== q.answer;
-          const isNeutral = selected === null;
           return (
             <div key={i} onClick={() => handleSelect(i)} style={{
               padding: "12px 16px", borderRadius: "12px", cursor: selected !== null ? "default" : "pointer",
