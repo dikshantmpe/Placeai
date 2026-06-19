@@ -244,12 +244,12 @@ export default function AptitudeQuiz() {
           })}
         </div>
 
-        <button onClick={() => { setQuizDone(false); setAnswers([]; setError(""); }} style={{
-          background: "#dc2626", color: "white", padding: "12px 32px", width: "100%",
-          borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: "600"
-        }}>
-          🔄 Try Again
-        </button>
+        <button onClick={() => { setQuizDone(false); setAnswers([]); setError(""); }} style={{
+  background: "#dc2626", color: "white", padding: "12px 32px", width: "100%",
+  borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: "600"
+}}>
+  🔄 Try Again
+</button>
       </div>
     );
   }
