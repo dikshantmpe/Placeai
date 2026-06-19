@@ -23,41 +23,79 @@ export default function AptitudeQuiz() {
   }, [timeLeft, quizStarted, quizDone]);
 
   const startQuiz = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      console.log("Fetching quiz questions...");
+  try {
+    setLoading(true);
+    setError("");
 
-      const timestamp = Date.now();
-      const res = await axios.get(
-        `https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`,
-        {
-          headers: { "Cache-Control": "no-cache" },
-          timeout: 30000
-        }
-      );
+    console.log("Fetching quiz questions...");
 
-      console.log("Questions received:", res.data);
+    const timestamp = Date.now();
 
-      if (!res.data || !Array.isArray(res.data) || res.data.length === 0) {
-        setError("Invalid questions received. Please try again.");
-        setLoading(false);
-        return;
+    const res = await axios.get(
+      `https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`,
+      {
+        headers: {
+          "Cache-Control": "no-cache"
+        },
+        timeout: 30000
       }
+    );
 
-      setQuestions(res.data);
-      setQuizStarted(true);
-      setQuizDone(false);
-      setCurrent(0);
-      setAnswers([]);
-      setTimeLeft(600);
-      setLoading(false);
-    } catch (err) {
-      console.error("Quiz error:", err);
-      setError(`Failed to load quiz: ${err.message}`);
-      setLoading(false);
+    console.log("Backend response:", res.data);
+
+    let quizQuestions = [];
+
+    // Case 1: backend returns array directly
+    if (Array.isArray(res.data)) {
+      quizQuestions = res.data;
     }
-  };
+
+    // Case 2: backend returns { questions: [...] }
+    else if (Array.isArray(res.data?.questions)) {
+      quizQuestions = res.data.questions;
+    }
+
+    // Case 3: backend returns { data: [...] }
+    else if (Array.isArray(res.data?.data)) {
+      quizQuestions = res.data.data;
+    }
+
+    // Validate questions
+    quizQuestions = quizQuestions.filter(
+      q =>
+        q &&
+        q.question &&
+        Array.isArray(q.options) &&
+        q.options.length === 4
+    );
+
+    console.log("Validated questions:", quizQuestions);
+
+    if (quizQuestions.length === 0) {
+      throw new Error("No valid questions received from server");
+    }
+
+    setQuestions(quizQuestions);
+    setCurrent(0);
+    setAnswers([]);
+    setSelected(null);
+    setTimeLeft(600);
+
+    setQuizStarted(true);
+    setQuizDone(false);
+
+  } catch (err) {
+    console.error("Quiz Error:", err);
+
+    setError(
+      err.response?.data?.error ||
+      err.message ||
+      "Failed to load quiz"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSelect = (index) => { if (selected !== null) return; setSelected(index); };
 
