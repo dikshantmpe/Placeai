@@ -21,7 +21,7 @@ const mockQuestions = [
   { question: "Fill the blank: He is ___ honest man", category: "Verbal", difficulty: "Easy", options: ["a", "an", "the", "none"], answer: 1 },
   { question: "If 3 men can do a job in 10 days, how many days will 5 men take?", category: "Quant", difficulty: "Medium", options: ["5", "6", "6.5", "7"], answer: 2 },
   { question: "What should replace ? : 1, 4, 9, 16, 25, ?", category: "Logical", difficulty: "Easy", options: ["30", "35", "36", "40"], answer: 2 },
-  { question: "Choose correct spelling: Bussiness", category: "Verbal", difficulty: "Easy", options: ["Bussiness", "Business", "Bisness", "Bussnes"], answer: 1 },
+  { question: "Choose correct spelling", category: "Verbal", difficulty: "Easy", options: ["Bussiness", "Business", "Bisness", "Bussnes"], answer: 1 },
   { question: "What is the LCM of 12, 18, 24?", category: "Quant", difficulty: "Medium", options: ["36", "48", "72", "84"], answer: 2 }
 ];
 
@@ -38,7 +38,7 @@ router.get("/", async (req, res) => {
       return res.json(mockQuestions);
     }
 
-    console.log("Fetching questions from Cohere API...");
+    console.log("Fetching from Cohere API...");
 
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
@@ -47,20 +47,9 @@ router.get("/", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: `Generate exactly 20 aptitude quiz questions as a JSON array. No markdown, no code blocks, just pure JSON.
+            content: `Generate a JSON array with exactly 20 aptitude quiz questions. Return ONLY the JSON, no other text.
 
-Format (MUST be valid JSON):
-[
-  {"question": "What is 50% of 200?", "category": "Quant", "difficulty": "Easy", "options": ["50", "100", "150", "200"], "answer": 1},
-  {"question": "Find the next number: 2, 4, 8, 16, ?", "category": "Logical", "difficulty": "Easy", "options": ["24", "32", "36", "48"], "answer": 1},
-  ...continue with 18 more questions...
-]
-
-Include 7 Quant (percentages, ratios, profit/loss, speed/time, work), 7 Logical (patterns, sequences, puzzles), 6 Verbal (grammar, vocabulary, comprehension) questions.
-
-Vary difficulty (Easy, Medium, Hard). Each answer is 0-3 index.
-
-Return ONLY valid JSON array, nothing else.`
+[{"question":"Q1","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":0},{"question":"Q2","category":"Logical","difficulty":"Easy","options":["A","B","C","D"],"answer":1},{"question":"Q3","category":"Verbal","difficulty":"Easy","options":["A","B","C","D"],"answer":2},{"question":"Q4","category":"Quant","difficulty":"Medium","options":["A","B","C","D"],"answer":1},{"question":"Q5","category":"Logical","difficulty":"Medium","options":["A","B","C","D"],"answer":0},{"question":"Q6","category":"Verbal","difficulty":"Medium","options":["A","B","C","D"],"answer":3},{"question":"Q7","category":"Quant","difficulty":"Hard","options":["A","B","C","D"],"answer":2},{"question":"Q8","category":"Logical","difficulty":"Hard","options":["A","B","C","D"],"answer":1},{"question":"Q9","category":"Verbal","difficulty":"Hard","options":["A","B","C","D"],"answer":0},{"question":"Q10","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":3},{"question":"Q11","category":"Logical","difficulty":"Easy","options":["A","B","C","D"],"answer":2},{"question":"Q12","category":"Verbal","difficulty":"Easy","options":["A","B","C","D"],"answer":1},{"question":"Q13","category":"Quant","difficulty":"Medium","options":["A","B","C","D"],"answer":0},{"question":"Q14","category":"Logical","difficulty":"Medium","options":["A","B","C","D"],"answer":3},{"question":"Q15","category":"Verbal","difficulty":"Medium","options":["A","B","C","D"],"answer":2},{"question":"Q16","category":"Quant","difficulty":"Hard","options":["A","B","C","D"],"answer":1},{"question":"Q17","category":"Logical","difficulty":"Hard","options":["A","B","C","D"],"answer":0},{"question":"Q18","category":"Verbal","difficulty":"Hard","options":["A","B","C","D"],"answer":3},{"question":"Q19","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":2},{"question":"Q20","category":"Logical","difficulty":"Medium","options":["A","B","C","D"],"answer":1}]`
           }
         ]
       },
@@ -73,48 +62,49 @@ Return ONLY valid JSON array, nothing else.`
       }
     );
 
-    let text = response.data?.text;
+    let text = response.data?.text || "";
     
     if (!text) {
-      console.log("Empty response, using mock questions");
+      console.log("Empty response, using mock");
       return res.json(mockQuestions);
     }
+
+    console.log("Response:", text.substring(0, 200));
 
     // Clean text
     text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    // Find JSON array
+    // Find JSON
     const startIdx = text.indexOf("[");
     const endIdx = text.lastIndexOf("]");
     
     if (startIdx === -1 || endIdx === -1) {
-      console.log("No JSON found in response, using mock");
+      console.log("No JSON found");
       return res.json(mockQuestions);
     }
 
     const jsonStr = text.substring(startIdx, endIdx + 1);
     let questions = JSON.parse(jsonStr);
 
-    // Validate questions format
     if (!Array.isArray(questions) || questions.length < 20) {
-      console.log("Invalid format or insufficient questions, using mock");
+      console.log("Invalid or insufficient questions");
       return res.json(mockQuestions);
     }
 
-    // Ensure each question has required fields
+    // Validate and fix each question
     questions = questions.slice(0, 20).map((q, i) => ({
       question: q.question || `Question ${i + 1}`,
-      category: q.category || "Quant",
-      difficulty: q.difficulty || "Easy",
-      options: Array.isArray(q.options) ? q.options : ["A", "B", "C", "D"],
-      answer: typeof q.answer === "number" ? q.answer : 0
+      category: ["Quant", "Logical", "Verbal"].includes(q.category) ? q.category : "Quant",
+      difficulty: ["Easy", "Medium", "Hard"].includes(q.difficulty) ? q.difficulty : "Easy",
+      options: Array.isArray(q.options) && q.options.length === 4 ? q.options : ["A", "B", "C", "D"],
+      answer: (typeof q.answer === "number" && q.answer >= 0 && q.answer < 4) ? q.answer : 0
     }));
 
-    console.log("Cohere API questions loaded successfully");
+    console.log("API questions loaded");
     res.json(questions);
   } catch (err) {
-    console.error("Cohere API error:", err.message);
-    console.log("Falling back to mock questions");
+    console.error("Error:", err.message);
+    console.log("Using mock questions");
     res.json(mockQuestions);
   }
 });
