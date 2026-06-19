@@ -32,80 +32,148 @@ router.get("/", async (req, res) => {
 
   try {
     const apiKey = process.env.COHERE_API_KEY;
-    
+
     if (!apiKey) {
-      console.log("No Cohere API key, using mock questions");
+      console.log("No Cohere API key found. Using mock questions.");
       return res.json(mockQuestions);
     }
 
-    console.log("Fetching from Cohere API...");
+    console.log("Fetching quiz questions from Cohere...");
+
+    const prompt = `
+Generate exactly 20 aptitude quiz questions.
+
+Rules:
+- Return ONLY a valid JSON array.
+- Do NOT include markdown.
+- Do NOT include explanations.
+- Do NOT include code blocks.
+
+Format:
+
+[
+  {
+    "question": "What is 50% of 200?",
+    "category": "Quant",
+    "difficulty": "Easy",
+    "options": ["50", "100", "150", "200"],
+    "answer": 1
+  }
+]
+
+Requirements:
+- 7 Quant questions
+- 7 Logical questions
+- 6 Verbal questions
+- Each question must have exactly 4 options.
+- "answer" must be the correct option index (0-3).
+- Difficulty should be Easy, Medium or Hard.
+`;
 
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
       {
         model: "command-r",
-        messages: [
-          {
-            role: "user",
-            content: `Generate a JSON array with exactly 20 aptitude quiz questions. Return ONLY the JSON, no other text.
-
-[{"question":"Q1","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":0},{"question":"Q2","category":"Logical","difficulty":"Easy","options":["A","B","C","D"],"answer":1},{"question":"Q3","category":"Verbal","difficulty":"Easy","options":["A","B","C","D"],"answer":2},{"question":"Q4","category":"Quant","difficulty":"Medium","options":["A","B","C","D"],"answer":1},{"question":"Q5","category":"Logical","difficulty":"Medium","options":["A","B","C","D"],"answer":0},{"question":"Q6","category":"Verbal","difficulty":"Medium","options":["A","B","C","D"],"answer":3},{"question":"Q7","category":"Quant","difficulty":"Hard","options":["A","B","C","D"],"answer":2},{"question":"Q8","category":"Logical","difficulty":"Hard","options":["A","B","C","D"],"answer":1},{"question":"Q9","category":"Verbal","difficulty":"Hard","options":["A","B","C","D"],"answer":0},{"question":"Q10","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":3},{"question":"Q11","category":"Logical","difficulty":"Easy","options":["A","B","C","D"],"answer":2},{"question":"Q12","category":"Verbal","difficulty":"Easy","options":["A","B","C","D"],"answer":1},{"question":"Q13","category":"Quant","difficulty":"Medium","options":["A","B","C","D"],"answer":0},{"question":"Q14","category":"Logical","difficulty":"Medium","options":["A","B","C","D"],"answer":3},{"question":"Q15","category":"Verbal","difficulty":"Medium","options":["A","B","C","D"],"answer":2},{"question":"Q16","category":"Quant","difficulty":"Hard","options":["A","B","C","D"],"answer":1},{"question":"Q17","category":"Logical","difficulty":"Hard","options":["A","B","C","D"],"answer":0},{"question":"Q18","category":"Verbal","difficulty":"Hard","options":["A","B","C","D"],"answer":3},{"question":"Q19","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":2},{"question":"Q20","category":"Logical","difficulty":"Medium","options":["A","B","C","D"],"answer":1}]`
-          }
-        ]
+        message: prompt
       },
       {
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json"
         },
         timeout: 30000
       }
     );
 
-    let text = response.data?.text || "";
-    
+    console.log(
+      "Cohere response:",
+      JSON.stringify(response.data, null, 2)
+    );
+
+    let text =
+      response.data?.text ||
+      response.data?.message ||
+      "";
+
     if (!text) {
-      console.log("Empty response, using mock");
+      console.log("Empty response from Cohere.");
       return res.json(mockQuestions);
     }
 
-    console.log("Response:", text.substring(0, 200));
+    // Remove markdown if present
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    // Clean text
-    text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    // Extract JSON array
+    const startIndex = text.indexOf("[");
+    const endIndex = text.lastIndexOf("]");
 
-    // Find JSON
-    const startIdx = text.indexOf("[");
-    const endIdx = text.lastIndexOf("]");
-    
-    if (startIdx === -1 || endIdx === -1) {
-      console.log("No JSON found");
+    if (startIndex === -1 || endIndex === -1) {
+      console.log("JSON array not found.");
       return res.json(mockQuestions);
     }
 
-    const jsonStr = text.substring(startIdx, endIdx + 1);
-    let questions = JSON.parse(jsonStr);
+    const jsonString = text.substring(
+      startIndex,
+      endIndex + 1
+    );
 
-    if (!Array.isArray(questions) || questions.length < 20) {
-      console.log("Invalid or insufficient questions");
+    let questions;
+
+    try {
+      questions = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.log("Failed to parse JSON.");
+      console.log(parseError.message);
       return res.json(mockQuestions);
     }
 
-    // Validate and fix each question
-    questions = questions.slice(0, 20).map((q, i) => ({
-      question: q.question || `Question ${i + 1}`,
-      category: ["Quant", "Logical", "Verbal"].includes(q.category) ? q.category : "Quant",
-      difficulty: ["Easy", "Medium", "Hard"].includes(q.difficulty) ? q.difficulty : "Easy",
-      options: Array.isArray(q.options) && q.options.length === 4 ? q.options : ["A", "B", "C", "D"],
-      answer: (typeof q.answer === "number" && q.answer >= 0 && q.answer < 4) ? q.answer : 0
+    if (!Array.isArray(questions)) {
+      console.log("Questions are not an array.");
+      return res.json(mockQuestions);
+    }
+
+    if (questions.length < 20) {
+      console.log("Less than 20 questions generated.");
+      return res.json(mockQuestions);
+    }
+
+    // Validate questions
+    questions = questions.slice(0, 20).map((q, index) => ({
+      question: q.question || `Question ${index + 1}`,
+      category: ["Quant", "Logical", "Verbal"].includes(q.category)
+        ? q.category
+        : "Quant",
+      difficulty: ["Easy", "Medium", "Hard"].includes(q.difficulty)
+        ? q.difficulty
+        : "Easy",
+      options:
+        Array.isArray(q.options) && q.options.length === 4
+          ? q.options
+          : ["Option A", "Option B", "Option C", "Option D"],
+      answer:
+        typeof q.answer === "number" &&
+        q.answer >= 0 &&
+        q.answer <= 3
+          ? q.answer
+          : 0
     }));
 
-    console.log("API questions loaded");
-    res.json(questions);
+    console.log("Successfully generated quiz.");
+
+    return res.json(questions);
+
   } catch (err) {
-    console.error("Error:", err.message);
-    console.log("Using mock questions");
-    res.json(mockQuestions);
+    console.error(
+      "Cohere Error:",
+      err.response?.data || err.message
+    );
+
+    console.log("Using fallback mock questions.");
+
+    return res.json(mockQuestions);
   }
 });
 
