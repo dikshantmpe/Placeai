@@ -1,26 +1,62 @@
 const express = require("express");
+const axios = require("axios");
 const router = express.Router();
-const Problem = require("../models/Problem");
-const Question = require("../models/Question");
 
-// Get today's daily challenge
+const mockDaily = {
+  dsa: {
+    title: "Two Sum Problem",
+    topic: "Array/HashMap",
+    difficulty: "Easy",
+    link: "https://leetcode.com/problems/two-sum/"
+  },
+  quiz: {
+    question: "What is 25% of 400?",
+    options: ["50", "100", "150", "200"],
+    answer: 1
+  }
+};
+
 router.get("/", async (req, res) => {
   try {
-    // Use today's date as a seed to pick same questions all day
-    const today = new Date().toISOString().split("T")[0]; // "2026-06-01"
-    const seed = today.replace(/-/g, "");                 // "20260601"
-    const index = parseInt(seed) % 20;                    // consistent index
+    if (!process.env.COHERE_API_KEY) {
+      return res.json(mockDaily);
+    }
 
-    const dsaProblems = await Problem.find();
-    const quizQuestions = await Question.find();
+    const response = await axios.post(
+      "https://api.cohere.ai/v1/chat",
+      {
+        model: "command-r",
+        messages: [
+          {
+            role: "user",
+            content: `Generate today's daily challenge. Return ONLY JSON:
+{"dsa":{"title":"...","topic":"...","difficulty":"Easy|Medium|Hard","link":"leetcode.com link"},"quiz":{"question":"...","options":["A","B","C","D"],"answer":0}}`
+          }
+        ]
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      }
+    );
 
-    const dsaChallenge = dsaProblems[index % dsaProblems.length];
-    const quizChallenge = quizQuestions[index % quizQuestions.length];
+    let text = response.data.text;
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}");
 
-    res.json({ date: today, dsa: dsaChallenge, quiz: quizChallenge });
+    if (jsonStart === -1 || jsonEnd === -1) {
+      return res.json(mockDaily);
+    }
 
+    const challenge = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
+    res.json(challenge);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch daily challenge" });
+    console.error("Daily challenge error:", err.message);
+    res.json(mockDaily);
   }
 });
 

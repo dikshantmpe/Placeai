@@ -1,27 +1,60 @@
 const express = require("express");
+const axios = require("axios");
 const router = express.Router();
-const CompanyQuestion = require("../models/CompanyQuestion");
 
-// Get all questions (optional filter by company)
-router.get("/", async (req, res) => {
+router.get("/:companyName", async (req, res) => {
   try {
-    const { company } = req.query;
-    const filter = company ? { company } : {};
-    const questions = await CompanyQuestion.find(filter);
-    res.json(questions);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch questions" });
-  }
-});
+    const { companyName } = req.params;
 
-// Add a new question
-router.post("/", async (req, res) => {
-  try {
-    const question = new CompanyQuestion(req.body);
-    await question.save();
-    res.json(question);
+    if (!process.env.COHERE_API_KEY) {
+      return res.json([
+        { question: "Tell us about yourself", difficulty: "Easy", category: "HR" },
+        { question: "Why do you want to join our company?", difficulty: "Easy", category: "HR" },
+        { question: "What are your strengths?", difficulty: "Medium", category: "HR" }
+      ]);
+    }
+
+    const response = await axios.post(
+      "https://api.cohere.ai/v1/chat",
+      {
+        model: "command-r",
+        messages: [
+          {
+            role: "user",
+            content: `Generate 10 interview questions for ${companyName}. Return ONLY valid JSON array:
+[{"question":"...","difficulty":"Easy|Medium|Hard","category":"Technical|HR|Behavioral"},...10 total...]`
+          }
+        ]
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      }
+    );
+
+    let text = response.data.text;
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    const jsonStart = text.indexOf("[");
+    const jsonEnd = text.lastIndexOf("]");
+
+    if (jsonStart === -1 || jsonEnd === -1) {
+      return res.json([
+        { question: "Tell us about yourself", difficulty: "Easy", category: "HR" },
+        { question: "Why do you want to join " + companyName + "?", difficulty: "Easy", category: "HR" },
+        { question: "What are your strengths?", difficulty: "Medium", category: "HR" }
+      ]);
+    }
+
+    const questions = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
+    res.json(questions.slice(0, 10));
   } catch (err) {
-    res.status(500).json({ error: "Failed to add question" });
+    console.error("Company questions error:", err.message);
+    res.json([
+      { question: "Tell us about yourself", difficulty: "Easy", category: "HR" }
+    ]);
   }
 });
 
