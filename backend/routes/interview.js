@@ -13,6 +13,11 @@ router.post("/chat", async (req, res) => {
       return res.status(500).json({ error: "API key not configured" });
     }
 
+    if (!messages || messages.length === 0) {
+      console.error("No messages provided");
+      return res.status(400).json({ error: "No messages provided" });
+    }
+
     console.log("API key found, calling Cohere...");
 
     const preamble = `You are a strict but fair technical interviewer at a top tech company.
@@ -38,7 +43,7 @@ Rules:
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
       {
-        model: "command-r",
+        model: "command-a-03-2025",
         message: lastMessage.content,
         chat_history: history,
         preamble: preamble,
