@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const axios = require("axios");
 
-// Fallback mock questions (20 questions: 7 Quant, 7 Logical, 6 Verbal)
 const mockQuestions = [
   { question: "What is 25% of 400?", category: "Quant", difficulty: "Easy", options: ["50", "100", "150", "200"], answer: 1 },
   { question: "If A:B = 3:4, find B:C when B:C = 4:5", category: "Quant", difficulty: "Medium", options: ["3:4:5", "3:5:6", "2:3:4", "4:5:6"], answer: 0 },
@@ -18,11 +17,11 @@ const mockQuestions = [
   { question: "Find odd: 4, 9, 16, 25, 36, 49, 50", category: "Logical", difficulty: "Medium", options: ["9", "25", "36", "50"], answer: 3 },
   { question: "Complete: 2, 6, 12, 20, ?", category: "Logical", difficulty: "Medium", options: ["28", "30", "32", "36"], answer: 1 },
   { question: "Choose correct spelling", category: "Verbal", difficulty: "Easy", options: ["Occasion", "Ocassion", "Occassion", "Ocasion"], answer: 0 },
-  { question: "Antonym of 'Harsh'", category: "Verbal", difficulty: "Easy", options: ["Soft", "Gentle", "Kind", "All of above"], answer: 3 },
+  { question: "Antonym of Harsh", category: "Verbal", difficulty: "Easy", options: ["Soft", "Gentle", "Kind", "All"], answer: 3 },
   { question: "Fill blank: He is ___ honest man", category: "Verbal", difficulty: "Easy", options: ["a", "an", "the", "none"], answer: 1 },
   { question: "Correct sentence?", category: "Verbal", difficulty: "Medium", options: ["She go", "She goes", "She going", "She gone"], answer: 1 },
-  { question: "Synonym of 'Quick'", category: "Verbal", difficulty: "Easy", options: ["Slow", "Fast", "Lazy", "Tired"], answer: 1 },
-  { question: "Correct spelling: Business", category: "Verbal", difficulty: "Easy", options: ["Bussiness", "Business", "Bisness", "Bussnes"], answer: 1 }
+  { question: "Synonym of Quick", category: "Verbal", difficulty: "Easy", options: ["Slow", "Fast", "Lazy", "Tired"], answer: 1 },
+  { question: "Spelling: Business", category: "Verbal", difficulty: "Easy", options: ["Bussiness", "Business", "Bisness", "Bussnes"], answer: 1 }
 ];
 
 router.get("/", async (req, res) => {
@@ -30,19 +29,13 @@ router.get("/", async (req, res) => {
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
 
-  console.log("=== QUIZ API CALLED ===");
-  
   try {
     const apiKey = process.env.COHERE_API_KEY;
     
     if (!apiKey) {
-      console.log("❌ No COHERE_API_KEY in environment");
-      console.log("✅ Returning mock questions");
+      console.log("No API key, using mock");
       return res.json(mockQuestions);
     }
-
-    console.log("✅ API Key found");
-    console.log("📡 Calling Cohere API...");
 
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
@@ -51,83 +44,49 @@ router.get("/", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: `Generate 20 aptitude quiz questions. Return ONLY valid JSON array:
-[{"question":"...","category":"Quant|Logical|Verbal","difficulty":"Easy|Medium|Hard","options":["A","B","C","D"],"answer":0},...20 total...]`
+            content: `Generate 20 quiz questions as JSON array only. 7 Quant, 7 Logical, 6 Verbal.
+[{"question":"...","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":0}]`
           }
         ]
       },
       {
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json"
         },
         timeout: 30000
       }
     );
 
-    console.log("✅ API Response status:", response.status);
-    
-    let content = response.data?.text || "";
-    console.log("📝 Content length:", content.length);
-    console.log("📝 Content preview:", content.substring(0, 100));
+    let text = response.data.text || "";
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    if (!content || content.length === 0) {
-      console.log("❌ Empty response from API");
-      console.log("✅ Using mock questions");
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+
+    if (start === -1 || end === -1) {
       return res.json(mockQuestions);
     }
 
-    // Clean response
-    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    console.log("🧹 Cleaned content:", content.substring(0, 100));
-
-    // Find JSON
-    const jsonStart = content.indexOf("[");
-    const jsonEnd = content.lastIndexOf("]");
-
-    console.log("🔍 JSON indices - start:", jsonStart, "end:", jsonEnd);
-
-    if (jsonStart === -1 || jsonEnd === -1) {
-      console.log("❌ No JSON array found");
-      console.log("✅ Using mock questions");
-      return res.json(mockQuestions);
-    }
-
-    const jsonString = content.substring(jsonStart, jsonEnd + 1);
-    console.log("📦 JSON string length:", jsonString.length);
-
-    let questions = JSON.parse(jsonString);
-    console.log("✅ Parsed JSON - count:", questions.length);
+    const json = text.substring(start, end + 1);
+    const questions = JSON.parse(json);
 
     if (!Array.isArray(questions) || questions.length < 20) {
-      console.log("⚠️ Invalid count:", questions.length);
-      console.log("✅ Using mock questions");
       return res.json(mockQuestions);
     }
 
-    // Validate each question
-    const validatedQuestions = questions.slice(0, 20).map((q, i) => {
-      const validated = {
-        question: String(q.question || `Q${i + 1}`),
-        category: ["Quant", "Logical", "Verbal"].includes(q.category) ? q.category : "Quant",
-        difficulty: ["Easy", "Medium", "Hard"].includes(q.difficulty) ? q.difficulty : "Easy",
-        options: Array.isArray(q.options) && q.options.length === 4 ? q.options.map(String) : ["A", "B", "C", "D"],
-        answer: typeof q.answer === "number" && q.answer >= 0 && q.answer < 4 ? q.answer : 0
-      };
-      return validated;
-    });
+    const validated = questions.slice(0, 20).map((q) => ({
+      question: String(q.question || "Question"),
+      category: ["Quant", "Logical", "Verbal"].includes(q.category) ? q.category : "Quant",
+      difficulty: ["Easy", "Medium", "Hard"].includes(q.difficulty) ? q.difficulty : "Easy",
+      options: Array.isArray(q.options) && q.options.length === 4 ? q.options.map(String) : ["A", "B", "C", "D"],
+      answer: typeof q.answer === "number" && q.answer >= 0 && q.answer < 4 ? q.answer : 0
+    }));
 
-    console.log("✅ Validated questions count:", validatedQuestions.length);
-    console.log("🚀 Sending API questions to frontend");
-    return res.json(validatedQuestions);
-
+    res.json(validated);
   } catch (err) {
-    console.error("❌ ERROR:", err.message);
-    if (err.response?.data) {
-      console.error("API Error Details:", err.response.data);
-    }
-    console.log("✅ Using mock questions as fallback");
-    return res.json(mockQuestions);
+    console.error("Quiz error:", err.message);
+    res.json(mockQuestions);
   }
 });
 
