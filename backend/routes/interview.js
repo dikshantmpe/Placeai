@@ -1,40 +1,51 @@
 const express = require("express");
+const axios = require("axios");
 const router = express.Router();
-const groq = require("../utils/gemini");
 
 router.post("/chat", async (req, res) => {
   try {
     const { messages, role, difficulty } = req.body;
+    
+    if (!process.env.COHERE_API_KEY) {
+      return res.status(500).json({ error: "API key not configured" });
+    }
 
-    const chatMessages = [
+    const systemPrompt = `You are a strict but fair technical interviewer at a top tech company.
+You are interviewing for a ${role} role at ${difficulty} difficulty.
+Rules:
+- Ask one question at a time
+- Wait for the candidate to answer before asking next question
+- Start by greeting and asking the first question immediately
+- After 5 questions say "Interview Complete" and give detailed feedback
+- Be professional and encouraging
+- Evaluate their technical knowledge and communication`;
+
+    const response = await axios.post(
+      "https://api.cohere.ai/v1/chat",
       {
-        role: "system",
-        content: `You are a strict but fair technical interviewer at a top tech company.
-        You are interviewing for a ${role} role at ${difficulty} difficulty.
-        Rules:
-        - Ask ONE question at a time
-        - Wait for the candidate to answer before asking next question
-        - Start by greeting and asking the first question immediately
-        - After 5 questions say "Interview Complete!" and give detailed feedback
-        - Be professional and encouraging`
+        model: "command-r",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          },
+          ...messages
+        ]
       },
-      ...messages.map(m => ({
-        role: m.role === "model" ? "assistant" : "user",
-        content: m.content
-      }))
-    ];
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      }
+    );
 
-    const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: chatMessages
-    });
-
-    const reply = response.choices[0].message.content;
+    const reply = response.data.text;
     res.json({ reply });
-
   } catch (err) {
-    console.error("FULL ERROR:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("Interview error:", err.message);
+    res.status(500).json({ error: err.message || "Failed to process interview" });
   }
 });
 
