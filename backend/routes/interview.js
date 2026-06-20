@@ -5,7 +5,7 @@ const router = express.Router();
 router.post("/chat", async (req, res) => {
   try {
     const { messages, role, difficulty } = req.body;
-    
+
     console.log("Interview request received:", { role, difficulty });
 
     if (!process.env.COHERE_API_KEY) {
@@ -15,7 +15,7 @@ router.post("/chat", async (req, res) => {
 
     console.log("API key found, calling Cohere...");
 
-    const systemPrompt = `You are a strict but fair technical interviewer at a top tech company.
+    const preamble = `You are a strict but fair technical interviewer at a top tech company.
 You are interviewing for a ${role} role at ${difficulty} difficulty.
 Rules:
 - Ask one question at a time
@@ -24,33 +24,40 @@ Rules:
 - After 5 questions say "Interview Complete" and give detailed feedback
 - Be professional and encouraging`;
 
+    // messages coming from frontend are assumed to look like:
+    // [{ role: "user" | "assistant", content: "..." }, ...]
+    // Convert to Cohere's format: last message becomes `message`,
+    // everything before it becomes `chat_history`.
+
+    const lastMessage = messages[messages.length - 1];
+    const history = messages.slice(0, -1).map((m) => ({
+      role: m.role === "assistant" ? "CHATBOT" : "USER",
+      message: m.content,
+    }));
+
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
       {
         model: "command-r",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt
-          },
-          ...messages
-        ]
+        message: lastMessage.content,
+        chat_history: history,
+        preamble: preamble,
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        timeout: 30000
+        timeout: 30000,
       }
     );
 
     console.log("Cohere API response received");
-    
+
     const reply = response.data.text;
     res.json({ reply });
   } catch (err) {
-    console.error("Interview error:", err.message);
+    console.error("Interview error:", err.response?.data || err.message);
     res.status(500).json({ error: err.message || "Failed to process interview" });
   }
 });
