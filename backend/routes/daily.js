@@ -22,17 +22,14 @@ router.get("/", async (req, res) => {
       return res.json(mockDaily);
     }
 
+    const prompt = `Generate today's daily challenge. Return ONLY JSON:
+{"dsa":{"title":"...","topic":"...","difficulty":"Easy|Medium|Hard","link":"leetcode.com link"},"quiz":{"question":"...","options":["A","B","C","D"],"answer":0}}`;
+
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
       {
-        model: "command-r",
-        messages: [
-          {
-            role: "user",
-            content: `Generate today's daily challenge. Return ONLY JSON:
-{"dsa":{"title":"...","topic":"...","difficulty":"Easy|Medium|Hard","link":"leetcode.com link"},"quiz":{"question":"...","options":["A","B","C","D"],"answer":0}}`
-          }
-        ]
+        model: "command-a-03-2025",
+        message: prompt
       },
       {
         headers: {
@@ -49,13 +46,14 @@ router.get("/", async (req, res) => {
     const jsonEnd = text.lastIndexOf("}");
 
     if (jsonStart === -1 || jsonEnd === -1) {
+      console.error("Daily challenge: no JSON found in Cohere response:", text);
       return res.json(mockDaily);
     }
 
     const challenge = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
     res.json(challenge);
   } catch (err) {
-    console.error("Daily challenge error:", err.message);
+    console.error("Daily challenge error:", err.response?.data || err.message);
     res.json(mockDaily);
   }
 });

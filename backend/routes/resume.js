@@ -11,9 +11,9 @@ router.post("/upload", async (req, res) => {
     }
 
     const response = await axios.post(
-      "https://api.cohere.ai/v1/chat",
+      "https://api.cohere.com/v2/chat",
       {
-        model: "command-r",
+        model: "command-a-03-2025",
         messages: [
           {
             role: "user",
@@ -42,13 +42,15 @@ ${resume}`
       }
     );
 
-    let text = response.data.text;
+    // v2 API response shape: response.data.message.content[0].text
+    let text = response.data.message?.content?.[0]?.text || "";
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
     const jsonStart = text.indexOf("{");
     const jsonEnd = text.lastIndexOf("}");
-    
+
     if (jsonStart === -1 || jsonEnd === -1) {
-      return res.json({ 
+      console.error("Resume: could not find JSON in model response:", text);
+      return res.json({
         overallScore: 75,
         strengths: ["Clear structure", "Good experience"],
         weaknesses: ["Could add metrics", "Need more projects"],
@@ -60,8 +62,8 @@ ${resume}`
     const feedback = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
     res.json(feedback);
   } catch (err) {
-    console.error("Resume error:", err.message);
-    res.json({ 
+    console.error("Resume error:", err.response?.data || err.message);
+    res.json({
       overallScore: 70,
       strengths: ["Professional format"],
       weaknesses: ["Limited details"],

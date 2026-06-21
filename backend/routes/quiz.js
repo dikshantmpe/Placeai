@@ -31,23 +31,20 @@ router.get("/", async (req, res) => {
 
   try {
     const apiKey = process.env.COHERE_API_KEY;
-    
+
     if (!apiKey) {
       console.log("No API key, using mock");
       return res.json(mockQuestions);
     }
 
+    const prompt = `Generate 20 quiz questions as JSON array only. 7 Quant, 7 Logical, 6 Verbal.
+[{"question":"...","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":0}]`;
+
     const response = await axios.post(
       "https://api.cohere.ai/v1/chat",
       {
-        model: "command-r",
-        messages: [
-          {
-            role: "user",
-            content: `Generate 20 quiz questions as JSON array only. 7 Quant, 7 Logical, 6 Verbal.
-[{"question":"...","category":"Quant","difficulty":"Easy","options":["A","B","C","D"],"answer":0}]`
-          }
-        ]
+        model: "command-a-03-2025",
+        message: prompt
       },
       {
         headers: {
@@ -65,6 +62,7 @@ router.get("/", async (req, res) => {
     const end = text.lastIndexOf("]");
 
     if (start === -1 || end === -1) {
+      console.error("Quiz: no JSON array found in Cohere response:", text);
       return res.json(mockQuestions);
     }
 
@@ -72,6 +70,7 @@ router.get("/", async (req, res) => {
     const questions = JSON.parse(json);
 
     if (!Array.isArray(questions) || questions.length < 20) {
+      console.error("Quiz: invalid or too few questions returned:", questions?.length);
       return res.json(mockQuestions);
     }
 
@@ -85,7 +84,7 @@ router.get("/", async (req, res) => {
 
     res.json(validated);
   } catch (err) {
-    console.error("Quiz error:", err.message);
+    console.error("Quiz error:", err.response?.data || err.message);
     res.json(mockQuestions);
   }
 });
