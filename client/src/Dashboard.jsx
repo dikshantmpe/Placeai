@@ -10,7 +10,10 @@ export default function Dashboard() {
   const streak = parseInt(localStorage.getItem("streak") || "0");
 
   useEffect(() => {
-    axios.get("https://placeai-sqjj.onrender.com/api/dashboard")
+    const token = localStorage.getItem("token");
+    axios.get("https://placeai-sqjj.onrender.com/api/dashboard", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(res => { setData(res.data); setLoading(false); })
       .catch(err => { console.error(err); setLoading(false); });
   }, []);

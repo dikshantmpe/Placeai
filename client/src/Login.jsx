@@ -5,6 +5,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import robotImg from "./assets/robot.png";
 
+const API_URL = "https://placeai-sqjj.onrender.com/api";
+
 const features = [
   { icon: "◈", title: "AI-Powered Tools", desc: "Resume Analyzer, Mock Interviews and more." },
   { icon: "◎", title: "Track & Improve", desc: "Smart progress tracking across all modules." },
@@ -25,8 +27,8 @@ export default function Login({ setUser }) {
     setLoading(true);
     try {
       const url = isRegister
-        ? "https://placeai-sqjj.onrender.com/api/auth/register"
-        : "https://placeai-sqjj.onrender.com/api/auth/login";
+        ? `${API_URL}/auth/register`
+        : `${API_URL}/auth/login`;
       const res = await axios.post(url, form);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -42,17 +44,16 @@ export default function Login({ setUser }) {
     setError("");
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const { displayName, email, photoURL } = result.user;
-      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
-        name: displayName, email, avatar: photoURL
-      });
+      const idToken = await result.user.getIdToken();
+
+      const res = await axios.post(`${API_URL}/auth/google`, { idToken });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      setError("Google login failed. Try again.");
+      setError(err.response?.data?.error || "Google login failed. Try again.");
     }
   };
 

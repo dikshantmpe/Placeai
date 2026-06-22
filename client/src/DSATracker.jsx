@@ -11,13 +11,19 @@ export default function DSATracker() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("https://placeai-sqjj.onrender.com/api/problems")
+    const token = localStorage.getItem("token");
+    axios.get("https://placeai-sqjj.onrender.com/api/problems", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(res => { setProblems(res.data); setLoading(false); })
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
   const toggleStatus = async (id) => {
-    const res = await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`);
+    const token = localStorage.getItem("token");
+    const res = await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     setProblems(problems.map(p => p._id === id ? res.data : p));
   };
 
