@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
@@ -6,6 +7,7 @@ const diffColor = { Easy: "#22c55e", Medium: "#f59e0b", Hard: "#ef4444" };
 const diffBg = { Easy: "#22c55e18", Medium: "#f59e0b18", Hard: "#ef444418" };
 
 export default function DSATracker() {
+  const navigate = useNavigate();
   const [problems, setProblems] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
@@ -154,15 +156,17 @@ export default function DSATracker() {
               {p.status && "✓"}
             </div>
 
-            <a href={p.link} target="_blank" rel="noreferrer" style={{
+            <button onClick={() => navigate(`/problem/${p._id}`)} style={{
               color: p.status ? "#555" : "#fff", fontSize: "13px",
-              textDecoration: p.status ? "line-through" : "none"
+              textDecoration: p.status ? "line-through" : "none",
+              background: "transparent", border: "none", cursor: "pointer",
+              textAlign: "left", padding: 0
             }}>
               <span style={{ color: "#333", marginRight: "8px", fontSize: "11px" }}>
                 {String(i + 1).padStart(2, "0")}.
               </span>
               {p.title}
-            </a>
+            </button>
 
             <span style={{ fontSize: "11px", color: "#555" }}>{p.topic}</span>
 
@@ -208,16 +212,18 @@ export default function DSATracker() {
 
             {/* Content */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <a href={p.link} target="_blank" rel="noreferrer" style={{
+              <button onClick={() => navigate(`/problem/${p._id}`)} style={{
                 color: p.status ? "#555" : "#fff", fontSize: "13px",
                 textDecoration: p.status ? "line-through" : "none",
-                display: "block", marginBottom: "6px", fontWeight: "500"
+                display: "block", marginBottom: "6px", fontWeight: "500",
+                background: "transparent", border: "none", cursor: "pointer",
+                textAlign: "left", padding: 0
               }}>
                 <span style={{ color: "#333", marginRight: "6px", fontSize: "11px" }}>
                   {String(i + 1).padStart(2, "0")}.
                 </span>
                 {p.title}
-              </a>
+              </button>
               <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                 <span style={{ fontSize: "10px", color: "#555", background: "#1a1a1a",
                   padding: "2px 8px", borderRadius: "4px" }}>{p.topic}</span>

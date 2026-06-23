@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import DSATracker from "../DSATracker";
+import ProblemDetail from "../ProblemDetail";
 import ResumeAnalyzer from "../ResumeAnalyzer";
 import MockInterview from "../MockInterview";
 import AptitudeQuiz from "../AptitudeQuiz";
@@ -121,6 +122,7 @@ export default function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/daily" element={<DailyChallenge />} />
               <Route path="/dsa" element={<DSATracker />} />
+              <Route path="/problem/:id" element={<ProblemDetail />} />
               <Route path="/resume" element={<ResumeAnalyzer />} />
               <Route path="/interview" element={<MockInterview />} />
               <Route path="/quiz" element={<AptitudeQuiz />} />
