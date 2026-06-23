@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import DSATracker from "../DSATracker";
-import ProblemDetail from "../ProblemDetail.jsx";
+import ProblemDetail from "./ProblemDetail.jsx";
 import ResumeAnalyzer from "../ResumeAnalyzer";
 import MockInterview from "../MockInterview";
 import AptitudeQuiz from "../AptitudeQuiz";
