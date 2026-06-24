@@ -109,14 +109,25 @@ export default function ProblemDetail() {
           </div>
         </div>
 
-        {/* Problem Description Placeholder */}
+        {/* Problem Description */}
         <div style={{ marginBottom: "2rem" }}>
-          <h3 style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: "600", color: "#ccc" }}>
+          <h3 style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: "600", color: "#ccc" }}>
             Description
           </h3>
-          <p style={{ margin: 0, color: "#555", fontSize: "13px", lineHeight: "1.6" }}>
-            Problem descriptions coming soon! Visit LeetCode to see the full problem statement.
-          </p>
+          {problem.description ? (
+            <pre style={{
+              margin: 0, color: "#aaa", fontSize: "12px", lineHeight: "1.6",
+              whiteSpace: "pre-wrap", wordWrap: "break-word", fontFamily: "Fira Code, monospace",
+              background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "8px",
+              border: "1px solid #1f1f1f", maxHeight: "400px", overflowY: "auto"
+            }}>
+              {problem.description}
+            </pre>
+          ) : (
+            <p style={{ margin: 0, color: "#555", fontSize: "13px", lineHeight: "1.6" }}>
+              No description available yet.
+            </p>
+          )}
         </div>
 
         {/* Links & Actions */}
