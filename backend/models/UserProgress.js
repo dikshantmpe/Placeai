@@ -7,7 +7,6 @@ const userProgressSchema = new mongoose.Schema({
   solvedAt:  { type: Date, default: Date.now }
 });
 
-// A user can only have one progress record per problem
 userProgressSchema.index({ userId: 1, problemId: 1 }, { unique: true });
 
-module.exports = mongoose.model("UserProgress", userProgressSchema);
+module.exports = mongoose.models.UserProgress || mongoose.model("UserProgress", userProgressSchema);
