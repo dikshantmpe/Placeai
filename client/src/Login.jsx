@@ -23,6 +23,11 @@ export default function Login({ setUser }) {
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
+    // 1. Prevent empty form submissions from crashing the backend
+    if (!form.email || !form.password || (isRegister && !form.name)) {
+      return setError("Please fill in all required fields.");
+    }
+
     setError("");
     setLoading(true);
     try {
@@ -44,9 +49,17 @@ export default function Login({ setUser }) {
     setError("");
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const idToken = await result.user.getIdToken();
+      
+      // 2. Extract the actual user details to match what the backend expects
+      const userData = {
+        name: result.user.displayName,
+        email: result.user.email,
+        avatar: result.user.photoURL
+      };
 
-      const res = await axios.post(`${API_URL}/auth/google`, { idToken });
+      // 3. Send the userData instead of the idToken
+      const res = await axios.post(`${API_URL}/auth/google`, userData);
+      
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
