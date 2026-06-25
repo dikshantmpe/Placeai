@@ -17,7 +17,8 @@ import RightSidebar from "../components/RightSidebar";
 
 export default function App() {
   useEffect(() => {
-    fetch('https://placeai-backend.onrender.com/api/ping').catch(() => {});
+   // Change it to this:
+fetch('https://placeai-sqjj.onrender.com/api/ping').catch(() => {});
   }, []);
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
