@@ -56,28 +56,36 @@ export default function ProblemDetail() {
     alert("Code saved locally!");
   };
 
-  const handleRunCode = async () => {
+ const handleRunCode = async () => {
     if (!code.trim()) return;
     setIsRunning(true);
     setOutput("Running...");
 
+    // Piston V2 requires exact version numbers now!
+    const LANGUAGE_VERSIONS = {
+      javascript: "18.15.0",
+      python: "3.10.0",
+      java: "15.0.2",
+      cpp: "10.2.0"
+    };
+
     try {
       const res = await axios.post("https://emkc.org/api/v2/piston/execute", {
         language: language,
-        version: "*", // The asterisk tells Piston to just use the latest version of the language
+        version: LANGUAGE_VERSIONS[language], 
         files: [{ content: code }]
       });
 
       const result = res.data.run;
       if (result.stderr) {
-        // If there is a compilation or runtime error, show it in red
         setOutput(`❌ Error:\n${result.stderr}`);
       } else {
-        // If it runs successfully, show the printed output
         setOutput(`${result.stdout}`);
       }
     } catch (err) {
-      setOutput("❌ Execution Failed. Please check your network or try again.");
+      // This will now print the actual API error so we know exactly what's wrong!
+      const errorMsg = err.response?.data?.message || err.message;
+      setOutput(`❌ Execution Failed: ${errorMsg}`);
       console.error(err);
     } finally {
       setIsRunning(false);
@@ -294,7 +302,7 @@ export default function ProblemDetail() {
           </pre>
         </div>
       </div>
-      
+
       <style>{`
         ::-webkit-scrollbar {
           width: 8px;
