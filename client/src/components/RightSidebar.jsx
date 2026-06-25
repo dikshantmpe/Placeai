@@ -12,17 +12,25 @@ export default function RightSidebar({ user }) {
 
   // 1. Dedicated hook to fetch sidebar progress
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    const fetchDashboardData = () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    axios.get("https://placeai-sqjj.onrender.com/api/dashboard", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        // Update the sidebar state with the fetched DSA data
-        setDsaProgress(res.data.dsa);
+      axios.get("https://placeai-sqjj.onrender.com/api/dashboard", {
+        headers: { Authorization: `Bearer ${token}` }
       })
-      .catch(err => console.error("Sidebar fetch error:", err));
+        .then(res => setDsaProgress(res.data.dsa))
+        .catch(err => console.error("Sidebar fetch error:", err));
+    };
+
+    // Run once when the sidebar first loads
+    fetchDashboardData();
+
+    // Listen for the "ping" from the Mark Solved button to run it again
+    window.addEventListener("dsaProgressUpdated", fetchDashboardData);
+
+    // Cleanup the listener if the component unmounts
+    return () => window.removeEventListener("dsaProgressUpdated", fetchDashboardData);
   }, []);
 
   // Countdown to midnight

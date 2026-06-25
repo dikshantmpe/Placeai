@@ -9,6 +9,8 @@ export default function ProblemDetail() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState("javascript");
+  const [output, setOutput] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
 
   const diffColor = { Easy: "#22c55e", Medium: "#f59e0b", Hard: "#ef4444" };
   const diffBg = { Easy: "#22c55e18", Medium: "#f59e0b18", Hard: "#ef444418" };
@@ -30,16 +32,56 @@ export default function ProblemDetail() {
   }, [id]);
 
   const handleToggleSolved = async () => {
-    const token = localStorage.getItem("token");
-    await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setProblem({ ...problem, status: !problem.status });
+    try {
+      const token = localStorage.getItem("token");
+      
+      // 1. Tell the backend to toggle the status
+      const res = await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // 2. Update the button UI instantly with the new data
+      setProblem(res.data); 
+
+      // 3. Fire a custom invisible event across the browser
+      window.dispatchEvent(new Event("dsaProgressUpdated"));
+      
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
   };
 
   const handleSaveCode = () => {
     localStorage.setItem(`problem_${id}_code`, code);
     alert("Code saved locally!");
+  };
+
+  const handleRunCode = async () => {
+    if (!code.trim()) return;
+    setIsRunning(true);
+    setOutput("Running...");
+
+    try {
+      const res = await axios.post("https://emkc.org/api/v2/piston/execute", {
+        language: language,
+        version: "*", // The asterisk tells Piston to just use the latest version of the language
+        files: [{ content: code }]
+      });
+
+      const result = res.data.run;
+      if (result.stderr) {
+        // If there is a compilation or runtime error, show it in red
+        setOutput(`❌ Error:\n${result.stderr}`);
+      } else {
+        // If it runs successfully, show the printed output
+        setOutput(`${result.stdout}`);
+      }
+    } catch (err) {
+      setOutput("❌ Execution Failed. Please check your network or try again.");
+      console.error(err);
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   if (loading) return (
@@ -179,7 +221,7 @@ export default function ProblemDetail() {
         </div>
       </div>
 
-      {/* RIGHT PANEL — Code Editor */}
+      {/* RIGHT PANEL — Code Editor & Output */}
       <div style={{
         flex: 1, display: "flex", flexDirection: "column",
         background: "#111", borderLeft: "1px solid #1f1f1f"
@@ -196,46 +238,63 @@ export default function ProblemDetail() {
               background: "#1f1f1f", color: "#ccc", border: "1px solid #333",
               padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer"
             }}>
-              <option>javascript</option>
-              <option>python</option>
-              <option>java</option>
-              <option>cpp</option>
+              <option value="javascript">javascript</option>
+              <option value="python">python</option>
+              <option value="java">java</option>
+              <option value="cpp">cpp</option>
             </select>
           </div>
-          <button onClick={handleSaveCode} style={{
-            background: "#dc2626", color: "white", border: "none",
-            padding: "6px 12px", borderRadius: "6px", cursor: "pointer",
-            fontSize: "11px", fontWeight: "600", transition: "all 0.2s"
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = "#b91c1c"}
-            onMouseLeave={e => e.currentTarget.style.background = "#dc2626"}
-          >
-            💾 Save Code
-          </button>
+          
+          {/* Action Buttons */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button onClick={handleSaveCode} style={{
+              background: "transparent", color: "#ccc", border: "1px solid #333",
+              padding: "6px 12px", borderRadius: "6px", cursor: "pointer",
+              fontSize: "11px", transition: "all 0.2s"
+            }}>
+              💾 Save
+            </button>
+            <button onClick={handleRunCode} disabled={isRunning} style={{
+              background: isRunning ? "#555" : "#22c55e", color: "white", border: "none",
+              padding: "6px 16px", borderRadius: "6px", cursor: isRunning ? "not-allowed" : "pointer",
+              fontSize: "11px", fontWeight: "600", transition: "all 0.2s"
+            }}>
+              {isRunning ? "⏳ Running..." : "▶ Run Code"}
+            </button>
+          </div>
         </div>
 
         {/* Code Editor */}
         <textarea
           value={code}
           onChange={e => setCode(e.target.value)}
-          placeholder={`// Write your ${language} solution here...\n// Your code will be saved locally in this browser.`}
+          placeholder={`// Write your ${language} solution here...\n// Use console.log() or print() to see output below.`}
           style={{
-            flex: 1, padding: "16px", background: "#0a0a0a", color: "#fff",
+            flex: 2, padding: "16px", background: "#0a0a0a", color: "#fff",
             border: "none", fontFamily: "Fira Code, monospace", fontSize: "13px",
             lineHeight: "1.6", resize: "none", outline: "none"
           }}
         />
 
-        {/* Editor Footer */}
+        {/* Output Terminal */}
         <div style={{
-          padding: "12px 16px", borderTop: "1px solid #1f1f1f",
-          fontSize: "11px", color: "#555", display: "flex", justifyContent: "space-between"
+          flex: 1, borderTop: "1px solid #1f1f1f", background: "#050505",
+          display: "flex", flexDirection: "column"
         }}>
-          <span>💡 Code is saved locally in your browser</span>
-          <span>{code.length} characters</span>
+          <div style={{ padding: "8px 16px", borderBottom: "1px solid #1f1f1f", fontSize: "11px", color: "#888", fontWeight: "600" }}>
+            Terminal Output
+          </div>
+          <pre style={{
+            margin: 0, padding: "16px", 
+            color: output?.includes("❌") ? "#ef4444" : "#22c55e",
+            fontFamily: "Fira Code, monospace", fontSize: "13px", 
+            overflowY: "auto", flex: 1, whiteSpace: "pre-wrap"
+          }}>
+            {output || "Run your code to see the output here..."}
+          </pre>
         </div>
       </div>
-
+      
       <style>{`
         ::-webkit-scrollbar {
           width: 8px;
