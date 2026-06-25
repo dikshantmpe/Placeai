@@ -1,43 +1,106 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-const Problem = require("./models/Problem");
+async function seedDatabase() {
+  try {
+    // Require inside function to avoid model recompilation
+    const mongoose = require("mongoose");
 
-const problems = [
-  { title: "Two Sum", topic: "Arrays", difficulty: "Easy", link: "https://leetcode.com/problems/two-sum/" },
-  { title: "Best Time to Buy and Sell Stock", topic: "Arrays", difficulty: "Easy", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" },
-  { title: "Maximum Subarray", topic: "Arrays", difficulty: "Medium", link: "https://leetcode.com/problems/maximum-subarray/" },
-  { title: "Contains Duplicate", topic: "Arrays", difficulty: "Easy", link: "https://leetcode.com/problems/contains-duplicate/" },
-  { title: "Product of Array Except Self", topic: "Arrays", difficulty: "Medium", link: "https://leetcode.com/problems/product-of-array-except-self/" },
-  { title: "Reverse Linked List", topic: "Linked List", difficulty: "Easy", link: "https://leetcode.com/problems/reverse-linked-list/" },
-  { title: "Merge Two Sorted Lists", topic: "Linked List", difficulty: "Easy", link: "https://leetcode.com/problems/merge-two-sorted-lists/" },
-  { title: "Linked List Cycle", topic: "Linked List", difficulty: "Easy", link: "https://leetcode.com/problems/linked-list-cycle/" },
-  { title: "Remove Nth Node From End", topic: "Linked List", difficulty: "Medium", link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/" },
-  { title: "Invert Binary Tree", topic: "Trees", difficulty: "Easy", link: "https://leetcode.com/problems/invert-binary-tree/" },
-  { title: "Maximum Depth of Binary Tree", topic: "Trees", difficulty: "Easy", link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/" },
-  { title: "Validate Binary Search Tree", topic: "Trees", difficulty: "Medium", link: "https://leetcode.com/problems/validate-binary-search-tree/" },
-  { title: "Level Order Traversal", topic: "Trees", difficulty: "Medium", link: "https://leetcode.com/problems/binary-tree-level-order-traversal/" },
-  { title: "Binary Search", topic: "Binary Search", difficulty: "Easy", link: "https://leetcode.com/problems/binary-search/" },
-  { title: "Find Minimum in Rotated Sorted Array", topic: "Binary Search", difficulty: "Medium", link: "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/" },
-  { title: "Search in Rotated Sorted Array", topic: "Binary Search", difficulty: "Medium", link: "https://leetcode.com/problems/search-in-rotated-sorted-array/" },
-  { title: "Climbing Stairs", topic: "DP", difficulty: "Easy", link: "https://leetcode.com/problems/climbing-stairs/" },
-  { title: "House Robber", topic: "DP", difficulty: "Medium", link: "https://leetcode.com/problems/house-robber/" },
-  { title: "Longest Common Subsequence", topic: "DP", difficulty: "Medium", link: "https://leetcode.com/problems/longest-common-subsequence/" },
-  { title: "0/1 Knapsack", topic: "DP", difficulty: "Medium", link: "https://www.geeksforgeeks.org/0-1-knapsack-problem-dp-10/" },
-  { title: "Valid Parentheses", topic: "Stack", difficulty: "Easy", link: "https://leetcode.com/problems/valid-parentheses/" },
-  { title: "Min Stack", topic: "Stack", difficulty: "Medium", link: "https://leetcode.com/problems/min-stack/" },
-  { title: "Number of Islands", topic: "Graphs", difficulty: "Medium", link: "https://leetcode.com/problems/number-of-islands/" },
-  { title: "Clone Graph", topic: "Graphs", difficulty: "Medium", link: "https://leetcode.com/problems/clone-graph/" },
-  { title: "Course Schedule", topic: "Graphs", difficulty: "Medium", link: "https://leetcode.com/problems/course-schedule/" },
-];
+// Define or get the Problem model
+let Problem;
+try {
+  Problem = require("./models/Problem");
+} catch (err) {
+  if (err.message.includes("Cannot overwrite")) {
+    Problem = mongoose.model("Problem");
+  } else {
+    throw err;
+  }
+}
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(async () => {
-    await Problem.deleteMany(); // clear old data first
-    await Problem.insertMany(problems);
-    console.log("✅ Problems seeded successfully!");
-    process.exit();
-  })
-  .catch((err) => {
-    console.error("DB Error:", err);
-    process.exit(1);
-  });
+    const problemsData = [
+      {
+        title: "Two Sum",
+        topic: "Arrays",
+        difficulty: "Easy",
+        description: `Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target.
+
+You may assume that each input has exactly one solution, and you may not use the same element twice.
+
+Example 1:
+Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+
+Constraints:
+- 2 <= nums.length <= 104
+- -109 <= nums[i] <= 109`,
+        link: "https://leetcode.com/problems/two-sum/"
+      },
+      {
+        title: "Reverse Linked List",
+        topic: "Linked List",
+        difficulty: "Easy",
+        description: `Given the head of a singly linked list, reverse the list, and return the reversed list.
+
+Example 1:
+Input: head = [1,2,3,4,5]
+Output: [5,4,3,2,1]
+
+Constraints:
+- The number of nodes in the list is the range [0, 5000].
+- -5000 <= Node.val <= 5000`,
+        link: "https://leetcode.com/problems/reverse-linked-list/"
+      },
+      {
+        title: "0/1 Knapsack",
+        topic: "DP",
+        difficulty: "Medium",
+        description: `Given weights and values of n items, put these items in a knapsack of capacity W to get the maximum total value.
+
+You cannot break an item, either pick the complete item or don't pick it.
+
+Constraints:
+- 1 <= n <= 1000
+- 1 <= W <= 1000`,
+        link: "https://leetcode.com/problems/partition-equal-subset-sum/"
+      },
+      {
+        title: "Maximum Depth of Binary Tree",
+        topic: "Trees",
+        difficulty: "Easy",
+        description: `Given the root of a binary tree, return its maximum depth.
+
+A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
+
+Constraints:
+- The number of nodes in the tree is in the range [0, 104].
+- -100 <= Node.val <= 100`,
+        link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/"
+      },
+      {
+        title: "Binary Search",
+        topic: "Binary Search",
+        difficulty: "Easy",
+        description: `Given a sorted array of integers and a target, return the index of the target if found, otherwise return -1.
+
+You must write an algorithm with O(log n) runtime complexity.
+
+Constraints:
+- 1 <= nums.length <= 10^4
+- -10^4 < nums[i], target < 10^4`,
+        link: "https://leetcode.com/problems/binary-search/"
+      }
+    ];
+
+    const count = await Problem.countDocuments();
+    
+    if (count === 0) {
+      console.log("🌱 Seeding problems...");
+      await Problem.insertMany(problemsData);
+      console.log("✅ Problems seeded successfully!");
+    } else {
+      console.log(`✅ Database already has ${count} problems, skipping seed.`);
+    }
+  } catch (err) {
+    console.error("❌ Seeding error:", err.message);
+  }
+}
+
+module.exports = seedDatabase;
