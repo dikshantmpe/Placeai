@@ -10,6 +10,21 @@ export default function RightSidebar({ user }) {
   const dsaDone = localStorage.getItem(`dsa_${today}`) === "true";
   const quizDone = localStorage.getItem(`quiz_${today}`) === "true";
 
+  // 1. Dedicated hook to fetch sidebar progress
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    axios.get("https://placeai-sqjj.onrender.com/api/dashboard", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        // Update the sidebar state with the fetched DSA data
+        setDsaProgress(res.data.dsa);
+      })
+      .catch(err => console.error("Sidebar fetch error:", err));
+  }, []);
+
   // Countdown to midnight
   useEffect(() => {
     const tick = () => {
