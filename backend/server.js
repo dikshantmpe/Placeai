@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.get('/api/ping', (req, res) => res.status(200).send('awake'));
 app.use("/api/problems", require("./routes/problems"));
 app.use("/api/resume", require("./routes/resume"));
 app.use("/api/interview", require("./routes/interview"));
