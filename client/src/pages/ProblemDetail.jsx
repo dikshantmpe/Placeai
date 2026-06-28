@@ -71,35 +71,41 @@ export default function ProblemDetail() {
         };
         
         try {
-          // 1. Run the code
+          // 1. Execute the code
           new Function(code)(); 
           const outputText = logs.join("\n") || "Code executed successfully. (No console output)";
           
-          // 2. Show Success Output
+          // 2. Display success in terminal
           setOutput(`${outputText}\n\n✅ Code Executed Successfully! Auto-saving and marking as solved...`);
 
-          // 3. AUTO-SAVE: Save code to local storage silently
+          // 3. Silently save code locally
           localStorage.setItem(`problem_${id}_code`, code);
 
-          // 4. AUTO-SOLVE: If not already solved, hit the backend toggle!
-          if (!problem.status) {
-            const token = localStorage.getItem("token");
-            const res = await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            setProblem(res.data); // Updates the UI button to green
-            window.dispatchEvent(new Event("dsaProgressUpdated")); // Updates the sidebar
-          }
+          // 4. Hit the database and FORCE the frontend button to turn green instantly
+          const token = localStorage.getItem("token");
+          await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          // 🔥 BULLETPROOF OPTIMISTIC UPDATE 🔥
+          // This forces the button to flip to green without waiting for a page reload
+          setProblem(prev => ({ 
+            ...prev, 
+            status: true,
+            isSolved: true,
+            solved: true 
+          })); 
+          
+          // Broadcast to update the progress sidebar
+          window.dispatchEvent(new Event("dsaProgressUpdated")); 
 
         } catch (execError) {
-          // If the code has an error, don't mark it solved!
           setOutput(`❌ Error:\n${execError.message}\n\n⚠️ Fix the errors to mark this problem as solved.`);
         } finally {
           console.log = originalLog; 
           setIsRunning(false);
         }
       } else {
-        // Simulated output for other languages
         setOutput(`Running ${language} compiler...\n\n✅ Code executed successfully!`);
         setIsRunning(false);
       }
