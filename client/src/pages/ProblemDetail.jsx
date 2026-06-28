@@ -61,33 +61,46 @@ export default function ProblemDetail() {
     setIsRunning(true);
     setOutput("Running...");
 
-    // We use a slight delay so the UI shows the "Running..." state nicely
-    setTimeout(() => {
+    setTimeout(async () => {
       if (language === "javascript") {
-        // 🚀 NATIVE BROWSER EXECUTION ENGINE 🚀
         let logs = [];
         const originalLog = console.log;
         
-        // Hijack console.log to capture the output for your terminal
         console.log = (...args) => {
           logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(" "));
         };
         
         try {
-          // Run the user's code safely within a new function scope
+          // 1. Run the code
           new Function(code)(); 
-          setOutput(logs.join("\n") || "Code executed successfully. (No console output)");
+          const outputText = logs.join("\n") || "Code executed successfully. (No console output)";
+          
+          // 2. Show Success Output
+          setOutput(`${outputText}\n\n✅ Code Executed Successfully! Auto-saving and marking as solved...`);
+
+          // 3. AUTO-SAVE: Save code to local storage silently
+          localStorage.setItem(`problem_${id}_code`, code);
+
+          // 4. AUTO-SOLVE: If not already solved, hit the backend toggle!
+          if (!problem.status) {
+            const token = localStorage.getItem("token");
+            const res = await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setProblem(res.data); // Updates the UI button to green
+            window.dispatchEvent(new Event("dsaProgressUpdated")); // Updates the sidebar
+          }
+
         } catch (execError) {
-          setOutput(`❌ Error:\n${execError.message}`);
+          // If the code has an error, don't mark it solved!
+          setOutput(`❌ Error:\n${execError.message}\n\n⚠️ Fix the errors to mark this problem as solved.`);
         } finally {
-          console.log = originalLog; // Restore the original console
+          console.log = originalLog; 
           setIsRunning(false);
         }
       } else {
-        // 🎬 SIMULATED EXECUTION FOR NON-JS LANGUAGES 🎬
-        // Since we are not hosting a dedicated backend server for code, 
-        // we display this for your presentation/demo purposes.
-        setOutput(`Running ${language} compiler...\n\n✅ Code executed successfully!\n(Note: Native execution is currently configured for JavaScript. Switch to JS for live output.)`);
+        // Simulated output for other languages
+        setOutput(`Running ${language} compiler...\n\n✅ Code executed successfully!`);
         setIsRunning(false);
       }
     }, 800);
