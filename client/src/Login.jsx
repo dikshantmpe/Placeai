@@ -1,3 +1,10 @@
+Got it. To get that sleek, neutral dark glass look from your mockup, we need to strip out all the pink/purple background tints from the panels and replace them with a very subtle, transparent white/grey gradient. We also need to add a slight "inner white edge" to mimic how physical glass catches the light on the top-left corner, just like your reference image.
+
+I have kept everything else exactly the same (the animated border, the Vanta background, all your content and structure).
+
+Here is your updated `Login.jsx`. Copy and paste this to overwrite your current file:
+
+```jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -196,9 +203,6 @@ export default function Login() {
           animation: shimmer 3.2s ease-in-out infinite;
         }
 
-        /* NEW FIX: The gradient border is now drawn via a pseudo-element 
-          with a mask, leaving the inside 100% transparent for glass! 
-        */
         .gradient-border-wrap {
           position: relative;
           border-radius: 28px;
@@ -275,12 +279,13 @@ export default function Login() {
       >
         <div className="login-card-inner" style={{
           display: "flex",
-          /* NEW: Purple & Pink semi-transparent gradient + blur */
-          background: "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))",
-          backdropFilter: "blur(16px) saturate(120%)",
-          WebkitBackdropFilter: "blur(16px) saturate(120%)",
+          /* CHANGED: Neutral dark frosted glass gradient */
+          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01))",
+          backdropFilter: "blur(20px) saturate(120%)",
+          WebkitBackdropFilter: "blur(20px) saturate(120%)",
           borderRadius: "26.5px",
-          boxShadow: "0 30px 80px -20px rgba(0,0,0,0.7)",
+          /* CHANGED: Added inset shadow for the subtle white inner edge */
+          boxShadow: "0 30px 80px -20px rgba(0,0,0,0.7), inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.15)",
           overflow: "hidden",
           minHeight: "640px"
         }}>
@@ -293,7 +298,8 @@ export default function Login() {
             flexDirection: "column",
             justifyContent: "center",
             position: "relative",
-            background: "rgba(124,58,237,0.035)",
+            /* CHANGED: Removed the purple tint, made it transparent to let the main glass handle it */
+            background: "transparent",
             borderRight: "1px solid rgba(255,255,255,0.08)"
           }}>
             <div className="animate-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
@@ -337,7 +343,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* RIGHT: translucent login form */}
+          {/* RIGHT: login form */}
           <div style={{
             flex: "1",
             padding: "3.25rem 3rem",
@@ -349,7 +355,8 @@ export default function Login() {
           }}>
             <div style={{
               position: "absolute", top: "-20%", right: "-15%", width: "55%", height: "55%",
-              background: "radial-gradient(circle, rgba(255,63,129,0.08), transparent 70%)",
+              /* CHANGED: Neutralized the pink radial glow to a subtle white/grey */
+              background: "radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%)",
               pointerEvents: "none"
             }} />
 
@@ -487,3 +494,5 @@ export default function Login() {
     </div>
   );
 }
+
+```
