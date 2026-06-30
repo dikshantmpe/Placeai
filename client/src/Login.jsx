@@ -82,45 +82,45 @@ export default function Login() {
   const features = [
     {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="3" />
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
         </svg>
       ),
-      title: "AI-Powered Tools",
-      desc: "Resume Analyzer, Mock Interviews and more.",
+      title: "AI-Powered",
+      desc: "Resume & Mock Interviews",
     },
     {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 17l6-6 4 4 8-8" />
           <path d="M17 7h4v4" />
         </svg>
       ),
-      title: "Track & Improve",
-      desc: "Smart progress tracking across all modules.",
+      title: "Track Progress",
+      desc: "Smart Analytics",
     },
     {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="3" y="4" width="18" height="18" rx="2" />
           <path d="M3 10h18" />
           <path d="M8 2v4M16 2v4" />
         </svg>
       ),
       title: "Daily Challenges",
-      desc: "Build consistency with daily DSA & Aptitude challenges.",
+      desc: "DSA & Aptitude",
     },
     {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
           <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
           <path d="M8 7h8M8 11h8M8 15h5" />
         </svg>
       ),
-      title: "Company Insights",
-      desc: "Access company-wise questions and interview experiences.",
+      title: "Insights",
+      desc: "Company Questions",
     },
   ];
 
@@ -136,36 +136,28 @@ export default function Login() {
       fontFamily: "'Inter', sans-serif",
       color: "#ffffff",
       background: "#0c0a14",
-      padding: "2rem"
+      padding: "2rem",
+      /* NEW: Perspective established on the main container for 3D effects */
+      perspective: "1200px" 
     }}>
       <style>{`
-        @keyframes border-glow {
-          0%   { background-position: 0% 50%; }
-          50%  { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
         @keyframes fade-in-up {
           0%   { opacity: 0; transform: translateY(22px); }
           100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes card-entrance {
-          0%   { opacity: 0; transform: translateY(40px) scale(0.97); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(200%); }
         }
-        @keyframes float-y {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-7px); }
+        @keyframes float-cube {
+          0%, 100% { transform: translateY(0px) rotateX(0deg); }
+          50% { transform: translateY(-12px) rotateX(3deg); }
         }
 
         .animate-in { animation: fade-in-up 0.7s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
         .d1 { animation-delay: 0.1s; } .d2 { animation-delay: 0.2s; }
         .d3 { animation-delay: 0.3s; } .d4 { animation-delay: 0.4s; }
         .d5 { animation-delay: 0.5s; } .d6 { animation-delay: 0.6s; }
-        .d7 { animation-delay: 0.7s; } .d8 { animation-delay: 0.8s; }
 
         .glass-field {
           background: rgba(255,255,255,0.05);
@@ -175,8 +167,9 @@ export default function Login() {
           transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
         }
         .glass-field.focused {
-          background: rgba(255,255,255,0.07);
+          background: rgba(255,255,255,0.09);
           box-shadow: 0 0 0 3px rgba(255,63,129,0.18), 0 0 24px rgba(255,63,129,0.3);
+          border-color: rgba(255,63,129,0.4);
         }
 
         .eye-btn {
@@ -196,58 +189,49 @@ export default function Login() {
           animation: shimmer 3.2s ease-in-out infinite;
         }
 
-        .gradient-border-wrap {
-          position: relative;
-          border-radius: 28px;
-        }
-        .gradient-border-wrap::before {
-          content: "";
-          position: absolute;
-          inset: -1.5px;
-          border-radius: 29.5px;
-          background: linear-gradient(120deg, #7c3aed, #ff3f81, #f59e0b, #22d3ee, #7c3aed);
-          background-size: 300% 300%;
-          animation: border-glow 8s ease infinite;
-          z-index: -1;
-          padding: 1.5px;
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          pointer-events: none;
-        }
-
-        .feature-row {
+        /* NEW: The 3D Glass Cubic Panel Styles */
+        .feature-cube {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 20px;
+          padding: 1.5rem 1rem;
           display: flex;
-          align-items: flex-start;
-          gap: 14px;
-          padding: 11px 0;
-        }
-        .feature-icon {
-          flex-shrink: 0;
-          width: 38px;
-          height: 38px;
-          border-radius: 11px;
-          background: rgba(255,63,129,0.1);
-          border: 1px solid rgba(255,63,129,0.25);
-          color: #ff7aab;
-          display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          animation: float-y 4.5s ease-in-out infinite;
+          text-align: center;
+          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.2);
+          animation: float-cube 5s ease-in-out infinite;
         }
 
-        .badge-pill {
-          display: inline-flex; align-items: center; gap: 6px;
-          background: rgba(255,63,129,0.1); border: 1px solid rgba(255,63,129,0.3);
-          color: #ff9ec4; font-size: 0.75rem; font-weight: 600;
-          padding: 6px 14px; border-radius: 999px;
+        /* NEW: The Main Tilted Form Panel */
+        .tilted-panel {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
+          backdrop-filter: blur(20px) saturate(120%);
+          -webkit-backdrop-filter: blur(20px) saturate(120%);
+          border-radius: 28px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: -20px 30px 60px -20px rgba(0,0,0,0.7), inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.2);
+          padding: 3.5rem;
+          transform: rotateY(-15deg) rotateX(2deg);
+          transform-style: preserve-3d;
+          transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        /* Interactive hover flattens it slightly towards the user */
+        .tilted-panel:hover {
+          transform: rotateY(-5deg) rotateX(0deg) translateZ(10px);
         }
 
         input::placeholder { color: #6b6b78; }
 
-        @media (max-width: 900px) {
-          .login-card-inner { flex-direction: column !important; }
-          .login-left-panel { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+        @media (max-width: 960px) {
+          .layout-wrapper { flex-direction: column !important; gap: 40px !important; }
+          .tilted-panel { transform: none !important; padding: 2rem !important; }
+          .left-column { transform: none !important; width: 100% !important; align-items: center !important; }
+          .tilted-panel:hover { transform: none !important; }
         }
       `}</style>
 
@@ -258,115 +242,94 @@ export default function Login() {
         background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(8,6,14,0.35) 75%)"
       }} />
 
-      {/* === Main wide card === */}
-      <div
-        className="gradient-border-wrap"
-        style={{
-          position: "relative",
-          zIndex: 10,
-          width: "100%",
-          maxWidth: "1080px",
-          opacity: mounted ? 1 : 0,
-          animation: mounted ? "card-entrance 0.8s cubic-bezier(0.16,1,0.3,1) forwards" : "none"
-        }}
-      >
-        <div className="login-card-inner" style={{
-          display: "flex",
-          /* CHANGED: Neutral dark frosted glass gradient */
-          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01))",
-          backdropFilter: "blur(20px) saturate(120%)",
-          WebkitBackdropFilter: "blur(20px) saturate(120%)",
-          borderRadius: "26.5px",
-          /* CHANGED: Added inset shadow for the subtle white inner edge */
-          boxShadow: "0 30px 80px -20px rgba(0,0,0,0.7), inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.15)",
-          overflow: "hidden",
-          minHeight: "640px"
-        }}>
+      {/* === Layout Wrapper === */}
+      <div className="layout-wrapper" style={{
+        position: "relative",
+        zIndex: 10,
+        width: "100%",
+        maxWidth: "1150px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "4rem",
+        opacity: mounted ? 1 : 0,
+        transition: "opacity 0.8s ease-in"
+      }}>
 
-          {/* LEFT: overview / branding panel */}
-          <div className="login-left-panel" style={{
-            flex: "1.1",
-            padding: "3.25rem 3rem",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            position: "relative",
-            /* CHANGED: Removed the purple tint, made it transparent to let the main glass handle it */
-            background: "transparent",
-            borderRight: "1px solid rgba(255,255,255,0.08)"
-          }}>
-            <div className="animate-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
+        {/* LEFT COLUMN: Animated Floating Cubes */}
+        <div className="left-column" style={{
+          flex: "1",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2.5rem",
+          /* Slight opposite tilt to enhance depth */
+          transform: "rotateY(10deg) translateZ(30px)",
+          transformStyle: "preserve-3d"
+        }}>
+          {/* Header Text (Floating above cubes) */}
+          <div className="animate-in d1">
+            <h1 style={{ fontSize: "3rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 0.5rem 0" }}>
+              Prepare <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Smarter.</span>
+            </h1>
+            <p style={{ color: "#a9a9b8", fontSize: "1.1rem" }}>✦ Your AI Placement Partner</p>
+          </div>
+
+          {/* 2x2 Grid of Floating Cubes */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1.25rem", maxWidth: "400px" }}>
+            {features.map((f, i) => (
+              <div 
+                key={i} 
+                className={`animate-in d${Math.min(i + 2, 8)} feature-cube`}
+                style={{ animationDelay: `${i * 0.4}s` }} /* Staggered bobbing */
+              >
+                <div style={{
+                  width: "48px", height: "48px", borderRadius: "14px",
+                  background: "rgba(255,63,129,0.1)", border: "1px solid rgba(255,63,129,0.25)",
+                  color: "#ff7aab", display: "flex", alignItems: "center", justifyContent: "center",
+                  marginBottom: "12px"
+                }}>
+                  {f.icon}
+                </div>
+                <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>{f.title}</div>
+                <div style={{ color: "#9b9ba8", fontSize: "0.75rem", lineHeight: "1.4" }}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
+        {/* RIGHT COLUMN: The 3D Tilted Login Form */}
+        <div style={{ flex: "1.1", perspective: "1000px" }}>
+          <div className="tilted-panel animate-in d2">
+            
+            {/* Embedded Logo */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2.5rem" }}>
               <div style={{
-                width: "36px", height: "36px", borderRadius: "10px",
+                width: "40px", height: "40px", borderRadius: "10px",
                 background: "linear-gradient(135deg, #7c3aed, #ff3f81)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: "800", fontSize: "1rem",
+                fontWeight: "800", fontSize: "1.2rem",
                 boxShadow: "0 0 20px rgba(255,63,129,0.4)"
               }}>P</div>
-              <h2 style={{ margin: 0, fontSize: "1.15rem", fontWeight: "700" }}>
-                PlacePrep <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff7aab)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
+              <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700" }}>
+                PlacePrep <span style={{ color: "#ff7aab" }}>AI</span>
               </h2>
             </div>
 
-            <div className="animate-in d1 badge-pill" style={{ width: "fit-content", marginBottom: "1.4rem" }}>
-              ✦ Your AI Placement Partner
-            </div>
-
-            <h1 className="animate-in d1" style={{ fontSize: "2.6rem", fontWeight: "800", lineHeight: "1.12", margin: "0 0 1.25rem 0" }}>
-              Prepare Smarter.<br/>
-              <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                Get Placed Faster.
-              </span>
-            </h1>
-
-            <p className="animate-in d2" style={{ color: "#a9a9b8", fontSize: "1rem", lineHeight: "1.6", maxWidth: "420px", marginBottom: "1.5rem" }}>
-              All-in-one platform to track your progress, analyze your resume, practice interviews, and ace every placement challenge.
-            </p>
-
-            <div>
-              {features.map((f, i) => (
-                <div className={`animate-in d${Math.min(i + 3, 8)} feature-row`} key={i}>
-                  <div className="feature-icon" style={{ animationDelay: `${i * 0.3}s` }}>{f.icon}</div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: "0.95rem" }}>{f.title}</div>
-                    <div style={{ color: "#9b9ba8", fontSize: "0.8rem", marginTop: "2px" }}>{f.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* RIGHT: login form */}
-          <div style={{
-            flex: "1",
-            padding: "3.25rem 3rem",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            position: "relative",
-            background: "rgba(255,255,255,0.015)"
-          }}>
-            <div style={{
-              position: "absolute", top: "-20%", right: "-15%", width: "55%", height: "55%",
-              /* CHANGED: Neutralized the pink radial glow to a subtle white/grey */
-              background: "radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%)",
-              pointerEvents: "none"
-            }} />
-
-            <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: "400px", margin: "0 auto" }}>
-              <h1 className="animate-in d1" style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 0.4rem 0", lineHeight: 1.15 }}>
+            <div style={{ position: "relative", zIndex: 2, width: "100%" }}>
+              <h1 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 0.5rem 0", lineHeight: 1.15 }}>
                 Welcome Back
               </h1>
-              <p className="animate-in d1" style={{ color: "#9b9ba8", fontSize: "0.92rem", margin: "0 0 2rem 0" }}>
+              <p style={{ color: "#9b9ba8", fontSize: "0.95rem", margin: "0 0 2.5rem 0" }}>
                 Sign in to continue your placement journey.
               </p>
 
               <form onSubmit={handleLogin}>
                 {/* Email */}
-                <div className={`animate-in d2 glass-field ${focusedField === "email" ? "focused" : ""}`} style={{
-                  borderRadius: "14px", marginBottom: "1.1rem", display: "flex", alignItems: "center", padding: "0 16px"
+                <div className={`glass-field ${focusedField === "email" ? "focused" : ""}`} style={{
+                  borderRadius: "14px", marginBottom: "1.25rem", display: "flex", alignItems: "center", padding: "0 16px"
                 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7aab" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7aab" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                     <path d="M3 7l9 6 9-6" />
                     <rect x="3" y="5" width="18" height="14" rx="2" />
                   </svg>
@@ -379,17 +342,17 @@ export default function Login() {
                     placeholder="Email address"
                     style={{
                       flex: 1, background: "transparent", border: "none", outline: "none",
-                      color: "white", fontSize: "0.95rem", padding: "15px 0"
+                      color: "white", fontSize: "1rem", padding: "16px 0"
                     }}
                     required
                   />
                 </div>
 
                 {/* Password */}
-                <div className={`animate-in d2 glass-field ${focusedField === "password" ? "focused" : ""}`} style={{
-                  borderRadius: "14px", marginBottom: "0.9rem", display: "flex", alignItems: "center", padding: "0 16px"
+                <div className={`glass-field ${focusedField === "password" ? "focused" : ""}`} style={{
+                  borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
                 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7aab" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7aab" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                     <rect x="5" y="11" width="14" height="9" rx="2" />
                     <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                   </svg>
@@ -402,34 +365,27 @@ export default function Login() {
                     placeholder="Password"
                     style={{
                       flex: 1, background: "transparent", border: "none", outline: "none",
-                      color: "white", fontSize: "0.95rem", padding: "15px 0"
+                      color: "white", fontSize: "1rem", padding: "16px 0"
                     }}
                     required
                   />
                   <button type="button" className="eye-btn" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? (
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                     ) : (
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.6 18.6 0 0 1 4.22-5.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.7 18.7 0 0 1-2.16 3.19" />
-                        <path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" />
-                        <path d="M1 1l22 22" />
-                      </svg>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.6 18.6 0 0 1 4.22-5.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.7 18.7 0 0 1-2.16 3.19" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /><path d="M1 1l22 22" /></svg>
                     )}
                   </button>
                 </div>
 
-                <div className="animate-in d3" style={{ textAlign: "right", marginBottom: "1.5rem" }}>
-                  <a href="#" style={{ color: "#ff7aab", fontSize: "0.82rem", textDecoration: "none", fontWeight: 600 }}>Forgot Password?</a>
+                <div style={{ textAlign: "right", marginBottom: "1.75rem" }}>
+                  <a href="#" style={{ color: "#ff7aab", fontSize: "0.85rem", textDecoration: "none", fontWeight: 600 }}>Forgot Password?</a>
                 </div>
 
                 {/* Login button */}
                 <button
                   type="submit"
-                  className="animate-in d4 glow-btn"
+                  className="glow-btn"
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                   style={{
@@ -437,7 +393,7 @@ export default function Login() {
                     background: isHovered
                       ? "linear-gradient(90deg, #6d28d9, #c2185b)"
                       : "linear-gradient(90deg, #7c3aed, #ff3f81)",
-                    color: "white", fontSize: "1rem", fontWeight: "700",
+                    color: "white", fontSize: "1.05rem", fontWeight: "700",
                     boxShadow: isHovered
                       ? "0 0 34px rgba(124,58,237,0.6), 0 0 34px rgba(255,63,129,0.4)"
                       : "0 0 20px rgba(255,63,129,0.35)",
@@ -450,7 +406,7 @@ export default function Login() {
               </form>
 
               {/* Divider */}
-              <div className="animate-in d5" style={{ display: "flex", alignItems: "center", gap: "14px", margin: "1.75rem 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "14px", margin: "2rem 0" }}>
                 <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
                 <span style={{ color: "#6b6b78", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "1px" }}>or continue with</span>
                 <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
@@ -459,14 +415,14 @@ export default function Login() {
               {/* Google button */}
               <button
                 type="button"
-                className="animate-in d5 glass-field"
+                className="glass-field"
                 style={{
                   width: "100%", padding: "14px", borderRadius: "14px", display: "flex", alignItems: "center",
-                  justifyContent: "center", gap: "10px", cursor: "pointer", fontSize: "0.92rem",
+                  justifyContent: "center", gap: "12px", cursor: "pointer", fontSize: "0.95rem",
                   fontWeight: "600", color: "white"
                 }}
               >
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -475,14 +431,14 @@ export default function Login() {
                 Continue with Google
               </button>
 
-              <p className="animate-in d6" style={{ textAlign: "center", marginTop: "1.75rem", color: "#9b9ba8", fontSize: "0.88rem" }}>
+              <p style={{ textAlign: "center", marginTop: "2rem", color: "#9b9ba8", fontSize: "0.9rem" }}>
                 Don't have an account?{" "}
                 <Link to="/signup" style={{ color: "#ff7aab", textDecoration: "none", fontWeight: "700" }}>Sign Up</Link>
               </p>
             </div>
           </div>
-
         </div>
+
       </div>
     </div>
   );
