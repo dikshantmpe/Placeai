@@ -29,17 +29,22 @@ export default function Login() {
       ),
       title: "AI-Powered",
       sub: "Tools",
+      top: "12%",
+      left: "6%",
+      delay: "0s",
     },
     {
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z" />
-          <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
-          <path d="M12 18v4M8 22h8" />
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       ),
       title: "Augmented",
-      sub: "Insights",
+      sub: "Security",
+      top: "44%",
+      left: "0%",
+      delay: "1.2s",
     },
     {
       icon: (
@@ -50,6 +55,9 @@ export default function Login() {
       ),
       title: "Track &",
       sub: "Improve",
+      top: "74%",
+      left: "8%",
+      delay: "2.1s",
     },
   ];
 
@@ -77,13 +85,19 @@ export default function Login() {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-12px); }
         }
+        @keyframes float-in-and-bob {
+          0% { opacity: 0; transform: translateY(28px); }
+          30% { opacity: 1; transform: translateY(0px); }
+          65% { transform: translateY(-12px); }
+          100% { transform: translateY(0px); }
+        }
         @keyframes float-y-slow {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-8px) rotate(4deg); }
         }
         @keyframes pulse-glow {
-          0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 6px rgba(239,68,68,0.6)); }
-          50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(239,68,68,0.9)); }
+          0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 6px rgba(239,68,68,0.6)); }
+          50% { opacity: 1; filter: drop-shadow(0 0 18px rgba(239,68,68,0.95)); }
         }
         @keyframes fade-in-up {
           0% { opacity: 0; transform: translateY(20px); }
@@ -115,10 +129,17 @@ export default function Login() {
         }
         .eye-btn:hover { color: #22d3ee; }
 
+        /* Outer wrapper handles entrance + continuous float together so they never fight */
+        .feature-badge-wrap {
+          position: absolute;
+          animation: float-in-and-bob 5.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+          opacity: 0;
+        }
         .feature-badge {
-          background: rgba(15, 15, 20, 0.55);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(15, 15, 20, 0.6);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.12);
           border-radius: 14px;
           padding: 14px 16px;
           display: flex;
@@ -126,7 +147,7 @@ export default function Login() {
           align-items: flex-start;
           gap: 8px;
           width: 130px;
-          animation: float-y 5s ease-in-out infinite;
+          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
         }
         .feature-badge svg { color: #ef4444; }
 
@@ -148,9 +169,9 @@ export default function Login() {
         animation: "wave-drift 14s ease-in-out infinite"
       }} />
 
-      {/* Floating geometric shapes */}
+      {/* Floating geometric shapes (outside the card, like the reference) */}
       <div className="floating-shape" style={{ top: "8%", left: "4%", width: "28px", height: "28px", border: "1px solid rgba(239,68,68,0.4)", transform: "rotate(20deg)", animationDelay: "0s" }} />
-      <div className="floating-shape" style={{ top: "60%", left: "2%", width: "20px", height: "20px", border: "1px solid rgba(34,211,238,0.4)", borderRadius: "4px", animationDelay: "1.5s" }} />
+      <div className="floating-shape" style={{ top: "62%", left: "2%", width: "22px", height: "22px", border: "1px solid rgba(255,255,255,0.3)", borderRadius: "4px", animationDelay: "1.5s" }} />
       <div className="floating-shape" style={{ top: "85%", left: "20%", width: "16px", height: "16px", background: "rgba(255,255,255,0.08)", borderRadius: "3px", animationDelay: "2.5s" }} />
       <div className="floating-shape" style={{ top: "10%", right: "6%", width: "60px", height: "80px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", animationDelay: "1s" }} />
 
@@ -182,43 +203,68 @@ export default function Login() {
           justifyContent: "center",
           padding: "3rem 2rem"
         }}>
-          <div className="animate-fade-in delay-1 feature-badge" style={{ position: "absolute", top: "12%", left: "6%", animationDelay: "0s" }}>
-            <div>{features[0].icon}</div>
-            <div style={{ fontWeight: 700, fontSize: "0.8rem", lineHeight: 1.2 }}>{features[0].title}<br/>{features[0].sub}</div>
-          </div>
-          <div className="animate-fade-in delay-2 feature-badge" style={{ position: "absolute", top: "44%", left: "0%", animationDelay: "1.2s" }}>
-            <div>{features[1].icon}</div>
-            <div style={{ fontWeight: 700, fontSize: "0.8rem", lineHeight: 1.2 }}>{features[1].title}<br/>{features[1].sub}</div>
-          </div>
-          <div className="animate-fade-in delay-3 feature-badge" style={{ position: "absolute", bottom: "10%", left: "8%", animationDelay: "2.1s" }}>
-            <div>{features[2].icon}</div>
-            <div style={{ fontWeight: 700, fontSize: "0.8rem", lineHeight: 1.2 }}>{features[2].title}<br/>{features[2].sub}</div>
-          </div>
+          {features.map((f, i) => (
+            <div
+              key={i}
+              className="feature-badge-wrap"
+              style={{ top: f.top, left: f.left, animationDelay: f.delay }}
+            >
+              <div className="feature-badge">
+                <div>{f.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "0.8rem", lineHeight: 1.2 }}>{f.title}<br/>{f.sub}</div>
+              </div>
+            </div>
+          ))}
 
-          <svg viewBox="0 0 320 420" width="78%" style={{ maxWidth: "340px", filter: "drop-shadow(0 20px 50px rgba(0,0,0,0.6))" }}>
+          {/* Robot head illustration, closer to a rounded helmet with visor */}
+          <svg viewBox="0 0 320 460" width="72%" style={{ maxWidth: "320px", filter: "drop-shadow(0 25px 60px rgba(0,0,0,0.65))" }}>
             <defs>
-              <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#1c1c22" />
-                <stop offset="100%" stopColor="#050507" />
-              </linearGradient>
+              <radialGradient id="headGrad" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stopColor="#2a2a32" />
+                <stop offset="55%" stopColor="#16161b" />
+                <stop offset="100%" stopColor="#08080a" />
+              </radialGradient>
               <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ff8a65" />
+                <stop offset="0%" stopColor="#ffab91" />
                 <stop offset="50%" stopColor="#ef4444" />
-                <stop offset="100%" stopColor="#b91c1c" />
+                <stop offset="100%" stopColor="#a91c1c" />
               </linearGradient>
+              <radialGradient id="eyeGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#ef4444" />
+                <stop offset="100%" stopColor="#1a0606" />
+              </radialGradient>
             </defs>
-            <ellipse cx="160" cy="160" rx="120" ry="130" fill="url(#headGrad)" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
-            <path d="M50 150 Q160 60 270 150 Q270 230 160 270 Q50 230 50 150 Z" fill="url(#headGrad)" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
-            <rect x="60" y="150" width="200" height="22" rx="11" fill="url(#visorGrad)" style={{ animation: "pulse-glow 2.4s ease-in-out infinite" }} />
-            <circle cx="160" cy="200" r="46" fill="#0a0a0c" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
-            <circle cx="160" cy="200" r="22" fill="#161618" stroke="rgba(239,68,68,0.5)" strokeWidth="1.5" />
-            <g stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" fill="none">
-              <path d="M70 120 L40 90" />
-              <path d="M250 120 L280 90" />
-              <path d="M100 280 L90 340" />
-              <path d="M220 280 L230 340" />
+
+            {/* round helmet skull */}
+            <circle cx="160" cy="195" r="160" fill="url(#headGrad)" />
+            {/* subtle top-right highlight like reflective dome */}
+            <ellipse cx="105" cy="120" rx="70" ry="40" fill="rgba(255,255,255,0.05)" />
+
+            {/* side antenna lines */}
+            <g stroke="rgba(255,255,255,0.18)" strokeWidth="2" fill="none" strokeLinecap="round">
+              <path d="M55 145 L18 100" />
+              <path d="M265 145 L302 100" />
             </g>
-            <rect x="120" y="300" width="80" height="100" rx="16" fill="url(#headGrad)" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
+
+            {/* faceplate / visor shield shape */}
+            <path d="M62 175 Q160 95 258 175 Q258 270 160 320 Q62 270 62 175 Z" fill="url(#headGrad)" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
+
+            {/* glowing red visor bar */}
+            <rect x="78" y="183" width="164" height="20" rx="10" fill="url(#visorGrad)" style={{ animation: "pulse-glow 2.4s ease-in-out infinite" }} />
+
+            {/* central eye / camera lens */}
+            <circle cx="160" cy="232" r="48" fill="#0a0a0c" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
+            <circle cx="160" cy="232" r="24" fill="url(#eyeGrad)" />
+            <circle cx="160" cy="232" r="9" fill="#1a0606" stroke="rgba(239,68,68,0.6)" strokeWidth="1.5" />
+
+            {/* lower jaw/neck lines */}
+            <g stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" fill="none" strokeLinecap="round">
+              <path d="M118 318 L102 380" />
+              <path d="M202 318 L218 380" />
+            </g>
+
+            {/* neck/collar block */}
+            <rect x="124" y="350" width="72" height="95" rx="16" fill="url(#headGrad)" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
           </svg>
         </div>
 
