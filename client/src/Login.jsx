@@ -22,7 +22,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isBtnHovered, setIsBtnHovered] = useState(false);
   const [isFormHovered, setIsFormHovered] = useState(false);
-  const [hoveredCube, setHoveredCube] = useState(null); // Tracks which left-side cube is hovered
+  const [hoveredCube, setHoveredCube] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
   const navigate = useNavigate();
 
@@ -156,13 +156,11 @@ export default function Login() {
         }
         input::placeholder { color: #6b6b78; }
         
-        /* Floating animation for cubes */
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
         }
 
-        /* Glass shine sweep animation */
         .glass-cube-shine {
           position: relative;
           overflow: hidden;
@@ -182,6 +180,11 @@ export default function Login() {
           15% { left: 200%; }
           100% { left: 200%; }
         }
+
+        /* Hides the middle image on small screens so it doesn't break mobile layout */
+        @media (max-width: 1100px) {
+          .middle-image-layer { display: none !important; }
+        }
       `}</style>
 
       {/* === Vanta.js animated network background === */}
@@ -196,12 +199,11 @@ export default function Login() {
         position: "relative",
         zIndex: 10,
         width: "100%",
-        maxWidth: "1150px",
+        maxWidth: "1350px", // INCREASED width to push left column further left
         display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "4rem",
         opacity: mounted ? 1 : 0,
         transition: "opacity 0.8s ease-in"
       }}>
@@ -210,11 +212,11 @@ export default function Login() {
         {/* LEFT COLUMN: Text & Animated Cubes        */}
         {/* ========================================= */}
         <div style={{
-          flex: "1 1 400px",
+          flex: "0 1 420px", // Locks width
           display: "flex",
           flexDirection: "column",
           gap: "2.5rem",
-          /* Stronger base 3D tilt for the whole left section */
+          zIndex: 10, // Keeps it above the middle image
           transform: "rotateY(12deg) rotateX(4deg) translateZ(10px)",
           transformStyle: "preserve-3d"
         }}>
@@ -241,14 +243,11 @@ export default function Login() {
             transformStyle: "preserve-3d"
           }}>
             {features.map((f, i) => (
-              /* Outer wrapper handles the continuous CSS float animation */
               <div key={i} style={{
                 animation: `float 4s ease-in-out infinite`,
                 animationDelay: `${i * 0.25}s`,
-                perspective: "1000px" // Allows inner child to pop out in 3D
+                perspective: "1000px" 
               }}>
-                
-                {/* Inner wrapper handles the interactive 3D tilt, hover, and glass styling */}
                 <div 
                   className="glass-cube-shine"
                   onMouseEnter={() => setHoveredCube(i)}
@@ -268,15 +267,12 @@ export default function Login() {
                       ? "0 20px 40px -10px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.4)"
                       : "0 10px 30px -10px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(255,255,255,0.2)",
                     transformStyle: "preserve-3d",
-                    /* MAGIC: When hovered, neutralizes the parent tilt to face the user and pops out */
                     transform: hoveredCube === i 
                       ? "rotateY(-12deg) rotateX(-4deg) translateZ(40px) scale(1.05)" 
                       : "rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)",
                     transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)"
                   }}
                 >
-                  
-                  {/* The actual content floats even further out for internal parallax */}
                   <div style={{
                     transform: hoveredCube === i ? "translateZ(30px)" : "translateZ(0px)",
                     transition: "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
@@ -297,7 +293,6 @@ export default function Login() {
                     <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>{f.title}</div>
                     <div style={{ color: "#9b9ba8", fontSize: "0.75rem", lineHeight: "1.4" }}>{f.desc}</div>
                   </div>
-
                 </div>
               </div>
             ))}
@@ -305,9 +300,38 @@ export default function Login() {
         </div>
 
         {/* ========================================= */}
+        {/* MIDDLE COLUMN: The Physical Image Layer   */}
+        {/* ========================================= */}
+        <div className="middle-image-layer" style={{
+          position: "absolute",
+          /* Positioned slightly to the right so the Right Form Panel overlaps its corner */
+          left: "54%", 
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "440px",
+          height: "640px",
+          zIndex: 5, /* Behind both left and right panels */
+          borderRadius: "28px",
+          overflow: "hidden",
+          boxShadow: "0 30px 60px rgba(0,0,0,0.7)"
+        }}>
+          {/* ↓↓↓ REPLACE THIS SRC WITH YOUR IMAGE URL ↓↓↓ */}
+          <img 
+            src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800&auto=format&fit=crop" 
+            alt="AI Concept" 
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          {/* Subtle dark gradient overlay so it blends into your dark theme */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to right, rgba(12,10,20,0.1), rgba(12,10,20,0.5))"
+          }} />
+        </div>
+
+        {/* ========================================= */}
         {/* RIGHT COLUMN: The Heavily Tilted Panel    */}
         {/* ========================================= */}
-        <div style={{ flex: "1 1 400px", perspective: "1500px" }}>
+        <div style={{ flex: "0 1 420px", perspective: "1500px", zIndex: 10 }}>
           <div 
             onMouseEnter={() => setIsFormHovered(true)}
             onMouseLeave={() => setIsFormHovered(false)}
@@ -320,7 +344,6 @@ export default function Login() {
               boxShadow: "-30px 40px 60px -20px rgba(0,0,0,0.8), inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.2)",
               padding: "3.5rem",
               transformStyle: "preserve-3d",
-              /* Main Form Tilt */
               transform: isFormHovered 
                 ? "rotateY(-5deg) rotateX(2deg) translateZ(20px) scale(1.02)" 
                 : "rotateY(-22deg) rotateX(4deg) translateZ(0px) scale(0.95)", 
