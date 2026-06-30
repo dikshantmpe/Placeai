@@ -168,10 +168,10 @@ export default function Login() {
         .d7 { animation-delay: 0.7s; } .d8 { animation-delay: 0.8s; }
 
         .glass-field {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.1);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.12);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
         }
         .glass-field.focused {
@@ -261,9 +261,9 @@ export default function Login() {
       >
         <div className="login-card-inner" style={{
           display: "flex",
-          background: "rgba(16, 16, 22, 0.45)",
-          backdropFilter: "blur(26px)",
-          WebkitBackdropFilter: "blur(26px)",
+          background: "rgba(16, 16, 22, 0.18)",
+          backdropFilter: "blur(12px) saturate(120%)",
+          WebkitBackdropFilter: "blur(12px) saturate(120%)",
           borderRadius: "26.5px",
           boxShadow: "0 30px 80px -20px rgba(0,0,0,0.7)",
           overflow: "hidden",
@@ -278,7 +278,7 @@ export default function Login() {
             flexDirection: "column",
             justifyContent: "center",
             position: "relative",
-            background: "rgba(124,58,237,0.06)",
+            background: "rgba(124,58,237,0.035)",
             borderRight: "1px solid rgba(255,255,255,0.08)"
           }}>
             <div className="animate-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
@@ -330,11 +330,11 @@ export default function Login() {
             flexDirection: "column",
             justifyContent: "center",
             position: "relative",
-            background: "rgba(255,255,255,0.02)"
+            background: "rgba(255,255,255,0.015)"
           }}>
             <div style={{
               position: "absolute", top: "-20%", right: "-15%", width: "55%", height: "55%",
-              background: "radial-gradient(circle, rgba(255,63,129,0.15), transparent 70%)",
+              background: "radial-gradient(circle, rgba(255,63,129,0.08), transparent 70%)",
               pointerEvents: "none"
             }} />
 
