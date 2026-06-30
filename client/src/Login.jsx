@@ -95,14 +95,26 @@ export default function Login() {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-8px) rotate(4deg); }
         }
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 6px rgba(239,68,68,0.6)); }
-          50% { opacity: 1; filter: drop-shadow(0 0 18px rgba(239,68,68,0.95)); }
-        }
         @keyframes fade-in-up {
           0% { opacity: 0; transform: translateY(20px); }
           100% { opacity: 1; transform: translateY(0); }
         }
+        @keyframes ribbon-flow-1 {
+          0% { transform: translateX(-6%) translateY(0); }
+          50% { transform: translateX(4%) translateY(-3%); }
+          100% { transform: translateX(-6%) translateY(0); }
+        }
+        @keyframes ribbon-flow-2 {
+          0% { transform: translateX(5%) translateY(-2%); }
+          50% { transform: translateX(-5%) translateY(3%); }
+          100% { transform: translateX(5%) translateY(-2%); }
+        }
+        @keyframes ribbon-flow-3 {
+          0% { transform: translateX(-3%) translateY(3%); }
+          50% { transform: translateX(6%) translateY(-2%); }
+          100% { transform: translateX(-3%) translateY(3%); }
+        }
+
         .animate-fade-in { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
@@ -129,11 +141,11 @@ export default function Login() {
         }
         .eye-btn:hover { color: #22d3ee; }
 
-        /* Outer wrapper handles entrance + continuous float together so they never fight */
         .feature-badge-wrap {
           position: absolute;
           animation: float-in-and-bob 5.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
           opacity: 0;
+          z-index: 3;
         }
         .feature-badge {
           background: rgba(15, 15, 20, 0.6);
@@ -156,6 +168,16 @@ export default function Login() {
           animation: float-y-slow 7s ease-in-out infinite;
           opacity: 0.5;
         }
+
+        .ribbon-layer {
+          position: absolute;
+          inset: -10%;
+          width: 120%;
+          height: 120%;
+        }
+        .ribbon-1 { animation: ribbon-flow-1 11s ease-in-out infinite; }
+        .ribbon-2 { animation: ribbon-flow-2 14s ease-in-out infinite; }
+        .ribbon-3 { animation: ribbon-flow-3 9s ease-in-out infinite; }
       `}</style>
 
       {/* Background wave glows */}
@@ -169,7 +191,7 @@ export default function Login() {
         animation: "wave-drift 14s ease-in-out infinite"
       }} />
 
-      {/* Floating geometric shapes (outside the card, like the reference) */}
+      {/* Floating geometric shapes (outside the card) */}
       <div className="floating-shape" style={{ top: "8%", left: "4%", width: "28px", height: "28px", border: "1px solid rgba(239,68,68,0.4)", transform: "rotate(20deg)", animationDelay: "0s" }} />
       <div className="floating-shape" style={{ top: "62%", left: "2%", width: "22px", height: "22px", border: "1px solid rgba(255,255,255,0.3)", borderRadius: "4px", animationDelay: "1.5s" }} />
       <div className="floating-shape" style={{ top: "85%", left: "20%", width: "16px", height: "16px", background: "rgba(255,255,255,0.08)", borderRadius: "3px", animationDelay: "2.5s" }} />
@@ -191,18 +213,53 @@ export default function Login() {
         transform: mounted ? "scale(1)" : "scale(0.98)",
         opacity: mounted ? 1 : 0,
         transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-        background: "radial-gradient(circle at 30% 50%, rgba(60,10,10,0.5) 0%, rgba(5,5,8,0.95) 60%)"
+        background: "#050507"
       }}>
 
-        {/* LEFT: stylized AI head illustration + floating feature badges */}
+        {/* LEFT: animated red/blue wave background + floating feature badges */}
         <div style={{
           flex: "0 0 46%",
           position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "3rem 2rem"
+          overflow: "hidden",
+          background: "#050507"
         }}>
+          {/* Animated wave ribbons */}
+          <svg className="ribbon-layer ribbon-1" viewBox="0 0 600 800" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="redRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ef4444" stopOpacity="0" />
+                <stop offset="50%" stopColor="#ef4444" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d="M-50 150 C 150 80, 250 220, 450 150 S 750 80, 950 150" stroke="url(#redRibbon)" strokeWidth="22" fill="none" />
+            <path d="M-50 380 C 150 310, 250 450, 450 380 S 750 310, 950 380" stroke="url(#redRibbon)" strokeWidth="14" fill="none" opacity="0.7" />
+            <path d="M-50 600 C 150 530, 250 670, 450 600 S 750 530, 950 600" stroke="url(#redRibbon)" strokeWidth="18" fill="none" opacity="0.5" />
+          </svg>
+          <svg className="ribbon-layer ribbon-2" viewBox="0 0 600 800" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="blueRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
+                <stop offset="50%" stopColor="#22d3ee" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d="M-50 260 C 150 190, 250 330, 450 260 S 750 190, 950 260" stroke="url(#blueRibbon)" strokeWidth="20" fill="none" />
+            <path d="M-50 480 C 150 410, 250 550, 450 480 S 750 410, 950 480" stroke="url(#blueRibbon)" strokeWidth="16" fill="none" opacity="0.65" />
+            <path d="M-50 700 C 150 630, 250 770, 450 700 S 750 630, 950 700" stroke="url(#blueRibbon)" strokeWidth="12" fill="none" opacity="0.5" />
+          </svg>
+          <svg className="ribbon-layer ribbon-3" viewBox="0 0 600 800" preserveAspectRatio="none">
+            <path d="M-50 100 C 150 30, 250 170, 450 100 S 750 30, 950 100" stroke="url(#redRibbon)" strokeWidth="8" fill="none" opacity="0.4" />
+            <path d="M-50 520 C 150 450, 250 590, 450 520 S 750 450, 950 520" stroke="url(#blueRibbon)" strokeWidth="8" fill="none" opacity="0.4" />
+          </svg>
+
+          {/* subtle dark vignette so text/badges stay legible */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "radial-gradient(circle at 30% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 75%)",
+            zIndex: 1
+          }} />
+
           {features.map((f, i) => (
             <div
               key={i}
@@ -215,57 +272,6 @@ export default function Login() {
               </div>
             </div>
           ))}
-
-          {/* Robot head illustration, closer to a rounded helmet with visor */}
-          <svg viewBox="0 0 320 460" width="72%" style={{ maxWidth: "320px", filter: "drop-shadow(0 25px 60px rgba(0,0,0,0.65))" }}>
-            <defs>
-              <radialGradient id="headGrad" cx="35%" cy="30%" r="75%">
-                <stop offset="0%" stopColor="#2a2a32" />
-                <stop offset="55%" stopColor="#16161b" />
-                <stop offset="100%" stopColor="#08080a" />
-              </radialGradient>
-              <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ffab91" />
-                <stop offset="50%" stopColor="#ef4444" />
-                <stop offset="100%" stopColor="#a91c1c" />
-              </linearGradient>
-              <radialGradient id="eyeGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#ef4444" />
-                <stop offset="100%" stopColor="#1a0606" />
-              </radialGradient>
-            </defs>
-
-            {/* round helmet skull */}
-            <circle cx="160" cy="195" r="160" fill="url(#headGrad)" />
-            {/* subtle top-right highlight like reflective dome */}
-            <ellipse cx="105" cy="120" rx="70" ry="40" fill="rgba(255,255,255,0.05)" />
-
-            {/* side antenna lines */}
-            <g stroke="rgba(255,255,255,0.18)" strokeWidth="2" fill="none" strokeLinecap="round">
-              <path d="M55 145 L18 100" />
-              <path d="M265 145 L302 100" />
-            </g>
-
-            {/* faceplate / visor shield shape */}
-            <path d="M62 175 Q160 95 258 175 Q258 270 160 320 Q62 270 62 175 Z" fill="url(#headGrad)" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
-
-            {/* glowing red visor bar */}
-            <rect x="78" y="183" width="164" height="20" rx="10" fill="url(#visorGrad)" style={{ animation: "pulse-glow 2.4s ease-in-out infinite" }} />
-
-            {/* central eye / camera lens */}
-            <circle cx="160" cy="232" r="48" fill="#0a0a0c" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-            <circle cx="160" cy="232" r="24" fill="url(#eyeGrad)" />
-            <circle cx="160" cy="232" r="9" fill="#1a0606" stroke="rgba(239,68,68,0.6)" strokeWidth="1.5" />
-
-            {/* lower jaw/neck lines */}
-            <g stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" fill="none" strokeLinecap="round">
-              <path d="M118 318 L102 380" />
-              <path d="M202 318 L218 380" />
-            </g>
-
-            {/* neck/collar block */}
-            <rect x="124" y="350" width="72" height="95" rx="16" fill="url(#headGrad)" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
-          </svg>
         </div>
 
         {/* RIGHT: translucent glass login card */}
