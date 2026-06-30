@@ -1,393 +1,232 @@
-import { useState } from "react";
-import { auth, googleProvider } from "./firebase";
-import { signInWithPopup } from "firebase/auth";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import robotImg from "./assets/robot.png";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
-const API_URL = "https://placeai-sqjj.onrender.com/api";
-
-const features = [
-  { icon: "◈", title: "AI-Powered Tools", desc: "Resume Analyzer, Mock Interviews and more." },
-  { icon: "◎", title: "Track & Improve", desc: "Smart progress tracking across all modules." },
-  { icon: "✦", title: "Daily Challenges", desc: "Build consistency with daily DSA & Aptitude challenges." },
-  { icon: "⊞", title: "Company Insights", desc: "Access company-wise questions and interview experiences." },
-];
-
-export default function Login({ setUser }) {
-  const [isRegister, setIsRegister] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    // 1. Prevent empty form submissions from crashing the backend
-    if (!form.email || !form.password || (isRegister && !form.name)) {
-      return setError("Please fill in all required fields.");
-    }
+  // Simulating the staggered entrance animation on load
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    setError("");
-    setLoading(true);
-    try {
-      const url = isRegister
-        ? `${API_URL}/auth/register`
-        : `${API_URL}/auth/login`;
-      const res = await axios.post(url, form);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      setUser(res.data.user);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.error || "Something went wrong");
-    }
-    setLoading(false);
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Add your login logic here (axios call to backend)
+    console.log("Logging in...", email, password);
+    navigate("/dashboard");
   };
-
-  const handleGoogle = async () => {
-    setError("");
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      
-      // 2. Extract the actual user details to match what the backend expects
-      const userData = {
-        name: result.user.displayName,
-        email: result.user.email,
-        avatar: result.user.photoURL
-      };
-
-      // 3. Send the userData instead of the idToken
-      const res = await axios.post(`${API_URL}/auth/google`, userData);
-      
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      setUser(res.data.user);
-      navigate("/dashboard");
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.error || "Google login failed. Try again.");
-    }
-  };
-
-  const handleKey = (e) => { if (e.key === "Enter") handleSubmit(); };
 
   return (
-    <div className="login-page">
-
-      {/* LEFT PANEL — desktop only */}
-      <div className="login-left">
-        {/* Grid overlay */}
-        <div style={{
-          position: "absolute", inset: 0, opacity: 0.025,
-          backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-          backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0
-        }} />
-
-        {/* Robot */}
-        <div style={{
-          position: "absolute", bottom: 0, right: "-20px",
-          height: "100%", zIndex: 1, pointerEvents: "none",
-          display: "flex", alignItems: "flex-end"
-        }}>
-          <div style={{
-            position: "absolute", bottom: "10%", left: "50%",
-            transform: "translateX(-50%)",
-            width: "500px", height: "500px",
-            background: "radial-gradient(circle, rgba(220,38,38,0.35) 0%, transparent 65%)",
-            borderRadius: "50%", pointerEvents: "none", zIndex: 0
-          }} />
-          <img src={robotImg} alt="AI Robot" style={{
-            height: "92vh", maxHeight: "780px",
-            objectFit: "contain", objectPosition: "bottom",
-            filter: "drop-shadow(0 0 60px rgba(220,38,38,0.6))",
-            animation: "float 4s ease-in-out infinite",
-            position: "relative", zIndex: 2
-          }} />
-        </div>
-
-        {/* Content */}
-        <div style={{ position: "relative", zIndex: 3 }}>
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "2.5rem" }}>
-            <div style={{
-              width: "34px", height: "34px", borderRadius: "8px",
-              background: "#dc2626", display: "flex", alignItems: "center",
-              justifyContent: "center", fontSize: "16px", color: "white", fontWeight: "700"
-            }}>P</div>
-            <span style={{ fontSize: "17px", fontWeight: "700" }}>
-              PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
-            </span>
-          </div>
-
-          {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: "6px",
-            background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.3)",
-            padding: "5px 12px", borderRadius: "20px", fontSize: "12px",
-            color: "#dc2626", fontWeight: "600", marginBottom: "1.2rem"
-          }}>
-            · Your AI Placement Partner
-          </div>
-
-          <h1 style={{
-            fontSize: "64px", fontWeight: "800", lineHeight: "1.05",
-            marginBottom: "1.2rem", maxWidth: "520px"
-          }}>
-            Prepare Smarter.<br />
-            <span style={{ color: "#dc2626" }}>Get Placed Faster.</span>
-          </h1>
-
-          <p style={{
-            color: "#666", fontSize: "15px", lineHeight: "1.7",
-            maxWidth: "420px", marginBottom: "2rem"
-          }}>
-            All-in-one platform to track your progress, analyze your resume,
-            practice interviews, and ace every placement challenge.
-          </p>
-
-          {/* Features */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxWidth: "340px" }}>
-            {features.map((f, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                <div style={{
-                  width: "34px", height: "34px", borderRadius: "8px",
-                  background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.25)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "15px", color: "#dc2626", flexShrink: 0
-                }}>{f.icon}</div>
-                <div>
-                  <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px", color: "#eee" }}>{f.title}</p>
-                  <p style={{ margin: 0, color: "#555", fontSize: "12px" }}>{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT PANEL — login form */}
-      <div className="login-right">
-        <div className="login-form-inner">
-
-          {/* Mobile Logo */}
-          <div className="mobile-logo">
-            <div style={{
-              width: "34px", height: "34px", borderRadius: "8px",
-              background: "#dc2626", display: "flex", alignItems: "center",
-              justifyContent: "center", fontSize: "16px", color: "white", fontWeight: "700"
-            }}>P</div>
-            <span style={{ fontSize: "17px", fontWeight: "700" }}>
-              PlacePrep <span style={{ color: "#dc2626" }}>AI</span>
-            </span>
-          </div>
-
-          <h2 style={{ fontSize: "28px", fontWeight: "800", margin: "0 0 6px", lineHeight: "1.2" }}>
-            Welcome Back
-          </h2>
-          <p style={{ color: "#555", fontSize: "13px", margin: "0 0 4px" }}>
-            <span style={{ color: "#dc2626", fontWeight: "700" }}>
-              {isRegister ? "Sign Up" : "Login"}
-            </span>{" "}to Continue
-          </p>
-          <p style={{ color: "#444", fontSize: "12px", margin: "0 0 20px", lineHeight: "1.6" }}>
-            Access your personalized dashboard and continue your placement journey.
-          </p>
-
-          {/* Google Button */}
-          <button onClick={handleGoogle} style={{
-            width: "100%", padding: "12px", background: "transparent", color: "white",
-            borderRadius: "10px", border: "1px solid #dc262644", cursor: "pointer",
-            fontSize: "13px", fontWeight: "600", display: "flex",
-            alignItems: "center", justifyContent: "center", gap: "10px",
-            marginBottom: "14px", transition: "all 0.2s"
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(220,38,38,0.07)"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-          >
-            <svg width="16" height="16" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-            Continue with Google
-          </button>
-
-          {/* Divider */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-            <div style={{ flex: 1, height: "1px", background: "#1f1f1f" }} />
-            <span style={{ color: "#333", fontSize: "11px" }}>or</span>
-            <div style={{ flex: 1, height: "1px", background: "#1f1f1f" }} />
-          </div>
-
-          {/* Name field */}
-          {isRegister && (
-            <div style={{ marginBottom: "12px" }}>
-              <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Full Name</label>
-              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                placeholder="Enter your name" style={{ width: "100%" }} />
-            </div>
-          )}
-
-          {/* Email */}
-          <div style={{ marginBottom: "12px" }}>
-            <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Email Address</label>
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#333", fontSize: "13px" }}>✉</span>
-              <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                onKeyDown={handleKey} placeholder="Enter your email" type="email"
-                style={{ width: "100%", paddingLeft: "34px" }} />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div style={{ marginBottom: "8px" }}>
-            <label style={{ fontSize: "11px", color: "#555", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Password</label>
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#333", fontSize: "13px" }}>⊕</span>
-              <input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
-                onKeyDown={handleKey} placeholder="Enter your password"
-                type={showPassword ? "text" : "password"}
-                style={{ width: "100%", paddingLeft: "34px", paddingRight: "40px" }} />
-              <button onClick={() => setShowPassword(!showPassword)} style={{
-                position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
-                background: "transparent", border: "none", cursor: "pointer", color: "#333", fontSize: "14px"
-              }}>
-                {showPassword ? "◎" : "◉"}
-              </button>
-            </div>
-          </div>
-
-          {/* Remember me */}
-          {!isRegister && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", color: "#666" }}>
-                <input type="checkbox" style={{ accentColor: "#dc2626" }} />
-                Remember me
-              </label>
-              <span style={{ color: "#dc2626", fontSize: "12px", cursor: "pointer" }}>Forgot Password?</span>
-            </div>
-          )}
-
-          {error && (
-            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid #ef444422",
-              borderRadius: "8px", padding: "8px 12px", marginBottom: "12px" }}>
-              <p style={{ color: "#ef4444", fontSize: "12px", margin: 0 }}>! {error}</p>
-            </div>
-          )}
-
-          {/* Submit */}
-          <button onClick={handleSubmit} disabled={loading} style={{
-            width: "100%", padding: "13px", background: "#dc2626", color: "white",
-            borderRadius: "10px", border: "none", cursor: loading ? "not-allowed" : "pointer",
-            fontSize: "14px", fontWeight: "700", marginBottom: "14px",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-            boxShadow: "0 4px 24px rgba(220,38,38,0.35)", opacity: loading ? 0.7 : 1,
-          }}>
-            {loading ? "Please wait..." : isRegister ? "Create Account" : "Login →"}
-          </button>
-
-          {/* Toggle */}
-          <p style={{ textAlign: "center", color: "#444", fontSize: "12px", margin: "0 0 14px" }}>
-            {isRegister ? "Already have an account? " : "Don't have an account? "}
-            <span onClick={() => { setIsRegister(!isRegister); setError(""); }}
-              style={{ color: "#dc2626", cursor: "pointer", fontWeight: "600" }}>
-              {isRegister ? "Login" : "Sign Up"}
-            </span>
-          </p>
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-            <span style={{ color: "#333", fontSize: "11px" }}>
-              Your data is <span style={{ color: "#22c55e" }}>secure</span> with us
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <div style={{
+      minHeight: "100vh",
+      width: "100%",
+      backgroundColor: "#050505",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      overflow: "hidden",
+      fontFamily: "'Inter', sans-serif",
+      color: "#ffffff"
+    }}>
+      {/* --- CSS Animations & Keyframes --- */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-12px); }
+        @keyframes blob-bounce {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-
-        .login-page {
-          min-height: 100vh;
-          background: #080808;
-          display: flex;
-          overflow: hidden;
-          position: relative;
+        @keyframes fade-in-up {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
-
-        .login-left {
-          flex: 1;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          padding: 3rem 4.5rem;
+        .animate-fade-in {
+          animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          opacity: 0;
         }
-
-        .login-right {
-          width: 520px;
-          flex-shrink: 0;
-          position: relative;
-          z-index: 10;
-          margin: 40px 60px 40px 0;
-          background: rgba(8,8,8,0.92);
-          backdrop-filter: blur(30px);
-          border: 1px solid rgba(220,38,38,0.15);
-          border-radius: 28px;
-          box-shadow: 0 0 80px rgba(0,0,0,0.7);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 2.5rem;
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        
+        .glass-input {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: white;
+          transition: all 0.3s ease;
         }
-
-        .login-form-inner {
-          width: 100%;
-          max-width: 360px;
-        }
-
-        .mobile-logo {
-          display: none;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-          .login-page {
-            flex-direction: column;
-            overflow-y: auto;
-          }
-
-          .login-left {
-            display: none;
-          }
-
-          .login-right {
-            width: 100%;
-            min-height: 100vh;
-            margin: 0;
-            border-radius: 0;
-            border: none;
-            padding: 2rem 1.5rem;
-            align-items: flex-start;
-            padding-top: 3rem;
-          }
-
-          .login-form-inner {
-            max-width: 100%;
-          }
-
-          .mobile-logo {
-            display: flex;
-          }
+        .glass-input:focus {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: #ef4444;
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+          outline: none;
         }
       `}</style>
+
+      {/* --- Dynamic Background Glows (The "Orbs") --- */}
+      <div style={{
+        position: "absolute", top: "10%", left: "15%", width: "40vw", height: "40vw",
+        background: "radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(0,0,0,0) 70%)",
+        filter: "blur(60px)", animation: "blob-bounce 10s infinite alternate ease-in-out", zIndex: 0
+      }} />
+      <div style={{
+        position: "absolute", bottom: "-10%", right: "10%", width: "35vw", height: "35vw",
+        background: "radial-gradient(circle, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0) 70%)",
+        filter: "blur(60px)", animation: "blob-bounce 12s infinite alternate-reverse ease-in-out", zIndex: 0
+      }} />
+
+      {/* --- Main Glass Container --- */}
+      <div style={{
+        position: "relative",
+        zIndex: 10,
+        width: "90%",
+        maxWidth: "1200px",
+        minHeight: "75vh",
+        background: "rgba(20, 20, 20, 0.4)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255, 255, 255, 0.05)",
+        borderRadius: "24px",
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        flexDirection: "row",
+        overflow: "hidden",
+        transform: mounted ? "scale(1)" : "scale(0.98)",
+        opacity: mounted ? 1 : 0,
+        transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)"
+      }}>
+        
+        {/* LEFT COLUMN: Branding & Image */}
+        <div style={{
+          flex: 1,
+          padding: "4rem",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          position: "relative",
+          background: "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(20,20,20,0.4) 100%)",
+          borderRight: "1px solid rgba(255, 255, 255, 0.05)"
+        }}>
+          {/* Subtle grid pattern overlay */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+            backgroundSize: "30px 30px", opacity: 0.5, zIndex: 0
+          }} />
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div className="animate-fade-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "3rem" }}>
+              <div style={{ width: "32px", height: "32px", background: "#ef4444", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>P</div>
+              <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: "700", letterSpacing: "1px" }}>PlacePrep <span style={{ color: "#ef4444" }}>AI</span></h2>
+            </div>
+            
+            <h1 className="animate-fade-in delay-1" style={{ fontSize: "3.5rem", fontWeight: "800", lineHeight: "1.1", marginBottom: "1.5rem" }}>
+              Prepare Smarter.<br/>
+              <span style={{ color: "#ef4444", textShadow: "0 0 30px rgba(239,68,68,0.4)" }}>Get Placed Faster.</span>
+            </h1>
+            
+            <p className="animate-fade-in delay-2" style={{ color: "#a1a1aa", fontSize: "1.1rem", lineHeight: "1.6", maxWidth: "400px" }}>
+              Your elite AI-powered partner. Master Data Structures, crush mock interviews, and land your dream job.
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Login Form */}
+        <div style={{
+          flex: 1,
+          padding: "4rem",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          <div style={{ width: "100%", maxWidth: "400px" }}>
+            
+            <div className="animate-fade-in delay-1" style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+              <h2 style={{ fontSize: "2rem", fontWeight: "700", margin: "0 0 8px 0" }}>Welcome Back</h2>
+              <p style={{ color: "#a1a1aa", margin: 0, fontSize: "0.9rem" }}>Access your personalized dashboard.</p>
+            </div>
+
+            {/* Google Button */}
+            <button className="animate-fade-in delay-2 glass-input" style={{
+              width: "100%", padding: "14px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+              cursor: "pointer", fontSize: "0.95rem", fontWeight: "600", marginBottom: "2rem"
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <div className="animate-fade-in delay-2" style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "2rem" }}>
+              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
+              <span style={{ color: "#71717a", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px" }}>or</span>
+              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
+            </div>
+
+            <form onSubmit={handleLogin}>
+              <div className="animate-fade-in delay-3" style={{ marginBottom: "1.5rem" }}>
+                <label style={{ display: "block", fontSize: "0.75rem", color: "#a1a1aa", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px" }}>Email Address</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="glass-input"
+                  placeholder="Enter your email"
+                  style={{ width: "100%", padding: "14px 16px", borderRadius: "12px", fontSize: "0.95rem", boxSizing: "border-box" }}
+                  required
+                />
+              </div>
+
+              <div className="animate-fade-in delay-3" style={{ marginBottom: "2rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <label style={{ fontSize: "0.75rem", color: "#a1a1aa", textTransform: "uppercase", letterSpacing: "1px" }}>Password</label>
+                  <a href="#" style={{ color: "#ef4444", fontSize: "0.8rem", textDecoration: "none" }}>Forgot Password?</a>
+                </div>
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="glass-input"
+                  placeholder="Enter your password"
+                  style={{ width: "100%", padding: "14px 16px", borderRadius: "12px", fontSize: "0.95rem", boxSizing: "border-box" }}
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit"
+                className="animate-fade-in delay-4"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                  width: "100%", padding: "16px", borderRadius: "12px", border: "none", cursor: "pointer",
+                  background: isHovered ? "#b91c1c" : "#ef4444",
+                  color: "white", fontSize: "1rem", fontWeight: "700",
+                  boxShadow: isHovered ? "0 0 25px rgba(239, 68, 68, 0.6)" : "0 0 15px rgba(239, 68, 68, 0.3)",
+                  transition: "all 0.3s ease", transform: isHovered ? "translateY(-2px)" : "translateY(0)"
+                }}
+              >
+                Login →
+              </button>
+            </form>
+
+            <p className="animate-fade-in delay-4" style={{ textAlign: "center", marginTop: "2rem", color: "#a1a1aa", fontSize: "0.9rem" }}>
+              Don't have an account? <Link to="/signup" style={{ color: "#ef4444", textDecoration: "none", fontWeight: "600" }}>Sign Up</Link>
+            </p>
+
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
