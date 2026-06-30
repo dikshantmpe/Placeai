@@ -1,10 +1,3 @@
-Got it. To get that sleek, neutral dark glass look from your mockup, we need to strip out all the pink/purple background tints from the panels and replace them with a very subtle, transparent white/grey gradient. We also need to add a slight "inner white edge" to mimic how physical glass catches the light on the top-left corner, just like your reference image.
-
-I have kept everything else exactly the same (the animated border, the Vanta background, all your content and structure).
-
-Here is your updated `Login.jsx`. Copy and paste this to overwrite your current file:
-
-```jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
