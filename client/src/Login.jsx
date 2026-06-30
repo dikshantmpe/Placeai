@@ -196,13 +196,27 @@ export default function Login() {
           animation: shimmer 3.2s ease-in-out infinite;
         }
 
+        /* NEW FIX: The gradient border is now drawn via a pseudo-element 
+          with a mask, leaving the inside 100% transparent for glass! 
+        */
         .gradient-border-wrap {
           position: relative;
           border-radius: 28px;
-          padding: 1.5px;
+        }
+        .gradient-border-wrap::before {
+          content: "";
+          position: absolute;
+          inset: -1.5px;
+          border-radius: 29.5px;
           background: linear-gradient(120deg, #7c3aed, #ff3f81, #f59e0b, #22d3ee, #7c3aed);
           background-size: 300% 300%;
           animation: border-glow 8s ease infinite;
+          z-index: -1;
+          padding: 1.5px;
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
         }
 
         .feature-row {
@@ -261,16 +275,17 @@ export default function Login() {
       >
         <div className="login-card-inner" style={{
           display: "flex",
-          background: "rgba(16, 16, 22, 0.18)",
-          backdropFilter: "blur(12px) saturate(120%)",
-          WebkitBackdropFilter: "blur(12px) saturate(120%)",
+          /* NEW: Purple & Pink semi-transparent gradient + blur */
+          background: "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))",
+          backdropFilter: "blur(16px) saturate(120%)",
+          WebkitBackdropFilter: "blur(16px) saturate(120%)",
           borderRadius: "26.5px",
           boxShadow: "0 30px 80px -20px rgba(0,0,0,0.7)",
           overflow: "hidden",
           minHeight: "640px"
         }}>
 
-          {/* LEFT: overview / branding panel (translucent) */}
+          {/* LEFT: overview / branding panel */}
           <div className="login-left-panel" style={{
             flex: "1.1",
             padding: "3.25rem 3rem",
