@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import purpleImage from "./assets/purple-image.jpeg"; // Ensure this path is correct
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -317,7 +318,7 @@ export default function Login() {
         }}>
           {/* ↓↓↓ REPLACE THIS SRC WITH YOUR IMAGE URL ↓↓↓ */}
           <img 
-            src="https://in.pinterest.com/pin/745556913351956009/" 
+            src={purpleImage}
             alt="AI Concept" 
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
