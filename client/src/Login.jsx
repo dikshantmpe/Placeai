@@ -5,6 +5,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isHovered, setIsHovered] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   // Simulating the staggered entrance animation on load
@@ -16,9 +17,53 @@ export default function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
     // Add your login logic here (axios call to backend)
-    console.log("Logging in...", email, password);
+    console.log("Logging in...", email, password, rememberMe);
     navigate("/dashboard");
   };
+
+  const features = [
+    {
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" />
+        </svg>
+      ),
+      title: "AI-Powered Tools",
+      desc: "Smarter prep, tailored to you.",
+    },
+    {
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 17l6-6 4 4 8-8" />
+          <path d="M17 7h4v4" />
+        </svg>
+      ),
+      title: "Track & Improve",
+      desc: "See your progress in real time.",
+    },
+    {
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
+          <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
+          <path d="M8 7h8M8 11h8M8 15h5" />
+        </svg>
+      ),
+      title: "Build Challenges",
+      desc: "Sharpen skills with mock tests.",
+    },
+    {
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 21h18" />
+          <path d="M5 21V7l8-4v18" />
+          <path d="M19 21V11l-6-4" />
+        </svg>
+      ),
+      title: "Company Insights",
+      desc: "Know what recruiters expect.",
+    },
+  ];
 
   return (
     <div style={{
@@ -53,7 +98,8 @@ export default function Login() {
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
-        
+        .delay-5 { animation-delay: 0.5s; }
+
         .glass-input {
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -65,6 +111,42 @@ export default function Login() {
           border-color: #ef4444;
           box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
           outline: none;
+        }
+
+        .feature-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          padding: 10px 0;
+        }
+        .feature-icon {
+          flex-shrink: 0;
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.25);
+          color: #ef4444;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .checkbox-custom {
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          border: 1px solid rgba(255,255,255,0.25);
+          background: rgba(255,255,255,0.03);
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+        }
+        .checkbox-custom.checked {
+          background: #ef4444;
+          border-color: #ef4444;
         }
       `}</style>
 
@@ -100,8 +182,8 @@ export default function Login() {
         opacity: mounted ? 1 : 0,
         transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)"
       }}>
-        
-        {/* LEFT COLUMN: Branding & Image */}
+
+        {/* LEFT COLUMN: Branding & Features */}
         <div style={{
           flex: 1,
           padding: "4rem",
@@ -120,19 +202,42 @@ export default function Login() {
           }} />
 
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div className="animate-fade-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "3rem" }}>
+            <div className="animate-fade-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
               <div style={{ width: "32px", height: "32px", background: "#ef4444", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>P</div>
               <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: "700", letterSpacing: "1px" }}>PlacePrep <span style={{ color: "#ef4444" }}>AI</span></h2>
             </div>
-            
+
+            {/* Badge */}
+            <div className="animate-fade-in delay-1" style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)",
+              color: "#fca5a5", fontSize: "0.75rem", fontWeight: "600",
+              padding: "6px 14px", borderRadius: "999px", marginBottom: "1.5rem"
+            }}>
+              ✦ Your AI Placement Partner
+            </div>
+
             <h1 className="animate-fade-in delay-1" style={{ fontSize: "3.5rem", fontWeight: "800", lineHeight: "1.1", marginBottom: "1.5rem" }}>
               Prepare Smarter.<br/>
               <span style={{ color: "#ef4444", textShadow: "0 0 30px rgba(239,68,68,0.4)" }}>Get Placed Faster.</span>
             </h1>
-            
-            <p className="animate-fade-in delay-2" style={{ color: "#a1a1aa", fontSize: "1.1rem", lineHeight: "1.6", maxWidth: "400px" }}>
-              Your elite AI-powered partner. Master Data Structures, crush mock interviews, and land your dream job.
+
+            <p className="animate-fade-in delay-2" style={{ color: "#a1a1aa", fontSize: "1.1rem", lineHeight: "1.6", maxWidth: "420px", marginBottom: "1rem" }}>
+              All-in-one platform to track your progress, analyze your resume, practice interviews, and ace every placement challenge.
             </p>
+
+            {/* Feature list */}
+            <div className="animate-fade-in delay-3" style={{ marginTop: "1rem" }}>
+              {features.map((f, i) => (
+                <div className="feature-row" key={i}>
+                  <div className="feature-icon">{f.icon}</div>
+                  <div>
+                    <div style={{ fontWeight: "700", fontSize: "0.95rem" }}>{f.title}</div>
+                    <div style={{ color: "#a1a1aa", fontSize: "0.8rem" }}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -146,10 +251,11 @@ export default function Login() {
           alignItems: "center"
         }}>
           <div style={{ width: "100%", maxWidth: "400px" }}>
-            
+
             <div className="animate-fade-in delay-1" style={{ textAlign: "center", marginBottom: "2.5rem" }}>
               <h2 style={{ fontSize: "2rem", fontWeight: "700", margin: "0 0 8px 0" }}>Welcome Back</h2>
-              <p style={{ color: "#a1a1aa", margin: 0, fontSize: "0.9rem" }}>Access your personalized dashboard.</p>
+              <p style={{ color: "#ef4444", margin: "0 0 4px 0", fontSize: "0.85rem", fontWeight: "600" }}>Login to Continue</p>
+              <p style={{ color: "#a1a1aa", margin: 0, fontSize: "0.9rem" }}>Access your personalized dashboard and continue your placement journey.</p>
             </div>
 
             {/* Google Button */}
@@ -175,8 +281,8 @@ export default function Login() {
             <form onSubmit={handleLogin}>
               <div className="animate-fade-in delay-3" style={{ marginBottom: "1.5rem" }}>
                 <label style={{ display: "block", fontSize: "0.75rem", color: "#a1a1aa", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px" }}>Email Address</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="glass-input"
@@ -186,13 +292,10 @@ export default function Login() {
                 />
               </div>
 
-              <div className="animate-fade-in delay-3" style={{ marginBottom: "2rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                  <label style={{ fontSize: "0.75rem", color: "#a1a1aa", textTransform: "uppercase", letterSpacing: "1px" }}>Password</label>
-                  <a href="#" style={{ color: "#ef4444", fontSize: "0.8rem", textDecoration: "none" }}>Forgot Password?</a>
-                </div>
-                <input 
-                  type="password" 
+              <div className="animate-fade-in delay-3" style={{ marginBottom: "1.25rem" }}>
+                <label style={{ display: "block", fontSize: "0.75rem", color: "#a1a1aa", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px" }}>Password</label>
+                <input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="glass-input"
@@ -202,7 +305,24 @@ export default function Login() {
                 />
               </div>
 
-              <button 
+              <div className="animate-fade-in delay-3" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.8rem", color: "#a1a1aa" }}>
+                  <span
+                    className={`checkbox-custom ${rememberMe ? "checked" : ""}`}
+                    onClick={() => setRememberMe(!rememberMe)}
+                  >
+                    {rememberMe && (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  Remember me
+                </label>
+                <a href="#" style={{ color: "#ef4444", fontSize: "0.8rem", textDecoration: "none" }}>Forgot Password?</a>
+              </div>
+
+              <button
                 type="submit"
                 className="animate-fade-in delay-4"
                 onMouseEnter={() => setIsHovered(true)}
