@@ -1,5 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
+// Dynamically load an external script once and resolve when ready
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,8 +26,53 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [mounted, setMounted] = useState(false);
+  const vantaRef = useRef(null);
+  const vantaEffect = useRef(null);
+
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Load Three.js + Vanta NET, then initialize the animated network background
+  useEffect(() => {
+    let cancelled = false;
+
+    async function initVanta() {
+      try {
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
+        if (cancelled || !vantaRef.current || vantaEffect.current) return;
+
+        vantaEffect.current = window.VANTA.NET({
+          el: vantaRef.current,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.0,
+          minWidth: 200.0,
+          scale: 1.0,
+          scaleMobile: 1.0,
+          color: 0xff3f81,
+          backgroundColor: 0x14101f,
+          points: 11.0,
+          maxDistance: 22.0,
+          spacing: 17.0,
+          showDots: true,
+        });
+      } catch (err) {
+        console.error("Failed to load Vanta background:", err);
+      }
+    }
+
+    initVanta();
+
+    return () => {
+      cancelled = true;
+      if (vantaEffect.current) {
+        vantaEffect.current.destroy();
+        vantaEffect.current = null;
+      }
+    };
   }, []);
 
   const handleLogin = (e) => {
@@ -31,36 +92,14 @@ export default function Login() {
       justifyContent: "center",
       fontFamily: "'Inter', sans-serif",
       color: "#ffffff",
-      background: "#06060a",
+      background: "#0c0a14",
       padding: "2rem"
     }}>
       <style>{`
-        @keyframes mesh-move {
-          0%   { transform: translate(0%, 0%) scale(1); }
-          33%  { transform: translate(5%, -8%) scale(1.1); }
-          66%  { transform: translate(-6%, 6%) scale(0.95); }
-          100% { transform: translate(0%, 0%) scale(1); }
-        }
-        @keyframes mesh-move-rev {
-          0%   { transform: translate(0%, 0%) scale(1); }
-          33%  { transform: translate(-7%, 5%) scale(0.9); }
-          66%  { transform: translate(6%, -6%) scale(1.08); }
-          100% { transform: translate(0%, 0%) scale(1); }
-        }
-        @keyframes grain-shift {
-          0% { background-position: 0 0; }
-          100% { background-position: 200px 200px; }
-        }
         @keyframes border-glow {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
-        }
-        @keyframes float-particle {
-          0%   { transform: translateY(0) translateX(0); opacity: 0; }
-          10%  { opacity: 1; }
-          90%  { opacity: 1; }
-          100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
         }
         @keyframes fade-in-up {
           0%   { opacity: 0; transform: translateY(22px); }
@@ -69,14 +108,6 @@ export default function Login() {
         @keyframes card-entrance {
           0%   { opacity: 0; transform: translateY(40px) scale(0.96); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes pulse-soft {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
         }
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
@@ -97,7 +128,7 @@ export default function Login() {
         }
         .glass-field.focused {
           background: rgba(255,255,255,0.07);
-          box-shadow: 0 0 0 3px rgba(124,58,237,0.18), 0 0 24px rgba(124,58,237,0.35);
+          box-shadow: 0 0 0 3px rgba(255,63,129,0.18), 0 0 24px rgba(255,63,129,0.3);
         }
 
         .eye-btn {
@@ -105,12 +136,9 @@ export default function Login() {
           display: flex; align-items: center; justify-content: center;
           padding: 4px; transition: color 0.2s ease;
         }
-        .eye-btn:hover { color: #a78bfa; }
+        .eye-btn:hover { color: #ff7aab; }
 
-        .glow-btn {
-          position: relative;
-          overflow: hidden;
-        }
+        .glow-btn { position: relative; overflow: hidden; }
         .glow-btn::after {
           content: "";
           position: absolute;
@@ -120,19 +148,11 @@ export default function Login() {
           animation: shimmer 3.2s ease-in-out infinite;
         }
 
-        .particle {
-          position: absolute;
-          bottom: -10px;
-          border-radius: 50%;
-          animation: float-particle linear infinite;
-          pointer-events: none;
-        }
-
         .gradient-border-wrap {
           position: relative;
           border-radius: 28px;
           padding: 1.5px;
-          background: linear-gradient(120deg, #7c3aed, #ec4899, #f59e0b, #22d3ee, #7c3aed);
+          background: linear-gradient(120deg, #7c3aed, #ff3f81, #f59e0b, #22d3ee, #7c3aed);
           background-size: 300% 300%;
           animation: border-glow 8s ease infinite;
         }
@@ -140,60 +160,13 @@ export default function Login() {
         input::placeholder { color: #6b6b78; }
       `}</style>
 
-      {/* === Animated mesh gradient background === */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-        <div style={{
-          position: "absolute", top: "-10%", left: "-5%", width: "55vw", height: "55vw",
-          background: "radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%)",
-          filter: "blur(80px)", animation: "mesh-move 16s ease-in-out infinite"
-        }} />
-        <div style={{
-          position: "absolute", bottom: "-15%", right: "-10%", width: "50vw", height: "50vw",
-          background: "radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%)",
-          filter: "blur(90px)", animation: "mesh-move-rev 18s ease-in-out infinite"
-        }} />
-        <div style={{
-          position: "absolute", top: "30%", right: "15%", width: "35vw", height: "35vw",
-          background: "radial-gradient(circle, rgba(34,211,238,0.25) 0%, transparent 70%)",
-          filter: "blur(70px)", animation: "mesh-move 13s ease-in-out infinite reverse"
-        }} />
-        <div style={{
-          position: "absolute", bottom: "10%", left: "15%", width: "30vw", height: "30vw",
-          background: "radial-gradient(circle, rgba(245,158,11,0.2) 0%, transparent 70%)",
-          filter: "blur(70px)", animation: "mesh-move-rev 20s ease-in-out infinite"
-        }} />
-        {/* subtle grain/grid */}
-        <div style={{
-          position: "absolute", inset: 0, opacity: 0.4,
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
-          backgroundSize: "44px 44px"
-        }} />
-      </div>
-
-      {/* === Floating particles === */}
-      {Array.from({ length: 18 }).map((_, i) => {
-        const size = 2 + Math.random() * 4;
-        const left = Math.random() * 100;
-        const duration = 10 + Math.random() * 14;
-        const delay = Math.random() * 10;
-        const colors = ["#a78bfa", "#f472b6", "#22d3ee", "#fbbf24"];
-        const color = colors[i % colors.length];
-        return (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${left}%`,
-              width: size, height: size,
-              background: color,
-              boxShadow: `0 0 ${size * 2}px ${color}`,
-              animationDuration: `${duration}s`,
-              animationDelay: `${delay}s`,
-              zIndex: 1
-            }}
-          />
-        );
-      })}
+      {/* === Vanta.js animated network background === */}
+      <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
+      {/* dark vignette so the card stays legible over the network animation */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
+        background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(8,6,14,0.35) 75%)"
+      }} />
 
       {/* === Main card with animated gradient border === */}
       <div
@@ -208,7 +181,7 @@ export default function Login() {
         }}
       >
         <div style={{
-          background: "rgba(16, 16, 22, 0.65)",
+          background: "rgba(16, 16, 22, 0.55)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
           borderRadius: "26.5px",
@@ -217,10 +190,9 @@ export default function Login() {
           position: "relative",
           overflow: "hidden"
         }}>
-          {/* inner soft glow accents */}
           <div style={{
             position: "absolute", top: "-30%", right: "-20%", width: "60%", height: "60%",
-            background: "radial-gradient(circle, rgba(124,58,237,0.25), transparent 70%)",
+            background: "radial-gradient(circle, rgba(255,63,129,0.2), transparent 70%)",
             pointerEvents: "none"
           }} />
 
@@ -229,13 +201,13 @@ export default function Login() {
             <div className="animate-in" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
               <div style={{
                 width: "40px", height: "40px", borderRadius: "11px",
-                background: "linear-gradient(135deg, #7c3aed, #ec4899)",
+                background: "linear-gradient(135deg, #7c3aed, #ff3f81)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontWeight: "800", fontSize: "1.1rem",
-                boxShadow: "0 0 22px rgba(124,58,237,0.5)"
+                boxShadow: "0 0 22px rgba(255,63,129,0.45)"
               }}>P</div>
               <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", letterSpacing: "0.3px" }}>
-                PlacePrep <span style={{ background: "linear-gradient(90deg, #a78bfa, #f472b6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
+                PlacePrep <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff7aab)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
               </h2>
             </div>
 
@@ -251,8 +223,7 @@ export default function Login() {
               <div className={`animate-in d2 glass-field ${focusedField === "email" ? "focused" : ""}`} style={{
                 borderRadius: "14px", marginBottom: "1.1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
-                  <path d="M4 4h16v16H4z" opacity="0" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7aab" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
                   <path d="M3 7l9 6 9-6" />
                   <rect x="3" y="5" width="18" height="14" rx="2" />
                 </svg>
@@ -275,7 +246,7 @@ export default function Login() {
               <div className={`animate-in d2 glass-field ${focusedField === "password" ? "focused" : ""}`} style={{
                 borderRadius: "14px", marginBottom: "0.9rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7aab" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
                   <rect x="5" y="11" width="14" height="9" rx="2" />
                   <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                 </svg>
@@ -309,7 +280,7 @@ export default function Login() {
               </div>
 
               <div className="animate-in d3" style={{ textAlign: "right", marginBottom: "1.5rem" }}>
-                <a href="#" style={{ color: "#a78bfa", fontSize: "0.82rem", textDecoration: "none", fontWeight: 600 }}>Forgot Password?</a>
+                <a href="#" style={{ color: "#ff7aab", fontSize: "0.82rem", textDecoration: "none", fontWeight: 600 }}>Forgot Password?</a>
               </div>
 
               {/* Login button */}
@@ -321,12 +292,12 @@ export default function Login() {
                 style={{
                   width: "100%", padding: "16px", borderRadius: "14px", border: "none", cursor: "pointer",
                   background: isHovered
-                    ? "linear-gradient(90deg, #6d28d9, #be185d)"
-                    : "linear-gradient(90deg, #7c3aed, #ec4899)",
+                    ? "linear-gradient(90deg, #6d28d9, #c2185b)"
+                    : "linear-gradient(90deg, #7c3aed, #ff3f81)",
                   color: "white", fontSize: "1rem", fontWeight: "700",
                   boxShadow: isHovered
-                    ? "0 0 34px rgba(124,58,237,0.65), 0 0 34px rgba(236,72,153,0.4)"
-                    : "0 0 20px rgba(124,58,237,0.4)",
+                    ? "0 0 34px rgba(124,58,237,0.6), 0 0 34px rgba(255,63,129,0.4)"
+                    : "0 0 20px rgba(255,63,129,0.35)",
                   transition: "all 0.3s ease",
                   transform: isHovered ? "translateY(-2px)" : "translateY(0)"
                 }}
@@ -363,7 +334,7 @@ export default function Login() {
 
             <p className="animate-in d6" style={{ textAlign: "center", marginTop: "1.75rem", color: "#9b9ba8", fontSize: "0.88rem" }}>
               Don't have an account?{" "}
-              <Link to="/signup" style={{ color: "#a78bfa", textDecoration: "none", fontWeight: "700" }}>Sign Up</Link>
+              <Link to="/signup" style={{ color: "#ff7aab", textDecoration: "none", fontWeight: "700" }}>Sign Up</Link>
             </p>
           </div>
         </div>
