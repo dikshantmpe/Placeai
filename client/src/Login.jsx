@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import purpleImage from "../assets/purple.jpeg"; // Ensure this path is correct
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -318,10 +317,10 @@ export default function Login() {
         }}>
           {/* ↓↓↓ REPLACE THIS SRC WITH YOUR IMAGE URL ↓↓↓ */}
           <img 
-            src={purpleImage}
-            alt="AI Concept" 
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
+           src="/purple.jpeg" 
+           alt="AI Robot Concept" 
+           style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />  
           {/* Subtle dark gradient overlay so it blends into your dark theme */}
           <div style={{
             position: "absolute", inset: 0,
