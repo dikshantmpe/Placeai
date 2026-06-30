@@ -22,6 +22,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isBtnHovered, setIsBtnHovered] = useState(false);
   const [isFormHovered, setIsFormHovered] = useState(false);
+  const [hoveredCube, setHoveredCube] = useState(null); // Tracks which left-side cube is hovered
   const [focusedField, setFocusedField] = useState(null);
   const navigate = useNavigate();
 
@@ -130,7 +131,7 @@ export default function Login() {
       minHeight: "100vh",
       width: "100%",
       position: "relative",
-      overflow: "hidden", // Prevents 3D elements from causing scrollbars
+      overflow: "hidden", 
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -138,7 +139,7 @@ export default function Login() {
       color: "#ffffff",
       background: "#0c0a14",
       padding: "2rem",
-      perspective: "1500px" // CRITICAL FOR 3D EFFECT
+      perspective: "1500px" 
     }}>
       <style>{`
         .glass-input {
@@ -158,7 +159,28 @@ export default function Login() {
         /* Floating animation for cubes */
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        /* Glass shine sweep animation */
+        .glass-cube-shine {
+          position: relative;
+          overflow: hidden;
+        }
+        .glass-cube-shine::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -100%;
+          width: 50%; height: 100%;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+          transform: skewX(-25deg);
+          animation: shine-sweep 6s infinite;
+          pointer-events: none;
+        }
+        @keyframes shine-sweep {
+          0% { left: -100%; }
+          15% { left: 200%; }
+          100% { left: 200%; }
         }
       `}</style>
 
@@ -191,13 +213,13 @@ export default function Login() {
           flex: "1 1 400px",
           display: "flex",
           flexDirection: "column",
-          gap: "2rem",
-          /* Slight opposite 3D tilt for depth */
-          transform: "rotateY(10deg) translateZ(30px)",
+          gap: "2.5rem",
+          /* Stronger base 3D tilt for the whole left section */
+          transform: "rotateY(12deg) rotateX(4deg) translateZ(10px)",
           transformStyle: "preserve-3d"
         }}>
           
-          <div>
+          <div style={{ transform: "translateZ(30px)" }}>
             <h1 style={{ fontSize: "3.5rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 0.5rem 0" }}>
               Prepare <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Smarter.</span>
             </h1>
@@ -215,33 +237,68 @@ export default function Login() {
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
             gap: "1.25rem", 
-            maxWidth: "420px" 
+            maxWidth: "420px",
+            transformStyle: "preserve-3d"
           }}>
             {features.map((f, i) => (
+              /* Outer wrapper handles the continuous CSS float animation */
               <div key={i} style={{
-                background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                borderRadius: "20px",
-                padding: "1.5rem 1rem",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
-                boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.2)",
                 animation: `float 4s ease-in-out infinite`,
-                animationDelay: `${i * 0.3}s` // Staggered floating effect
+                animationDelay: `${i * 0.25}s`,
+                perspective: "1000px" // Allows inner child to pop out in 3D
               }}>
-                <div style={{
-                  width: "44px", height: "44px", borderRadius: "12px",
-                  background: "rgba(255,63,129,0.1)", border: "1px solid rgba(255,63,129,0.25)",
-                  color: "#ff7aab", display: "flex", alignItems: "center", justifyContent: "center",
-                  marginBottom: "12px"
-                }}>
-                  {f.icon}
+                
+                {/* Inner wrapper handles the interactive 3D tilt, hover, and glass styling */}
+                <div 
+                  className="glass-cube-shine"
+                  onMouseEnter={() => setHoveredCube(i)}
+                  onMouseLeave={() => setHoveredCube(null)}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "20px",
+                    padding: "1.5rem 1rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    cursor: "pointer",
+                    boxShadow: hoveredCube === i 
+                      ? "0 20px 40px -10px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.4)"
+                      : "0 10px 30px -10px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(255,255,255,0.2)",
+                    transformStyle: "preserve-3d",
+                    /* MAGIC: When hovered, neutralizes the parent tilt to face the user and pops out */
+                    transform: hoveredCube === i 
+                      ? "rotateY(-12deg) rotateX(-4deg) translateZ(40px) scale(1.05)" 
+                      : "rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)",
+                    transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)"
+                  }}
+                >
+                  
+                  {/* The actual content floats even further out for internal parallax */}
+                  <div style={{
+                    transform: hoveredCube === i ? "translateZ(30px)" : "translateZ(0px)",
+                    transition: "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                  }}>
+                    <div style={{
+                      width: "44px", height: "44px", borderRadius: "12px",
+                      background: "rgba(255,63,129,0.1)", border: "1px solid rgba(255,63,129,0.25)",
+                      color: "#ff7aab", display: "flex", alignItems: "center", justifyContent: "center",
+                      marginBottom: "12px",
+                      boxShadow: hoveredCube === i ? "0 0 20px rgba(255,63,129,0.5)" : "none",
+                      transition: "box-shadow 0.3s ease"
+                    }}>
+                      {f.icon}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>{f.title}</div>
+                    <div style={{ color: "#9b9ba8", fontSize: "0.75rem", lineHeight: "1.4" }}>{f.desc}</div>
+                  </div>
+
                 </div>
-                <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>{f.title}</div>
-                <div style={{ color: "#9b9ba8", fontSize: "0.75rem", lineHeight: "1.4" }}>{f.desc}</div>
               </div>
             ))}
           </div>
@@ -263,10 +320,10 @@ export default function Login() {
               boxShadow: "-30px 40px 60px -20px rgba(0,0,0,0.8), inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.2)",
               padding: "3.5rem",
               transformStyle: "preserve-3d",
-              /* THIS IS THE MAGIC 3D CSS - FORCED INLINE */
+              /* Main Form Tilt */
               transform: isFormHovered 
-                ? "rotateY(-5deg) rotateX(2deg) translateZ(20px) scale(1.02)" // Flattens out slightly when you hover
-                : "rotateY(-22deg) rotateX(4deg) translateZ(0px) scale(0.95)", // Strong tilt backwards by default
+                ? "rotateY(-5deg) rotateX(2deg) translateZ(20px) scale(1.02)" 
+                : "rotateY(-22deg) rotateX(4deg) translateZ(0px) scale(0.95)", 
               transition: "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)"
           }}>
             
