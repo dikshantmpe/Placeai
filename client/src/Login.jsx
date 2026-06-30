@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import purpleImage from "../assets/purple.jpeg";
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
