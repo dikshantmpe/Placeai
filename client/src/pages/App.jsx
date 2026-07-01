@@ -20,10 +20,7 @@ export default function App() {
    // Change it to this:
 fetch('https://placeai-sqjj.onrender.com/api/ping').catch(() => {});
   }, []);
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarOpen, setSidebarOpen] = useState(false);
