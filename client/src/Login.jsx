@@ -129,15 +129,36 @@ export default function Login() {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
     
+    // Suppress CORS warnings during popup
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    console.warn = (...args) => {
+      const msg = args[0]?.toString?.() || "";
+      if (msg.includes("Cross-Origin") || msg.includes("window")) return;
+      originalWarn.apply(console, args);
+    };
+    console.error = (...args) => {
+      const msg = args[0]?.toString?.() || "";
+      if (msg.includes("Cross-Origin") || msg.includes("window")) return;
+      originalError.apply(console, args);
+    };
+    
     try {
       await signInWithPopup(auth, provider);
+      console.warn = originalWarn;
+      console.error = originalError;
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
+      console.warn = originalWarn;
+      console.error = originalError;
+      
       if (err.code !== "auth/popup-closed-by-user") {
         setError("Failed to sign in with Google. Please try again.");
       }
     } finally {
+      console.warn = originalWarn;
+      console.error = originalError;
       setIsLoading(false);
     }
   };
