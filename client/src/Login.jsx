@@ -168,7 +168,7 @@ export default function Login({ setUser }) {
     });
 
     return () => unsubscribe();
-  }, [navigate, auth]);
+    }, []);
 
   const features = [
     {
