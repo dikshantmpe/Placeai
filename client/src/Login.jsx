@@ -221,7 +221,6 @@ export default function Login() {
         }}>
           
           <div style={{ transform: "translateZ(30px)" }}>
-            {/* Crackin Ai Logo MOVED HERE */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
               <div style={{
                 width: "40px", height: "40px", borderRadius: "10px",
@@ -247,7 +246,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* 2x2 ZIGZAG Grid of 3D Cubes */}
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
@@ -257,17 +255,20 @@ export default function Login() {
             transformStyle: "preserve-3d"
           }}>
             {features.map((f, i) => (
-              <div key={i} style={{
-                animation: `float 4s ease-in-out infinite`,
-                animationDelay: `${i * 0.25}s`,
-                perspective: "1000px",
-                /* ZIGZAG EFFECT: pushes down the 2nd and 4th cubes */
-                marginTop: i % 2 !== 0 ? "3.5rem" : "0" 
+              /* FIX: Mouse events moved to this static outer wrapper to prevent jitter */
+              <div 
+                key={i} 
+                onMouseEnter={() => setHoveredCube(i)}
+                onMouseLeave={() => setHoveredCube(null)}
+                style={{
+                  cursor: "pointer",
+                  animation: `float 4s ease-in-out infinite`,
+                  animationDelay: `${i * 0.25}s`,
+                  perspective: "1000px",
+                  marginTop: i % 2 !== 0 ? "3.5rem" : "0" 
               }}>
                 <div 
                   className="glass-cube-shine"
-                  onMouseEnter={() => setHoveredCube(i)}
-                  onMouseLeave={() => setHoveredCube(null)}
                   style={{
                     background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))",
                     backdropFilter: "blur(12px)",
@@ -278,7 +279,6 @@ export default function Login() {
                     flexDirection: "column",
                     alignItems: "center",
                     textAlign: "center",
-                    cursor: "pointer",
                     boxShadow: hoveredCube === i 
                       ? "0 20px 40px -10px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.4)"
                       : "0 10px 30px -10px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(255,255,255,0.2)",
@@ -344,10 +344,13 @@ export default function Login() {
         {/* ========================================= */}
         {/* RIGHT COLUMN: The Heavily Tilted Panel    */}
         {/* ========================================= */}
-        <div style={{ flex: "0 1 420px", perspective: "1500px", zIndex: 10 }}>
+        {/* FIX: Mouse events moved to this static wrapper to prevent edge twitching */}
+        <div 
+          onMouseEnter={() => setIsFormHovered(true)}
+          onMouseLeave={() => setIsFormHovered(false)}
+          style={{ flex: "0 1 420px", perspective: "1500px", zIndex: 10 }}
+        >
           <div 
-            onMouseEnter={() => setIsFormHovered(true)}
-            onMouseLeave={() => setIsFormHovered(false)}
             style={{
               background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01))",
               backdropFilter: "blur(20px) saturate(120%)",
@@ -371,7 +374,6 @@ export default function Login() {
             </p>
 
             <form onSubmit={handleLogin}>
-              {/* Email */}
               <div className={`glass-input ${focusedField === "email" ? "focused" : ""}`} style={{
                 borderRadius: "14px", marginBottom: "1.25rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
@@ -394,7 +396,6 @@ export default function Login() {
                 />
               </div>
 
-              {/* Password */}
               <div className={`glass-input ${focusedField === "password" ? "focused" : ""}`} style={{
                 borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
@@ -430,7 +431,6 @@ export default function Login() {
                 <a href="#" style={{ color: "#ff7aab", fontSize: "0.85rem", textDecoration: "none", fontWeight: 600 }}>Forgot Password?</a>
               </div>
 
-              {/* Login button */}
               <button
                 type="submit"
                 onMouseEnter={() => setIsBtnHovered(true)}
@@ -458,7 +458,6 @@ export default function Login() {
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
             </div>
 
-            {/* Google button */}
             <button
               type="button"
               className="glass-input"
