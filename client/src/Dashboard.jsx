@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const COLORS = ["#dc2626", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706", "#f59e0b"];
+// Upgraded to your brand's vibrant neon color palette
+const COLORS = ["#ff3f81", "#7c3aed", "#3b82f6", "#10b981", "#f59e0b", "#a78bfa", "#f43f5e"];
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -18,15 +19,21 @@ export default function Dashboard() {
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
+  // Upgraded Glass Loading State
   if (loading) return (
-    <div style={{ padding: "2rem", color: "#555", display: "flex", alignItems: "center", gap: "10px" }}>
-      <span>⏳</span> Loading dashboard...
+    <div style={{ padding: "2rem", width: "100%", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+      <div className="glass-card" style={{ padding: "2rem", display: "flex", alignItems: "center", gap: "12px", color: "#a78bfa", fontWeight: "600" }}>
+        <span style={{ animation: "pulse-glow 1.5s infinite" }}>⏳</span> Fetching your analytics...
+      </div>
     </div>
   );
 
+  // Upgraded Glass Error State
   if (!data) return (
-    <div style={{ padding: "2rem", color: "#555" }}>
-      ⚠️ Failed to load dashboard. Please refresh.
+    <div style={{ padding: "2rem", width: "100%", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+      <div className="glass-card" style={{ padding: "2rem", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
+        ⚠️ Failed to load dashboard. Please refresh.
+      </div>
     </div>
   );
 
@@ -34,88 +41,165 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      <style>{`
+        .dashboard-container {
+          padding: 1.5rem;
+          width: 100%;
+          min-width: 0; /* Critical for preventing flexbox blowouts */
+          box-sizing: border-box;
+          color: white;
+          font-family: 'Inter', sans-serif;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          overflow-x: hidden;
+        }
+
+        /* The core aesthetic class */
+        .glass-card {
+          background: linear-gradient(145deg, rgba(20, 15, 25, 0.7), rgba(10, 8, 15, 0.9));
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 16px;
+          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .glass-card:hover {
+          transform: translateY(-4px) scale(1.01);
+          border-color: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.1);
+        }
+
+        /* Auto-fitting grids solve the overlapping issue entirely */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1.25rem;
+        }
+
+        .charts-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 1.25rem;
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+
+        /* Customizing Recharts tooltips */
+        .recharts-tooltip-wrapper {
+          outline: none !important;
+        }
+      `}</style>
 
       {/* Header */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 4px" }}>Progress Dashboard</h2>
-        <p style={{ color: "#555", margin: 0, fontSize: "13px" }}>Your overall placement preparation at a glance.</p>
+      <div style={{ marginBottom: "0.5rem" }}>
+        <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 8px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ width: "24px", height: "3px", background: "linear-gradient(90deg, #7c3aed, transparent)", borderRadius: "2px" }}></span>
+          Progress <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Dashboard</span>
+        </h2>
+        <p style={{ color: "#9b9ba8", margin: 0, fontSize: "14px", fontWeight: "500" }}>Your overall placement preparation at a glance.</p>
       </div>
 
       {/* Top Stats */}
       <div className="stats-grid">
         {[
-          { label: "DSA Progress", value: `${data.dsa.done}`, sub: `/ ${data.dsa.total} problems`, pct: data.dsa.percent, color: "#dc2626", icon: "⟨/⟩" },
+          { label: "DSA Progress", value: `${data.dsa.done}`, sub: `/ ${data.dsa.total} problems`, pct: data.dsa.percent, color: "#ff3f81", icon: "⟨/⟩" },
           { label: "Quiz Questions", value: data.quiz.total, sub: "available", pct: 100, color: "#7c3aed", icon: "🧠" },
-          { label: "Company Questions", value: totalCompany, sub: "across companies", pct: 80, color: "#2563eb", icon: "🏢" },
-          { label: "Daily Streak", value: streak, sub: "days", pct: Math.min(streak * 10, 100), color: "#d97706", icon: "🔥" },
+          { label: "Company Q's", value: totalCompany, sub: "across companies", pct: 80, color: "#3b82f6", icon: "🏢" },
+          { label: "Daily Streak", value: streak, sub: "days", pct: Math.min(streak * 10, 100), color: "#f59e0b", icon: "🔥" },
         ].map((s, i) => (
-          <div key={i} className="stat-card"
-            onMouseEnter={e => e.currentTarget.style.borderColor = s.color + "55"}
-            onMouseLeave={e => e.currentTarget.style.borderColor = "#1f1f1f"}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-              <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>{s.label}</p>
+          <div key={i} className="glass-card" style={{ padding: "1.25rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+              <p style={{ color: "#9b9ba8", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", margin: 0 }}>
+                {s.label}
+              </p>
               <div style={{
-                width: "30px", height: "30px", borderRadius: "8px",
-                background: `${s.color}18`, display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "14px", border: `1px solid ${s.color}33`
+                width: "32px", height: "32px", borderRadius: "10px",
+                background: `linear-gradient(135deg, ${s.color}20, transparent)`, 
+                display: "flex", alignItems: "center", justifyContent: "center", 
+                fontSize: "16px", border: `1px solid ${s.color}40`, color: s.color,
+                boxShadow: `0 0 15px ${s.color}15`
               }}>{s.icon}</div>
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "4px" }}>
-              <span style={{ fontSize: "24px", fontWeight: "700", color: "white" }}>{s.value}</span>
-              <span style={{ fontSize: "11px", color: "#555" }}>{s.sub}</span>
+            
+            <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "8px" }}>
+              <span style={{ fontSize: "28px", fontWeight: "800", color: "white", lineHeight: 1 }}>{s.value}</span>
+              <span style={{ fontSize: "12px", color: "#6b6b78", fontWeight: "600" }}>{s.sub}</span>
             </div>
-            <div style={{ background: "#1f1f1f", borderRadius: "4px", height: "4px", marginTop: "8px" }}>
-              <div style={{ width: `${s.pct}%`, background: s.color, height: "4px", borderRadius: "4px" }} />
+            
+            <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "6px", height: "5px", marginTop: "12px", overflow: "hidden" }}>
+              <div style={{ width: `${s.pct}%`, background: `linear-gradient(90deg, ${s.color}, ${s.color}dd)`, height: "100%", borderRadius: "6px", boxShadow: `0 0 10px ${s.color}80` }} />
             </div>
-            <p style={{ color: s.color, fontSize: "11px", margin: "4px 0 0" }}>{s.pct}% complete</p>
+            <p style={{ color: s.color, fontSize: "11px", fontWeight: "600", margin: "8px 0 0" }}>{s.pct}% complete</p>
           </div>
         ))}
       </div>
 
-      {/* DSA + Pie */}
+      {/* DSA + Pie Charts */}
       <div className="charts-grid">
 
         {/* DSA Progress by Topic */}
-        <div style={{ background: "#111", border: "1px solid #1f1f1f", borderRadius: "14px", padding: "1.25rem" }}>
-          <h3 style={{ margin: "0 0 1rem", fontSize: "14px", fontWeight: "600" }}>DSA Progress by Topic</h3>
-          {data.dsaByTopic.map((t, i) => (
-            <div key={t.topic} style={{ marginBottom: "12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "5px" }}>
-                <span style={{ color: "#ccc" }}>{t.topic}</span>
-                <span style={{ color: "#555" }}>{t.done}/{t.total} ({t.percent}%)</span>
+        <div className="glass-card" style={{ padding: "1.5rem" }}>
+          <h3 style={{ margin: "0 0 1.25rem", fontSize: "15px", fontWeight: "700", color: "#e2e8f0" }}>DSA Progress by Topic</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {data.dsaByTopic.map((t, i) => (
+              <div key={t.topic}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px", fontWeight: "500" }}>
+                  <span style={{ color: "#d1d5db" }}>{t.topic}</span>
+                  <span style={{ color: "#9ca3af" }}>{t.done}/{t.total} ({t.percent}%)</span>
+                </div>
+                <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "6px", height: "6px", overflow: "hidden" }}>
+                  <div style={{
+                    width: `${t.percent}%`,
+                    background: COLORS[i % COLORS.length],
+                    height: "100%", borderRadius: "6px", transition: "width 0.8s ease-in-out",
+                    boxShadow: `0 0 10px ${COLORS[i % COLORS.length]}80`
+                  }} />
+                </div>
               </div>
-              <div style={{ background: "#1f1f1f", borderRadius: "6px", height: "5px" }}>
-                <div style={{
-                  width: `${t.percent}%`,
-                  background: COLORS[i % COLORS.length],
-                  height: "5px", borderRadius: "6px", transition: "width 0.5s"
-                }} />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Pie Chart */}
-        <div style={{ background: "#111", border: "1px solid #1f1f1f", borderRadius: "14px", padding: "1.25rem" }}>
-          <h3 style={{ margin: "0 0 1rem", fontSize: "14px", fontWeight: "600" }}>Company-wise Distribution</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie data={data.companyStats} dataKey="count" nameKey="company"
-                cx="50%" cy="50%" outerRadius={80} innerRadius={35}>
-                {data.companyStats.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: "8px", color: "white", fontSize: "12px" }} />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="glass-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column" }}>
+          <h3 style={{ margin: "0 0 1rem", fontSize: "15px", fontWeight: "700", color: "#e2e8f0" }}>Company-wise Distribution</h3>
+          <div style={{ flex: 1, minHeight: "220px" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie 
+                  data={data.companyStats} dataKey="count" nameKey="company"
+                  cx="50%" cy="50%" outerRadius={85} innerRadius={45}
+                  stroke="rgba(255,255,255,0.05)" strokeWidth={2}
+                >
+                  {data.companyStats.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    background: "rgba(10, 8, 15, 0.9)", border: "1px solid rgba(255,255,255,0.15)", 
+                    borderRadius: "12px", backdropFilter: "blur(10px)", color: "white", fontSize: "13px" 
+                  }} 
+                  itemStyle={{ color: "#e2e8f0", fontWeight: "600" }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          
           {/* Legend */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "12px", justifyContent: "center" }}>
             {data.companyStats.map((c, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
-                <span style={{ fontSize: "11px", color: "#888" }}>{c.company}</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0, boxShadow: `0 0 8px ${COLORS[i % COLORS.length]}` }} />
+                <span style={{ fontSize: "12px", color: "#9b9ba8", fontWeight: "500" }}>{c.company}</span>
               </div>
             ))}
           </div>
@@ -123,67 +207,27 @@ export default function Dashboard() {
       </div>
 
       {/* Bar Chart */}
-      <div style={{ background: "#111", border: "1px solid #1f1f1f", borderRadius: "14px", padding: "1.25rem" }}>
-        <h3 style={{ margin: "0 0 1rem", fontSize: "14px", fontWeight: "600" }}>DSA Solved by Topic</h3>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data.dsaByTopic} barGap={4}>
-            <XAxis dataKey="topic" tick={{ fontSize: 10, fill: "#555" }} axisLine={{ stroke: "#222" }} tickLine={false} />
-            <YAxis tick={{ fontSize: 10, fill: "#555" }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: "8px", color: "white", fontSize: "12px" }} />
-            <Bar dataKey="done" fill="#dc2626" radius={[4, 4, 0, 0]} name="Solved" />
-            <Bar dataKey="total" fill="#2a2a2a" radius={[4, 4, 0, 0]} name="Total" />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="glass-card" style={{ padding: "1.5rem", marginBottom: "2rem" }}>
+        <h3 style={{ margin: "0 0 1.25rem", fontSize: "15px", fontWeight: "700", color: "#e2e8f0" }}>DSA Solved by Topic</h3>
+        <div style={{ height: "260px" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.dsaByTopic} barGap={6} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <XAxis dataKey="topic" tick={{ fontSize: 11, fill: "#9b9ba8", fontWeight: "500" }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#9b9ba8", fontWeight: "500" }} axisLine={false} tickLine={false} />
+              <Tooltip 
+                cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                contentStyle={{ 
+                  background: "rgba(10, 8, 15, 0.9)", border: "1px solid rgba(255,255,255,0.15)", 
+                  borderRadius: "12px", backdropFilter: "blur(10px)", color: "white", fontSize: "13px" 
+                }} 
+              />
+              <Bar dataKey="done" fill="#ff3f81" radius={[6, 6, 0, 0]} name="Solved" />
+              <Bar dataKey="total" fill="rgba(255,255,255,0.06)" radius={[6, 6, 0, 0]} name="Total" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      <style>{`
-        .dashboard-container {
-          padding: 1.5rem;
-          max-width: 1200px;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .stat-card {
-          background: #111;
-          border: 1px solid #1f1f1f;
-          border-radius: 12px;
-          padding: 16px;
-          transition: border-color 0.2s;
-        }
-
-        .charts-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-          margin-bottom: 16px;
-        }
-
-        @media (max-width: 768px) {
-          .dashboard-container {
-            padding: 1rem;
-          }
-
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-          }
-
-          .stat-card {
-            padding: 12px;
-          }
-
-          .charts-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-        }
-      `}</style>
     </div>
   );
 }
