@@ -221,15 +221,22 @@ export default function Login() {
         }}>
           
           <div style={{ transform: "translateZ(30px)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
+            {/* UPDATED: Custom Logo Image and Larger Font Size */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "1.5rem" }}>
               <div style={{
-                width: "40px", height: "40px", borderRadius: "10px",
-                background: "linear-gradient(135deg, #7c3aed, #ff3f81)",
+                width: "48px", height: "48px", borderRadius: "12px",
+                overflow: "hidden",
+                boxShadow: "0 0 20px rgba(255,63,129,0.4)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: "800", fontSize: "1.2rem",
-                boxShadow: "0 0 20px rgba(255,63,129,0.4)"
-              }}>C</div>
-              <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700", letterSpacing: "0.5px" }}>
+                background: "rgba(0,0,0,0.2)" // Slight background in case image takes a moment to load
+              }}>
+                <img 
+                  src="/logo.png" 
+                  alt="Crackin Ai Logo" 
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </div>
+              <h2 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "800", letterSpacing: "0.5px" }}>
                 Crackin <span style={{ color: "#ff7aab" }}>Ai</span>
               </h2>
             </div>
@@ -246,6 +253,7 @@ export default function Login() {
             </div>
           </div>
 
+          {/* 2x2 ZIGZAG Grid of 3D Cubes */}
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
@@ -255,7 +263,6 @@ export default function Login() {
             transformStyle: "preserve-3d"
           }}>
             {features.map((f, i) => (
-              /* FIX: Mouse events moved to this static outer wrapper to prevent jitter */
               <div 
                 key={i} 
                 onMouseEnter={() => setHoveredCube(i)}
@@ -344,7 +351,6 @@ export default function Login() {
         {/* ========================================= */}
         {/* RIGHT COLUMN: The Heavily Tilted Panel    */}
         {/* ========================================= */}
-        {/* FIX: Mouse events moved to this static wrapper to prevent edge twitching */}
         <div 
           onMouseEnter={() => setIsFormHovered(true)}
           onMouseLeave={() => setIsFormHovered(false)}
