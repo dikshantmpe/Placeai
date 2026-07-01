@@ -161,11 +161,11 @@ export default function Login({ setUser }) {
   // Monitor auth state changes (works better for redirects)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("✅ User authenticated:", user.email);
-        setIsLoading(false);
-        navigate("/dashboard");
-      }
+     if (user) {
+     console.log("✅ User authenticated:", user.email);
+    setUser(user);
+    setIsLoading(false);
+}
     });
 
     return () => unsubscribe();
