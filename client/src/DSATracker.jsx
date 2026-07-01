@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { auth } from "../firebase.js"; // Adjust path if needed
+// FIXED: Locked in the correct path for your folder structure
+import { auth } from "./firebase.js"; 
 
 const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
 const diffColor = { Easy: "#10b981", Medium: "#f59e0b", Hard: "#ef4444" };
