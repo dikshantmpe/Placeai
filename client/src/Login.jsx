@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 // --- FIREBASE IMPORTS ---
 import { auth } from "./firebase.js"; 
-import { signInWithEmailAndPassword, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -128,35 +128,41 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setError("");
     setIsLoading(true);
-    const provider = new GoogleAuthProvider();
     
     try {
+      // Verify Firebase is initialized
+      if (!auth) {
+        setError("Authentication service not initialized. Please refresh the page.");
+        setIsLoading(false);
+        return;
+      }
+      
+      const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      
       // Use redirect instead of popup (avoids CORS issues)
       await signInWithRedirect(auth, provider);
       // After redirect back, getRedirectResult will be called in useEffect below
     } catch (err) {
-      console.error(err);
-      setError("Failed to sign in with Google. Please try again.");
+      console.error("Google login error:", err);
+      setError("Failed to initiate Google sign-in. Please try again.");
       setIsLoading(false);
     }
   };
 
-  // Handle redirect result on component mount
+  // Monitor auth state changes (works better for redirects)
   useEffect(() => {
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          navigate("/dashboard");
-        }
-      })
-      .catch((error) => {
-        if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-          console.error(error);
-          setError("Failed to sign in with Google. Please try again.");
-        }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("✅ User authenticated:", user.email);
         setIsLoading(false);
-      });
-  }, [navigate]);
+        navigate("/dashboard");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate, auth]);
 
   const features = [
     {
