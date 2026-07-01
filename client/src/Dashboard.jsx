@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-// IMPORTANT: Make sure this path points correctly to your firebase.js file!
-import { auth } from "../firebase.js"; 
+// FIX: Changed from "../firebase.js" to "./firebase.js"
+import { auth } from "./firebase.js"; 
 
 const COLORS = ["#ff3f81", "#7c3aed", "#3b82f6", "#10b981", "#f59e0b", "#a78bfa", "#f43f5e"];
 
