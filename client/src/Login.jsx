@@ -114,9 +114,11 @@ export default function Login({ setUser }) {
       setUser(userCredential.user);
 
       navigate("/dashboard");
-      
+
     } catch (err) {
-      console.error(err);
+      console.log(err.code);
+      console.log(err.message);
+      
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
         setError("Invalid email or password.");
       } else if (err.code === "auth/invalid-email") {
