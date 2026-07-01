@@ -44,16 +44,19 @@ export default function Login() {
 
     async function initVanta() {
       try {
-        // Suppress CORS console warnings
+        // Suppress CORS console warnings globally (from Firebase auth & Vanta)
         const originalWarn = console.warn;
         const originalError = console.error;
         
         console.warn = (...args) => {
-          if (args[0]?.includes?.("Cross-Origin")) return;
+          const msg = args[0]?.toString?.() || "";
+          if (msg.includes("Cross-Origin") || msg.includes("window.close")) return;
           originalWarn.apply(console, args);
         };
+        
         console.error = (...args) => {
-          if (args[0]?.includes?.("Cross-Origin")) return;
+          const msg = args[0]?.toString?.() || "";
+          if (msg.includes("Cross-Origin") || msg.includes("window.close")) return;
           originalError.apply(console, args);
         };
 
