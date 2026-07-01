@@ -29,22 +29,21 @@ export default function Login({ setUser }) {
   const [focusedField, setFocusedField] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
-  const authInitialized = useRef(false);
+  const redirectChecked = useRef(false);
 
   // Clear autofill on mount
   useEffect(() => {
     setMounted(true);
     
-    // Prevent autofill by resetting values after a short delay
     const timer = setTimeout(() => {
       setEmail("");
       setPassword("");
-      // Force clear input values in DOM
       const emailInput = document.querySelector('input[type="email"]');
       const passwordInput = document.querySelector('input[type="password"]');
       if (emailInput) emailInput.value = "";
@@ -54,7 +53,32 @@ export default function Login({ setUser }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Vanta initialization - only once
+  // Check for Google redirect result FIRST - only once
+  useEffect(() => {
+    if (redirectChecked.current) return;
+    redirectChecked.current = true;
+
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          console.log("✅ Google auth successful:", result.user.email);
+          setUser(result.user);
+          navigate("/dashboard", { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error("Google redirect error:", err);
+        setError("Google sign-in failed. Please try again.");
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkRedirectResult();
+  }, [setUser, navigate]);
+
+  // Vanta initialization
   useEffect(() => {
     let cancelled = false;
 
@@ -114,42 +138,6 @@ export default function Login({ setUser }) {
     };
   }, []);
 
-  // Handle Google redirect - only once
-  useEffect(() => {
-    if (authInitialized.current) return;
-    authInitialized.current = true;
-
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          console.log("✅ Google redirect successful:", result.user.email);
-          setUser(result.user);
-          navigate("/dashboard");
-        }
-      } catch (err) {
-        console.error("Google redirect error:", err);
-        setError("Google sign-in failed. Please try again.");
-      }
-    };
-
-    handleRedirectResult();
-  }, [setUser, navigate]);
-
-  // Monitor auth state - single subscription
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("✅ User authenticated:", user.email);
-        setUser(user);
-        setIsLoading(false);
-        navigate("/dashboard");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [setUser, navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -158,7 +146,7 @@ export default function Login({ setUser }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       console.log(err.code);
       console.log(err.message);
@@ -191,12 +179,52 @@ export default function Login({ setUser }) {
       provider.addScope('email');
       
       await signInWithRedirect(auth, provider);
+      // Page will redirect, this code won't execute after redirect
     } catch (err) {
       console.error("Google login error:", err);
       setError("Failed to initiate Google sign-in. Please try again.");
       setIsLoading(false);
     }
   };
+
+  // Show loading screen while checking for redirect result
+  if (isCheckingAuth) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        width: "100%",
+        position: "relative",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Inter', sans-serif",
+        color: "#ffffff",
+        background: "#0c0a14",
+      }}>
+        <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
+          background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(8,6,14,0.35) 75%)"
+        }} />
+        <div style={{ position: "relative", zIndex: 10, textAlign: "center" }}>
+          <div style={{
+            width: "50px", height: "50px", borderRadius: "50%",
+            border: "3px solid rgba(255,63,129,0.3)",
+            borderTop: "3px solid #ff3f81",
+            animation: "spin 1s linear infinite",
+            margin: "0 auto 20px"
+          }} />
+          <p style={{ color: "#9b9ba8", fontSize: "1rem" }}>Signing you in...</p>
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
 
   const features = [
     {
