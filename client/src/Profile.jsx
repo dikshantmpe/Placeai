@@ -1,15 +1,21 @@
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebase";
 
 export default function Profile({ user, setUser }) {
   const navigate = useNavigate();
   const streak = parseInt(localStorage.getItem("streak") || "0");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
-  };
+  const handleLogout = async () => {
+  await signOut(auth);
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  setUser(null);
+
+  navigate("/");
+};
 
   const getInitials = (name) =>
     name ? name.split(" ").map(n => n[0]).join("").toUpperCase() : "?";
