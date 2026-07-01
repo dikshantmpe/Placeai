@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// FIXED: Locked in the correct path for your folder structure
 import { auth } from "./firebase.js"; 
 
 const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
 const diffColor = { Easy: "#10b981", Medium: "#f59e0b", Hard: "#ef4444" };
 const diffBg = { Easy: "rgba(16, 185, 129, 0.15)", Medium: "rgba(245, 158, 11, 0.15)", Hard: "rgba(239, 68, 68, 0.15)" };
 
+// Generate 45 Dummy Questions for the fallback
+const generateDummyData = () => {
+  return Array.from({ length: 45 }).map((_, i) => ({
+    _id: `demo-${i}`,
+    title: `Standard Technical Interview Problem ${i + 1}`,
+    topic: topics[(i % (topics.length - 1)) + 1],
+    difficulty: i % 4 === 0 ? "Hard" : i % 2 === 0 ? "Medium" : "Easy",
+    status: i % 5 === 0 // Make roughly 20% of them "Done"
+  }));
+};
+
 export default function DSATracker() {
   const navigate = useNavigate();
   const [problems, setProblems] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false); // Tracks if backend failed
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -26,19 +37,12 @@ export default function DSATracker() {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProblems(res.data);
+        setIsDemoMode(false);
       } catch (err) {
         console.error("Backend fetch failed. Loading Demo Data instead...", err);
-        // FALLBACK DEMO DATA
-        setProblems([
-          { _id: "1", title: "Two Sum", topic: "Arrays", difficulty: "Easy", status: true },
-          { _id: "2", title: "Longest Substring Without Repeating Characters", topic: "Strings", difficulty: "Medium", status: false },
-          { _id: "3", title: "Reverse Linked List", topic: "Linked List", difficulty: "Easy", status: true },
-          { _id: "4", title: "Binary Tree Maximum Path Sum", topic: "Trees", difficulty: "Hard", status: false },
-          { _id: "5", title: "Climbing Stairs", topic: "DP", difficulty: "Easy", status: true },
-          { _id: "6", title: "Course Schedule", topic: "Graphs", difficulty: "Medium", status: false },
-          { _id: "7", title: "Valid Parentheses", topic: "Stack", difficulty: "Easy", status: true },
-          { _id: "8", title: "Search in Rotated Sorted Array", topic: "Binary Search", difficulty: "Medium", status: false },
-        ]);
+        // Load the 45 generated demo questions
+        setProblems(generateDummyData());
+        setIsDemoMode(true); // Trigger the warning banner
       } finally {
         setLoading(false);
       }
@@ -47,9 +51,10 @@ export default function DSATracker() {
   }, []);
 
   const toggleStatus = async (id) => {
-    // Optimistic UI update for snappy feel
     setProblems(problems.map(p => p._id === id ? { ...p, status: !p.status } : p));
     
+    if (isDemoMode) return; // Don't try to send to backend if in demo mode
+
     try {
       let token = localStorage.getItem("token");
       if (auth.currentUser) token = await auth.currentUser.getIdToken();
@@ -59,8 +64,6 @@ export default function DSATracker() {
       });
     } catch (err) {
       console.error("Failed to update status on server.", err);
-      // Revert on failure (optional, but good practice)
-      // setProblems(problems.map(p => p._id === id ? { ...p, status: !p.status } : p));
     }
   };
 
@@ -166,6 +169,25 @@ export default function DSATracker() {
           .problems-mobile { display: block; }
         }
       `}</style>
+
+      {/* WARNING BANNER FOR DEMO MODE */}
+      {isDemoMode && (
+        <div style={{
+          background: "rgba(245, 158, 11, 0.1)",
+          border: "1px solid rgba(245, 158, 11, 0.4)",
+          color: "#fcd34d",
+          padding: "12px 16px",
+          borderRadius: "12px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          fontSize: "14px",
+          fontWeight: "600"
+        }}>
+          <span>⚠️</span> 
+          <span>Connected to Offline Demo Data. Your Render backend is asleep or rejected the Firebase auth token.</span>
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ marginBottom: "0.5rem" }}>
@@ -295,59 +317,6 @@ export default function DSATracker() {
           </div>
         ))}
       </div>
-
-      {/* MOBILE CARD VIEW */}
-      <div className="problems-mobile">
-        {filtered.length === 0 && (
-          <div style={{ padding: "3rem", textAlign: "center", color: "#6b6b78" }}>No problems found.</div>
-        )}
-        {filtered.map((p, i) => (
-          <div key={p._id} className="glass-card" style={{
-            border: `1px solid ${p.status ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.08)"}`,
-            padding: "16px", marginBottom: "12px",
-            display: "flex", alignItems: "flex-start", gap: "14px",
-            background: p.status ? "rgba(16, 185, 129, 0.05)" : undefined
-          }}>
-            {/* Checkbox */}
-            <div onClick={() => toggleStatus(p._id)} style={{
-              width: "24px", height: "24px", borderRadius: "8px", cursor: "pointer",
-              background: p.status ? "linear-gradient(135deg, #10b981, #059669)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${p.status ? "#10b981" : "rgba(255,255,255,0.2)"}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.2s", color: "white", flexShrink: 0, marginTop: "2px",
-              boxShadow: p.status ? "0 0 10px rgba(16,185,129,0.4)" : "none"
-            }}>
-              {p.status && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-            </div>
-
-            {/* Content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <button onClick={() => navigate(`/problem/${p._id}`)} style={{
-                color: p.status ? "#6b6b78" : "#e2e8f0", fontSize: "14px",
-                textDecoration: p.status ? "line-through" : "none",
-                display: "block", marginBottom: "10px", fontWeight: "600",
-                background: "transparent", border: "none", cursor: "pointer",
-                textAlign: "left", padding: 0
-              }}>
-                <span style={{ color: "#6b6b78", marginRight: "8px", fontSize: "12px" }}>
-                  {String(i + 1).padStart(2, "0")}.
-                </span>
-                {p.title}
-              </button>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "11px", color: "#9b9ba8", background: "rgba(255,255,255,0.05)",
-                  padding: "4px 10px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.1)", fontWeight: "500" }}>{p.topic}</span>
-                <span style={{
-                  fontSize: "11px", fontWeight: "700", padding: "4px 10px",
-                  borderRadius: "6px", color: diffColor[p.difficulty],
-                  background: diffBg[p.difficulty], border: `1px solid ${diffColor[p.difficulty]}40`
-                }}>{p.difficulty}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
     </div>
   );
 }
