@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 // --- FIREBASE IMPORTS ---
-// Make sure this path correctly points to your firebase.js file!
 import { auth } from "./firebase.js"; 
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
@@ -28,8 +27,6 @@ export default function Login() {
   const [isFormHovered, setIsFormHovered] = useState(false);
   const [hoveredCube, setHoveredCube] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
-  
-  // NEW: State to handle loading and errors
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
@@ -47,26 +44,45 @@ export default function Login() {
 
     async function initVanta() {
       try {
+        // Suppress CORS console warnings
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        console.warn = (...args) => {
+          if (args[0]?.includes?.("Cross-Origin")) return;
+          originalWarn.apply(console, args);
+        };
+        console.error = (...args) => {
+          if (args[0]?.includes?.("Cross-Origin")) return;
+          originalError.apply(console, args);
+        };
+
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
+        
+        console.warn = originalWarn;
+        console.error = originalError;
+
         if (cancelled || !vantaRef.current || vantaEffect.current) return;
 
-        vantaEffect.current = window.VANTA.NET({
-          el: vantaRef.current,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          scale: 1.0,
-          scaleMobile: 1.0,
-          color: 0xff3f81,
-          backgroundColor: 0x14101f,
-          points: 11.0,
-          maxDistance: 22.0,
-          spacing: 17.0,
-          showDots: true,
-        });
+        if (window.VANTA && window.VANTA.NET) {
+          vantaEffect.current = window.VANTA.NET({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            color: 0xff3f81,
+            backgroundColor: 0x14101f,
+            points: 11.0,
+            maxDistance: 22.0,
+            spacing: 17.0,
+            showDots: true,
+          });
+        }
       } catch (err) {
         console.error("Failed to load Vanta background:", err);
       }
@@ -83,7 +99,6 @@ export default function Login() {
     };
   }, []);
 
-  // --- NEW: FIREBASE EMAIL/PASSWORD LOGIN ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -91,13 +106,13 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // If successful, redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      // Clean up Firebase error messages to be user-friendly
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
         setError("Invalid email or password.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
       } else {
         setError("Failed to sign in. Please try again.");
       }
@@ -106,7 +121,6 @@ export default function Login() {
     }
   };
 
-  // --- NEW: FIREBASE GOOGLE LOGIN ---
   const handleGoogleLogin = async () => {
     setError("");
     setIsLoading(true);
@@ -117,7 +131,9 @@ export default function Login() {
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      setError("Failed to sign in with Google.");
+      if (err.code !== "auth/popup-closed-by-user") {
+        setError("Failed to sign in with Google. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -524,7 +540,6 @@ export default function Login() {
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
             </div>
 
-            {/* UPDATED: Google Login Button */}
             <button
               type="button"
               onClick={handleGoogleLogin}
