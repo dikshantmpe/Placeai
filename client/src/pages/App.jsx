@@ -14,6 +14,7 @@ import Login from "../Login";
 import Profile from "../Profile";
 import Home from "../Home";
 import RightSidebar from "../components/RightSidebar";
+import Signup from "../Signup";
 
 export default function App() {
   useEffect(() => {
@@ -38,7 +39,9 @@ fetch('https://placeai-sqjj.onrender.com/api/ping').catch(() => {});
     <BrowserRouter>
       {!user ? (
         <Routes>
-          <Route path="*" element={<Login setUser={setUser} />} />
+          <Route path="/" element={<Login setUser={setUser} />} />
+          <Route path="/signup" element={<Signup setUser={setUser} />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       ) : (
         <div style={{ display: "flex", minHeight: "100vh", background: "#0a0a0a" }}>
