@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+// --- FIREBASE IMPORTS ---
+// Make sure this path correctly points to your firebase.js file!
+import { auth } from "../firebase"; 
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -24,8 +28,12 @@ export default function Login() {
   const [isFormHovered, setIsFormHovered] = useState(false);
   const [hoveredCube, setHoveredCube] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
+  
+  // NEW: State to handle loading and errors
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
   const navigate = useNavigate();
-
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
@@ -75,10 +83,44 @@ export default function Login() {
     };
   }, []);
 
-  const handleLogin = (e) => {
+  // --- NEW: FIREBASE EMAIL/PASSWORD LOGIN ---
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Logging in...", email, password);
-    navigate("/dashboard");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // If successful, redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      // Clean up Firebase error messages to be user-friendly
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        setError("Invalid email or password.");
+      } else {
+        setError("Failed to sign in. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- NEW: FIREBASE GOOGLE LOGIN ---
+  const handleGoogleLogin = async () => {
+    setError("");
+    setIsLoading(true);
+    const provider = new GoogleAuthProvider();
+    
+    try {
+      await signInWithPopup(auth, provider);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to sign in with Google.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const features = [
@@ -221,14 +263,13 @@ export default function Login() {
         }}>
           
           <div style={{ transform: "translateZ(30px)" }}>
-            {/* UPDATED: Custom Logo Image and Larger Font Size */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "1.5rem" }}>
               <div style={{
                 width: "48px", height: "48px", borderRadius: "12px",
                 overflow: "hidden",
                 boxShadow: "0 0 20px rgba(255,63,129,0.4)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: "rgba(0,0,0,0.2)" // Slight background in case image takes a moment to load
+                background: "rgba(0,0,0,0.2)"
               }}>
                 <img 
                   src="/logo.png" 
@@ -253,7 +294,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* 2x2 ZIGZAG Grid of 3D Cubes */}
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
@@ -380,6 +420,23 @@ export default function Login() {
             </p>
 
             <form onSubmit={handleLogin}>
+              
+              {/* ERROR MESSAGE DISPLAY */}
+              {error && (
+                <div style={{
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  color: "#f87171",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  fontSize: "0.85rem",
+                  marginBottom: "1.25rem",
+                  textAlign: "center"
+                }}>
+                  {error}
+                </div>
+              )}
+
               <div className={`glass-input ${focusedField === "email" ? "focused" : ""}`} style={{
                 borderRadius: "14px", marginBottom: "1.25rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
@@ -439,22 +496,25 @@ export default function Login() {
 
               <button
                 type="submit"
+                disabled={isLoading}
                 onMouseEnter={() => setIsBtnHovered(true)}
                 onMouseLeave={() => setIsBtnHovered(false)}
                 style={{
-                  width: "100%", padding: "16px", borderRadius: "14px", border: "none", cursor: "pointer",
-                  background: isBtnHovered
+                  width: "100%", padding: "16px", borderRadius: "14px", border: "none", 
+                  cursor: isLoading ? "not-allowed" : "pointer",
+                  background: isBtnHovered && !isLoading
                     ? "linear-gradient(90deg, #6d28d9, #c2185b)"
                     : "linear-gradient(90deg, #7c3aed, #ff3f81)",
                   color: "white", fontSize: "1.05rem", fontWeight: "700",
-                  boxShadow: isBtnHovered
+                  boxShadow: isBtnHovered && !isLoading
                     ? "0 0 34px rgba(124,58,237,0.6), 0 0 34px rgba(255,63,129,0.4)"
                     : "0 0 20px rgba(255,63,129,0.35)",
                   transition: "all 0.3s ease",
-                  transform: isBtnHovered ? "translateY(-2px)" : "translateY(0)"
+                  transform: isBtnHovered && !isLoading ? "translateY(-2px)" : "translateY(0)",
+                  opacity: isLoading ? 0.7 : 1
                 }}
               >
-                Login →
+                {isLoading ? "Signing in..." : "Login →"}
               </button>
             </form>
 
@@ -464,13 +524,18 @@ export default function Login() {
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
             </div>
 
+            {/* UPDATED: Google Login Button */}
             <button
               type="button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
               className="glass-input"
               style={{
                 width: "100%", padding: "14px", borderRadius: "14px", display: "flex", alignItems: "center",
-                justifyContent: "center", gap: "12px", cursor: "pointer", fontSize: "0.95rem",
-                fontWeight: "600", color: "white"
+                justifyContent: "center", gap: "12px", 
+                cursor: isLoading ? "not-allowed" : "pointer", 
+                fontSize: "0.95rem", fontWeight: "600", color: "white",
+                opacity: isLoading ? 0.7 : 1
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
