@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 // --- FIREBASE IMPORTS ---
 // Make sure this path correctly points to your firebase.js file!
-import { auth } from "../firebase"; 
+import { auth } from "./firebase.js";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 function loadScript(src) {
