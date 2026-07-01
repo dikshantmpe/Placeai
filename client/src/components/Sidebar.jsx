@@ -9,14 +9,25 @@ export default function Sidebar() {
   // === THIS IS THE MISSING LOGOUT FUNCTION ===
   const handleLogout = async () => {
     try {
+      // 1. Sign out of Firebase
       await signOut(auth);
+      
+      // 2. Clear out any saved local storage variables 
+      localStorage.clear();
+      sessionStorage.clear();
+      
       console.log("Logged out successfully");
-      navigate("/"); // Redirect to the login screen
+      
+      // 3. THE BULLETPROOF REDIRECT
+      // Using window.location.replace is stronger than useNavigate here.
+      // It forces the browser to wipe the current state and load the root URL,
+      // and it removes the dashboard from the "back button" history.
+      window.location.replace("/"); 
+      
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
-  // ===========================================
 
   return (
     <aside style={{
