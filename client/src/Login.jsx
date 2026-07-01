@@ -181,7 +181,6 @@ export default function Login() {
           100% { left: 200%; }
         }
 
-        /* Hides the middle image on small screens so it doesn't break mobile layout */
         @media (max-width: 1100px) {
           .middle-image-layer { display: none !important; }
         }
@@ -199,7 +198,7 @@ export default function Login() {
         position: "relative",
         zIndex: 10,
         width: "100%",
-        maxWidth: "1350px", // INCREASED width to push left column further left
+        maxWidth: "1350px",
         display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
@@ -212,11 +211,11 @@ export default function Login() {
         {/* LEFT COLUMN: Text & Animated Cubes        */}
         {/* ========================================= */}
         <div style={{
-          flex: "0 1 420px", // Locks width
+          flex: "0 1 420px", 
           display: "flex",
           flexDirection: "column",
           gap: "2.5rem",
-          zIndex: 10, // Keeps it above the middle image
+          zIndex: 10, 
           transform: "rotateY(12deg) rotateX(4deg) translateZ(10px)",
           transformStyle: "preserve-3d"
         }}>
@@ -234,19 +233,22 @@ export default function Login() {
             </div>
           </div>
 
-          {/* 2x2 Grid of 3D Cubes */}
+          {/* 2x2 ZIGZAG Grid of 3D Cubes */}
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
             gap: "1.25rem", 
             maxWidth: "420px",
+            alignItems: "start",
             transformStyle: "preserve-3d"
           }}>
             {features.map((f, i) => (
               <div key={i} style={{
                 animation: `float 4s ease-in-out infinite`,
                 animationDelay: `${i * 0.25}s`,
-                perspective: "1000px" 
+                perspective: "1000px",
+                /* ZIGZAG EFFECT: pushes down the 2nd and 4th cubes */
+                marginTop: i % 2 !== 0 ? "3.5rem" : "0" 
               }}>
                 <div 
                   className="glass-cube-shine"
@@ -304,24 +306,21 @@ export default function Login() {
         {/* ========================================= */}
         <div className="middle-image-layer" style={{
           position: "absolute",
-          /* Positioned slightly to the right so the Right Form Panel overlaps its corner */
           left: "54%", 
           top: "50%",
           transform: "translate(-50%, -50%)",
           width: "440px",
           height: "640px",
-          zIndex: 5, /* Behind both left and right panels */
+          zIndex: 5, 
           borderRadius: "28px",
           overflow: "hidden",
           boxShadow: "0 30px 60px rgba(0,0,0,0.7)"
         }}>
-          {/* ↓↓↓ REPLACE THIS SRC WITH YOUR IMAGE URL ↓↓↓ */}
           <img 
-           src="/purple.jpeg" 
-           alt="AI Robot Concept" 
-           style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />  
-          {/* Subtle dark gradient overlay so it blends into your dark theme */}
+            src="/purple.jpeg" 
+            alt="AI Robot Concept" 
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
           <div style={{
             position: "absolute", inset: 0,
             background: "linear-gradient(to right, rgba(12,10,20,0.1), rgba(12,10,20,0.5))"
@@ -350,6 +349,7 @@ export default function Login() {
               transition: "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)"
           }}>
             
+            {/* UPDATED LOGO: Crackin Ai */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2.5rem" }}>
               <div style={{
                 width: "40px", height: "40px", borderRadius: "10px",
@@ -357,9 +357,9 @@ export default function Login() {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontWeight: "800", fontSize: "1.2rem",
                 boxShadow: "0 0 20px rgba(255,63,129,0.4)"
-              }}>P</div>
-              <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700" }}>
-                PlacePrep <span style={{ color: "#ff7aab" }}>AI</span>
+              }}>C</div>
+              <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700", letterSpacing: "0.5px" }}>
+                Crackin <span style={{ color: "#ff7aab" }}>Ai</span>
               </h2>
             </div>
 
