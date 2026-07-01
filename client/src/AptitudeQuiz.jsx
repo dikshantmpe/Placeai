@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { auth } from "./firebase.js"; // Standardized Firebase path
 
-const diffColor = { Easy: "#22c55e", Medium: "#f59e0b", Hard: "#ef4444" };
+const diffColor = { Easy: "#10b981", Medium: "#f59e0b", Hard: "#f43f5e" };
 const categoryIcon = { Quant: "🔢", Logical: "🧩", Verbal: "📝" };
 
 export default function AptitudeQuiz() {
@@ -14,6 +15,7 @@ export default function AptitudeQuiz() {
   const [quizDone, setQuizDone] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
     if (!quizStarted || quizDone) return;
@@ -23,79 +25,66 @@ export default function AptitudeQuiz() {
   }, [timeLeft, quizStarted, quizDone]);
 
   const startQuiz = async () => {
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
+      setIsDemoMode(false);
 
-    console.log("Fetching quiz questions...");
+      const timestamp = Date.now();
+      let token = localStorage.getItem("token");
+      if (auth.currentUser) token = await auth.currentUser.getIdToken();
 
-    const timestamp = Date.now();
+      const res = await axios.get(
+        `https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`,
+        {
+          headers: { 
+            "Cache-Control": "no-cache",
+            Authorization: `Bearer ${token}` 
+          },
+          timeout: 10000 // 10 second timeout
+        }
+      );
 
-    const res = await axios.get(
-      `https://placeai-sqjj.onrender.com/api/quiz?t=${timestamp}`,
-      {
-        headers: {
-          "Cache-Control": "no-cache"
-        },
-        timeout: 30000
-      }
-    );
+      let quizQuestions = [];
+      if (Array.isArray(res.data)) quizQuestions = res.data;
+      else if (Array.isArray(res.data?.questions)) quizQuestions = res.data.questions;
+      else if (Array.isArray(res.data?.data)) quizQuestions = res.data.data;
 
-    console.log("Backend response:", res.data);
+      quizQuestions = quizQuestions.filter(q => q && q.question && Array.isArray(q.options) && q.options.length === 4);
 
-    let quizQuestions = [];
+      if (quizQuestions.length === 0) throw new Error("No valid questions received from server");
 
-    // Case 1: backend returns array directly
-    if (Array.isArray(res.data)) {
-      quizQuestions = res.data;
+      setQuestions(quizQuestions);
+      setCurrent(0);
+      setAnswers([]);
+      setSelected(null);
+      setTimeLeft(600);
+      setQuizStarted(true);
+      setQuizDone(false);
+
+    } catch (err) {
+      console.error("Quiz Error, engaging Demo Mode:", err);
+      setIsDemoMode(true);
+      
+      // Fallback Demo Questions
+      setQuestions([
+        { question: "If the price of an item is increased by 20% and then decreased by 20%, what is the net change?", options: ["No change", "4% decrease", "4% increase", "2% decrease"], answer: 1, category: "Quant", difficulty: "Medium" },
+        { question: "Which word does NOT belong with the others?", options: ["Parsley", "Basil", "Dill", "Mayonnaise"], answer: 3, category: "Logical", difficulty: "Easy" },
+        { question: "A train running at 60 km/hr crosses a pole in 9 seconds. What is the length of the train?", options: ["120 metres", "180 metres", "324 metres", "150 metres"], answer: 3, category: "Quant", difficulty: "Medium" },
+        { question: "Choose the word most similar in meaning to 'ABUNDANT':", options: ["Scarce", "Plentiful", "Minimal", "Rare"], answer: 1, category: "Verbal", difficulty: "Easy" },
+        { question: "If A is the brother of B; B is the sister of C; and C is the father of D, how is D related to A?", options: ["Brother", "Sister", "Nephew", "Cannot be determined"], answer: 3, category: "Logical", difficulty: "Hard" }
+      ]);
+      setCurrent(0);
+      setAnswers([]);
+      setSelected(null);
+      setTimeLeft(300); // 5 mins for 5 demo questions
+      setQuizStarted(true);
+      setQuizDone(false);
+      
+    } finally {
+      setLoading(false);
     }
-
-    // Case 2: backend returns { questions: [...] }
-    else if (Array.isArray(res.data?.questions)) {
-      quizQuestions = res.data.questions;
-    }
-
-    // Case 3: backend returns { data: [...] }
-    else if (Array.isArray(res.data?.data)) {
-      quizQuestions = res.data.data;
-    }
-
-    // Validate questions
-    quizQuestions = quizQuestions.filter(
-      q =>
-        q &&
-        q.question &&
-        Array.isArray(q.options) &&
-        q.options.length === 4
-    );
-
-    console.log("Validated questions:", quizQuestions);
-
-    if (quizQuestions.length === 0) {
-      throw new Error("No valid questions received from server");
-    }
-
-    setQuestions(quizQuestions);
-    setCurrent(0);
-    setAnswers([]);
-    setSelected(null);
-    setTimeLeft(600);
-
-    setQuizStarted(true);
-    setQuizDone(false);
-
-  } catch (err) {
-    console.error("Quiz Error:", err);
-
-    setError(
-      err.response?.data?.error ||
-      err.message ||
-      "Failed to load quiz"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleSelect = (index) => { if (selected !== null) return; setSelected(index); };
 
@@ -118,71 +107,119 @@ export default function AptitudeQuiz() {
   const styles = `
     .quiz-container {
       padding: 1.5rem;
-      max-width: 700px;
+      width: 100%;
+      min-width: 0; /* Prevents flexbox overlapping */
+      box-sizing: border-box;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
     }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(20, 15, 25, 0.7), rgba(10, 8, 15, 0.9));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
     .quiz-cats-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
     }
+
     .quiz-info-row {
       display: flex;
-      gap: 12px;
-      margin-bottom: 1.5rem;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
     }
+
     .quiz-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
-      gap: 8px;
+      margin-bottom: 1.25rem;
+      gap: 12px;
       flex-wrap: wrap;
     }
+
+    .brand-btn {
+      background: linear-gradient(90deg, #7c3aed, #ff3f81);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(255,63,129,0.3);
+      transition: all 0.3s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .brand-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(124,58,237,0.4), 0 8px 30px rgba(255,63,129,0.4);
+    }
+    .brand-btn:disabled {
+      background: rgba(255,255,255,0.05);
+      color: #9b9ba8;
+      box-shadow: none;
+      cursor: not-allowed;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
     @media (max-width: 768px) {
       .quiz-container { padding: 1rem; }
-      .quiz-cats-grid { gap: 8px; }
-      .quiz-info-row { gap: 8px; }
+      .quiz-cats-grid { gap: 12px; }
+      .quiz-info-row { gap: 12px; flex-direction: column; }
     }
   `;
 
-  // Start Screen
+  // --- START SCREEN ---
   if (!quizStarted && !quizDone) return (
     <div className="quiz-container">
       <style>{styles}</style>
 
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 6px" }}>Aptitude Quiz</h2>
-        <p style={{ color: "#555", margin: 0, fontSize: "13px" }}>20 random questions — Quant, Logical & Verbal. 10 minutes timer.</p>
+      <div style={{ marginBottom: "2rem" }}>
+        <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 8px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ width: "24px", height: "3px", background: "linear-gradient(90deg, #10b981, transparent)", borderRadius: "2px" }}></span>
+          Aptitude <span style={{ background: "linear-gradient(90deg, #10b981, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Quiz</span>
+        </h2>
+        <p style={{ color: "#9b9ba8", margin: 0, fontSize: "14px", fontWeight: "500" }}>20 random questions — Quant, Logical & Verbal. 10 minutes timer.</p>
       </div>
-
-      {/* Error Alert */}
-      {error && (
-        <div style={{
-          background: "rgba(239,68,68,0.1)",
-          border: "1px solid rgba(239,68,68,0.3)",
-          borderRadius: "12px",
-          padding: "12px 16px",
-          marginBottom: "1.5rem"
-        }}>
-          <p style={{ color: "#ef4444", margin: 0, fontSize: "13px" }}>⚠️ {error}</p>
-        </div>
-      )}
 
       {/* Category Cards */}
       <div className="quiz-cats-grid">
         {[
-          { cat: "Quant", desc: "Numbers, percentages, ratios", color: "#dc2626" },
-          { cat: "Logical", desc: "Patterns, sequences, puzzles", color: "#7c3aed" },
-          { cat: "Verbal", desc: "Grammar, comprehension", color: "#2563eb" },
+          { cat: "Quant", desc: "Numbers, percentages, ratios", color: "#f43f5e" },
+          { cat: "Logical", desc: "Patterns, sequences, puzzles", color: "#a78bfa" },
+          { cat: "Verbal", desc: "Grammar, comprehension", color: "#60a5fa" },
         ].map(({ cat, desc, color }) => (
-          <div key={cat} style={{
-            background: "#111", border: "1px solid #1f1f1f",
-            borderRadius: "14px", padding: "16px", textAlign: "center"
-          }}>
-            <div style={{ fontSize: "28px", marginBottom: "8px" }}>{categoryIcon[cat]}</div>
-            <p style={{ fontWeight: "700", color, margin: "0 0 4px", fontSize: "14px" }}>{cat}</p>
-            <p style={{ color: "#555", fontSize: "11px", margin: 0, lineHeight: "1.5" }}>{desc}</p>
+          <div key={cat} className="glass-card" style={{
+            padding: "1.5rem", textAlign: "center", transition: "transform 0.2s"
+          }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
+             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+            <div style={{ fontSize: "36px", marginBottom: "12px", filter: `drop-shadow(0 0 10px ${color}80)` }}>{categoryIcon[cat]}</div>
+            <p style={{ fontWeight: "800", color, margin: "0 0 6px", fontSize: "15px", letterSpacing: "0.5px" }}>{cat}</p>
+            <p style={{ color: "#9b9ba8", fontSize: "12px", margin: 0, lineHeight: "1.5", fontWeight: "500" }}>{desc}</p>
           </div>
         ))}
       </div>
@@ -195,104 +232,99 @@ export default function AptitudeQuiz() {
           { icon: "🎯", label: "Instant Results" },
         ].map((item, i) => (
           <div key={i} style={{
-            flex: 1, background: "#111", border: "1px solid #1f1f1f",
-            borderRadius: "10px", padding: "12px", textAlign: "center"
+            flex: 1, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
+            borderRadius: "12px", padding: "16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center"
           }}>
-            <span style={{ fontSize: "20px" }}>{item.icon}</span>
-            <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#888" }}>{item.label}</p>
+            <span style={{ fontSize: "24px", marginBottom: "8px" }}>{item.icon}</span>
+            <p style={{ margin: 0, fontSize: "13px", color: "#e2e8f0", fontWeight: "600" }}>{item.label}</p>
           </div>
         ))}
       </div>
 
-      <button 
-        onClick={startQuiz} 
-        disabled={loading}
-        style={{
-          background: loading ? "#9ca3af" : "#dc2626",
-          color: "white", 
-          padding: "14px 32px", 
-          width: "100%",
-          borderRadius: "10px", 
-          border: "none", 
-          cursor: loading ? "not-allowed" : "pointer", 
-          fontSize: "15px",
-          fontWeight: "600", 
-          boxShadow: "0 4px 20px rgba(220,38,38,0.3)",
-          opacity: loading ? 0.7 : 1
-        }}>
-        {loading ? "⏳ Loading questions..." : "🚀 Start Quiz"}
+      <button onClick={startQuiz} disabled={loading} className="brand-btn">
+        {loading ? (
+          <>
+            <span style={{ animation: "pulse-glow 1.5s infinite" }}>⏳</span> Fetching database...
+          </>
+        ) : "🚀 Start Quiz"}
       </button>
     </div>
   );
 
-  // Results Screen
+  // --- RESULTS SCREEN ---
   if (quizDone) {
     const score = getScore();
     const percent = Math.round((score / answers.length) * 100);
-    const grade = percent >= 80 ? { label: "Excellent! 🎉", color: "#22c55e" }
-      : percent >= 60 ? { label: "Good Job! 👍", color: "#f59e0b" }
-      : { label: "Keep Practicing! 💪", color: "#ef4444" };
+    const grade = percent >= 80 ? { label: "Excellent! 🎉", color: "#10b981", gradient: "linear-gradient(90deg, #10b981, #059669)" }
+      : percent >= 60 ? { label: "Good Job! 👍", color: "#f59e0b", gradient: "linear-gradient(90deg, #f59e0b, #d97706)" }
+      : { label: "Keep Practicing! 💪", color: "#f43f5e", gradient: "linear-gradient(90deg, #f43f5e, #e11d48)" };
 
     return (
       <div className="quiz-container">
         <style>{styles}</style>
-        <h2 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 1.25rem" }}>Quiz Results</h2>
+        <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 1.5rem" }}>Quiz Results</h2>
 
         {/* Score Card */}
-        <div style={{
-          background: "#111", border: `1px solid ${grade.color}33`,
-          borderRadius: "16px", padding: "1.5rem", textAlign: "center", marginBottom: "1.25rem"
+        <div className="glass-card" style={{
+          border: `1px solid ${grade.color}50`, padding: "2.5rem 1.5rem", textAlign: "center", marginBottom: "2rem",
+          boxShadow: `0 0 30px ${grade.color}20`
         }}>
-          <div style={{ fontSize: "52px", fontWeight: "800", color: grade.color, marginBottom: "8px" }}>
-            {score}<span style={{ fontSize: "24px", color: "#333" }}>/{answers.length}</span>
+          <div style={{ fontSize: "64px", fontWeight: "800", color: grade.color, marginBottom: "12px", lineHeight: 1 }}>
+            {score}<span style={{ fontSize: "28px", color: "#6b6b78" }}>/{answers.length}</span>
           </div>
-          <p style={{ color: grade.color, fontWeight: "600", fontSize: "15px", margin: "0 0 14px" }}>
+          <p style={{ color: grade.color, fontWeight: "700", fontSize: "18px", margin: "0 0 20px" }}>
             {grade.label}
           </p>
-          <div style={{ background: "#1f1f1f", borderRadius: "8px", height: "8px", maxWidth: "300px", margin: "0 auto" }}>
-            <div style={{ width: `${percent}%`, background: grade.color, height: "8px", borderRadius: "8px", transition: "width 0.6s" }} />
+          <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", height: "10px", maxWidth: "400px", margin: "0 auto", overflow: "hidden" }}>
+            <div style={{ width: `${percent}%`, background: grade.gradient, height: "100%", borderRadius: "8px", transition: "width 1s cubic-bezier(0.2, 0.8, 0.2, 1)" }} />
           </div>
-          <p style={{ color: "#555", fontSize: "13px", marginTop: "8px" }}>{percent}% correct</p>
+          <p style={{ color: "#9b9ba8", fontSize: "14px", marginTop: "12px", fontWeight: "600" }}>{percent}% Accuracy</p>
         </div>
 
         {/* Answer Review */}
-        <h3 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "1rem", color: "#aaa" }}>Answer Review</h3>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "1.25rem" }}>
+        <h3 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "1.25rem", color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ width: "4px", height: "18px", background: "#7c3aed", borderRadius: "2px" }}></span>
+          Detailed Review
+        </h3>
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "2rem" }}>
           {answers.map((a, i) => {
             const correct = a.selected === a.question.answer;
             return (
-              <div key={i} style={{
-                background: "#111", border: `1px solid ${correct ? "#22c55e33" : "#ef444433"}`,
-                borderRadius: "12px", padding: "14px"
+              <div key={i} className="glass-card" style={{
+                border: `1px solid ${correct ? "rgba(16,185,129,0.3)" : "rgba(244,63,94,0.3)"}`,
+                background: correct ? "rgba(16, 185, 129, 0.05)" : "rgba(244, 63, 94, 0.05)",
+                padding: "1.25rem"
               }}>
-                <p style={{ fontWeight: "500", margin: "0 0 8px", fontSize: "13px", color: "#ddd", lineHeight: "1.5" }}>
-                  <span style={{ color: "#555", marginRight: "8px" }}>Q{i + 1}.</span>
+                <p style={{ fontWeight: "600", margin: "0 0 12px", fontSize: "15px", color: "#e2e8f0", lineHeight: "1.6" }}>
+                  <span style={{ color: "#9b9ba8", marginRight: "8px" }}>Q{i + 1}.</span>
                   {a.question.question}
                 </p>
-                <p style={{ margin: "4px 0", color: "#22c55e", fontSize: "12px" }}>
-                  ✅ {a.question.options[a.question.answer]}
-                </p>
-                {!correct && (
-                  <p style={{ margin: "4px 0", color: "#ef4444", fontSize: "12px" }}>
-                    ❌ Your answer: {a.selected !== null ? a.question.options[a.selected] : "Not answered"}
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <p style={{ margin: 0, color: "#34d399", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ background: "rgba(16,185,129,0.2)", padding: "2px 6px", borderRadius: "4px" }}>✓</span> 
+                    {a.question.options[a.question.answer]}
                   </p>
-                )}
+                  {!correct && (
+                    <p style={{ margin: 0, color: "#fb7185", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ background: "rgba(244,63,94,0.2)", padding: "2px 6px", borderRadius: "4px" }}>✗</span> 
+                      Your answer: {a.selected !== null ? a.question.options[a.selected] : "Not answered"}
+                    </p>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
 
-        <button onClick={() => { setQuizDone(false); setAnswers([]); setError(""); }} style={{
-  background: "#dc2626", color: "white", padding: "12px 32px", width: "100%",
-  borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: "600"
-}}>
-  🔄 Try Again
-</button>
+        <button onClick={() => { setQuizDone(false); setAnswers([]); setError(""); }} className="brand-btn">
+          🔄 Retake Quiz
+        </button>
       </div>
     );
   }
 
-  // Quiz Screen
+  // --- QUIZ ACTIVE SCREEN ---
   const q = questions[current];
   const progress = ((current + 1) / questions.length) * 100;
 
@@ -300,63 +332,80 @@ export default function AptitudeQuiz() {
     <div className="quiz-container">
       <style>{styles}</style>
 
+      {/* Warning Banner */}
+      {isDemoMode && (
+        <div style={{
+          background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.4)",
+          color: "#fcd34d", padding: "12px 16px", borderRadius: "12px",
+          display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "600",
+          marginBottom: "1.5rem"
+        }}>
+          <span>⚠️</span> 
+          <span>Connected to Offline Demo Quiz.</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="quiz-header">
-        <span style={{ fontSize: "13px", color: "#555" }}>
-          Question <span style={{ color: "white", fontWeight: "600" }}>{current + 1}</span> of {questions.length}
+        <span style={{ fontSize: "14px", color: "#9b9ba8", fontWeight: "500" }}>
+          Question <span style={{ color: "white", fontWeight: "700", fontSize: "16px" }}>{current + 1}</span> of {questions.length}
         </span>
+        
         <span style={{
-          background: timeLeft < 60 ? "rgba(239,68,68,0.15)" : "rgba(220,38,38,0.1)",
-          color: timeLeft < 60 ? "#ef4444" : "#dc2626",
-          padding: "5px 12px", borderRadius: "8px", fontWeight: "700", fontSize: "14px",
-          border: `1px solid ${timeLeft < 60 ? "#ef444433" : "#dc262633"}`
+          background: timeLeft < 60 ? "rgba(244,63,94,0.15)" : "rgba(255,255,255,0.05)",
+          color: timeLeft < 60 ? "#f43f5e" : "#e2e8f0",
+          padding: "6px 14px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
+          border: `1px solid ${timeLeft < 60 ? "rgba(244,63,94,0.4)" : "rgba(255,255,255,0.1)"}`,
+          boxShadow: timeLeft < 60 ? "0 0 15px rgba(244,63,94,0.3)" : "none",
+          display: "flex", alignItems: "center", gap: "6px", letterSpacing: "1px"
         }}>
           ⏱ {formatTime()}
         </span>
+        
         <span style={{
-          fontSize: "11px", background: "#1f1f1f", padding: "5px 10px",
-          borderRadius: "6px", color: "#888", border: "1px solid #2a2a2a"
+          fontSize: "12px", background: "rgba(0,0,0,0.3)", padding: "6px 12px",
+          borderRadius: "8px", color: "#9b9ba8", border: "1px solid rgba(255,255,255,0.08)",
+          fontWeight: "600", display: "flex", alignItems: "center", gap: "6px"
         }}>
-          {categoryIcon[q.category]} {q.category} · <span style={{ color: diffColor[q.difficulty] }}>{q.difficulty}</span>
+          {categoryIcon[q.category]} {q.category} <span style={{ margin: "0 4px", color: "#444" }}>|</span> <span style={{ color: diffColor[q.difficulty] }}>{q.difficulty}</span>
         </span>
       </div>
 
       {/* Progress Bar */}
-      <div style={{ background: "#1f1f1f", borderRadius: "8px", height: "4px", marginBottom: "1.25rem" }}>
-        <div style={{ width: `${progress}%`, background: "#dc2626", height: "4px", borderRadius: "8px", transition: "width 0.3s" }} />
+      <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", height: "6px", marginBottom: "2rem", overflow: "hidden" }}>
+        <div style={{ width: `${progress}%`, background: "linear-gradient(90deg, #7c3aed, #ff3f81)", height: "100%", borderRadius: "8px", transition: "width 0.4s ease-out", boxShadow: "0 0 10px rgba(255,63,129,0.5)" }} />
       </div>
 
-      {/* Question */}
-      <div style={{
-        background: "#111", border: "1px solid #1f1f1f",
-        borderRadius: "14px", padding: "1.25rem", marginBottom: "1.25rem"
-      }}>
-        <p style={{ fontSize: "15px", fontWeight: "500", margin: 0, lineHeight: "1.7", color: "#fff" }}>{q.question}</p>
+      {/* Question Card */}
+      <div className="glass-card" style={{ padding: "2rem", marginBottom: "1.5rem" }}>
+        <p style={{ fontSize: "18px", fontWeight: "600", margin: 0, lineHeight: "1.6", color: "#fff" }}>{q.question}</p>
       </div>
 
       {/* Options */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "1.25rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "2rem" }}>
         {q.options.map((opt, i) => {
           const isCorrect = selected !== null && i === q.answer;
           const isWrong = selected === i && i !== q.answer;
+          
           return (
-            <div key={i} onClick={() => handleSelect(i)} style={{
-              padding: "12px 16px", borderRadius: "12px", cursor: selected !== null ? "default" : "pointer",
-              border: `2px solid ${isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#1f1f1f"}`,
-              background: isCorrect ? "rgba(34,197,94,0.1)" : isWrong ? "rgba(239,68,68,0.1)" : "#111",
-              transition: "all 0.2s", display: "flex", alignItems: "center", gap: "10px"
+            <div key={i} onClick={() => handleSelect(i)} className="glass-card" style={{
+              padding: "16px 20px", borderRadius: "14px", cursor: selected !== null ? "default" : "pointer",
+              border: `1px solid ${isCorrect ? "#10b981" : isWrong ? "#f43f5e" : "rgba(255,255,255,0.08)"}`,
+              background: isCorrect ? "rgba(16,185,129,0.1)" : isWrong ? "rgba(244,63,94,0.1)" : "rgba(20,15,25,0.7)",
+              display: "flex", alignItems: "center", gap: "16px",
+              boxShadow: isCorrect ? "0 0 15px rgba(16,185,129,0.2)" : isWrong ? "0 0 15px rgba(244,63,94,0.2)" : "none"
             }}>
               <span style={{
-                width: "26px", height: "26px", borderRadius: "8px", flexShrink: 0,
+                width: "32px", height: "32px", borderRadius: "10px", flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "11px", fontWeight: "700",
-                background: isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#1f1f1f",
-                color: isCorrect || isWrong ? "white" : "#555",
-                border: `1px solid ${isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#2a2a2a"}`
+                fontSize: "13px", fontWeight: "800",
+                background: isCorrect ? "#10b981" : isWrong ? "#f43f5e" : "rgba(255,255,255,0.05)",
+                color: isCorrect || isWrong ? "white" : "#9b9ba8",
+                border: `1px solid ${isCorrect ? "#10b981" : isWrong ? "#f43f5e" : "rgba(255,255,255,0.1)"}`
               }}>
                 {["A", "B", "C", "D"][i]}
               </span>
-              <span style={{ fontSize: "13px", color: isCorrect ? "#22c55e" : isWrong ? "#ef4444" : "#ccc", lineHeight: "1.5" }}>
+              <span style={{ fontSize: "15px", fontWeight: "500", color: isCorrect ? "#34d399" : isWrong ? "#fb7185" : "#e2e8f0", lineHeight: "1.5" }}>
                 {opt}
               </span>
             </div>
@@ -365,12 +414,8 @@ export default function AptitudeQuiz() {
       </div>
 
       {selected !== null && (
-        <button onClick={handleNext} style={{
-          background: "#dc2626", color: "white", padding: "12px 32px", width: "100%",
-          borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px",
-          fontWeight: "600", boxShadow: "0 4px 20px rgba(220,38,38,0.3)"
-        }}>
-          {current + 1 === questions.length ? "🏁 Finish Quiz" : "Next Question →"}
+        <button onClick={handleNext} className="brand-btn" style={{ padding: "18px" }}>
+          {current + 1 === questions.length ? "🏁 Submit Final Answer" : "Next Question →"}
         </button>
       )}
     </div>
