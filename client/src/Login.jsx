@@ -20,7 +20,6 @@ function loadScript(src) {
 }
 
 export default function Login({ setUser }) {
-  console.count("Login rendered");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -35,31 +34,41 @@ export default function Login({ setUser }) {
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
+  const authInitialized = useRef(false);
 
+  // Clear autofill on mount
   useEffect(() => {
     setMounted(true);
-    // Clear autofilled values on mount
-    setEmail("");
-    setPassword("");
+    
+    // Prevent autofill by resetting values after a short delay
+    const timer = setTimeout(() => {
+      setEmail("");
+      setPassword("");
+      // Force clear input values in DOM
+      const emailInput = document.querySelector('input[type="email"]');
+      const passwordInput = document.querySelector('input[type="password"]');
+      if (emailInput) emailInput.value = "";
+      if (passwordInput) passwordInput.value = "";
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
+  // Vanta initialization - only once
   useEffect(() => {
     let cancelled = false;
 
     async function initVanta() {
       try {
-        // Suppress CORS console warnings globally (permanent for entire session)
         const originalWarn = console.warn;
         const originalError = console.error;
         
-        // Override console.warn globally
         console.warn = function(...args) {
           const msg = (args[0]?.toString?.() || args.join(" "));
           if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
           originalWarn.apply(console, args);
         };
         
-        // Override console.error globally  
         console.error = function(...args) {
           const msg = (args[0]?.toString?.() || args.join(" "));
           if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
@@ -68,8 +77,6 @@ export default function Login({ setUser }) {
 
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
-        
-        // Keep suppression active - don't restore!
 
         if (cancelled || !vantaRef.current || vantaEffect.current) return;
 
@@ -107,8 +114,11 @@ export default function Login({ setUser }) {
     };
   }, []);
 
-  // Handle Google redirect result on mount
+  // Handle Google redirect - only once
   useEffect(() => {
+    if (authInitialized.current) return;
+    authInitialized.current = true;
+
     const handleRedirectResult = async () => {
       try {
         const result = await getRedirectResult(auth);
@@ -124,6 +134,20 @@ export default function Login({ setUser }) {
     };
 
     handleRedirectResult();
+  }, [setUser, navigate]);
+
+  // Monitor auth state - single subscription
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("✅ User authenticated:", user.email);
+        setUser(user);
+        setIsLoading(false);
+        navigate("/dashboard");
+      }
+    });
+
+    return () => unsubscribe();
   }, [setUser, navigate]);
 
   const handleLogin = async (e) => {
@@ -156,7 +180,6 @@ export default function Login({ setUser }) {
     setIsLoading(true);
     
     try {
-      // Verify Firebase is initialized
       if (!auth) {
         setError("Authentication service not initialized. Please refresh the page.");
         setIsLoading(false);
@@ -167,28 +190,13 @@ export default function Login({ setUser }) {
       provider.addScope('profile');
       provider.addScope('email');
       
-      // Use redirect instead of popup (avoids CORS issues)
       await signInWithRedirect(auth, provider);
-      // Redirect will happen, getRedirectResult will be called on return
     } catch (err) {
       console.error("Google login error:", err);
       setError("Failed to initiate Google sign-in. Please try again.");
       setIsLoading(false);
     }
   };
-
-  // Monitor auth state changes (fallback for any auth changes)
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("✅ User authenticated:", user.email);
-        setUser(user);
-        setIsLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [setUser]);
 
   const features = [
     {
@@ -486,7 +494,7 @@ export default function Login({ setUser }) {
               Sign in to continue your placement journey.
             </p>
 
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} autoComplete="off">
               
               {/* ERROR MESSAGE DISPLAY */}
               {error && (
@@ -518,7 +526,8 @@ export default function Login({ setUser }) {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Email address"
-                  autoComplete="off"
+                  autoComplete="new-email"
+                  spellCheck="false"
                   style={{
                     flex: 1, background: "transparent", border: "none", outline: "none",
                     color: "white", fontSize: "1rem", padding: "16px 0"
@@ -541,7 +550,8 @@ export default function Login({ setUser }) {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Password"
-                  autoComplete="off"
+                  autoComplete="new-password"
+                  spellCheck="false"
                   style={{
                     flex: 1, background: "transparent", border: "none", outline: "none",
                     color: "white", fontSize: "1rem", padding: "16px 0"
