@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 // --- FIREBASE IMPORTS ---
 import { auth } from "./firebase.js"; 
-import { signInWithEmailAndPassword, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -38,6 +38,9 @@ export default function Login({ setUser }) {
 
   useEffect(() => {
     setMounted(true);
+    // Clear autofilled values on mount
+    setEmail("");
+    setPassword("");
   }, []);
 
   useEffect(() => {
@@ -104,6 +107,25 @@ export default function Login({ setUser }) {
     };
   }, []);
 
+  // Handle Google redirect result on mount
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("✅ Google redirect successful:", result.user.email);
+          setUser(result.user);
+          navigate("/dashboard");
+        }
+      } catch (err) {
+        console.error("Google redirect error:", err);
+        setError("Google sign-in failed. Please try again.");
+      }
+    };
+
+    handleRedirectResult();
+  }, [setUser, navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -111,11 +133,8 @@ export default function Login({ setUser }) {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
       setUser(userCredential.user);
-
       navigate("/dashboard");
-
     } catch (err) {
       console.log(err.code);
       console.log(err.message);
@@ -150,7 +169,7 @@ export default function Login({ setUser }) {
       
       // Use redirect instead of popup (avoids CORS issues)
       await signInWithRedirect(auth, provider);
-      // After redirect back, getRedirectResult will be called in useEffect below
+      // Redirect will happen, getRedirectResult will be called on return
     } catch (err) {
       console.error("Google login error:", err);
       setError("Failed to initiate Google sign-in. Please try again.");
@@ -158,18 +177,18 @@ export default function Login({ setUser }) {
     }
   };
 
-  // Monitor auth state changes (works better for redirects)
+  // Monitor auth state changes (fallback for any auth changes)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-     if (user) {
-     console.log("✅ User authenticated:", user.email);
-    setUser(user);
-    setIsLoading(false);
-}
+      if (user) {
+        console.log("✅ User authenticated:", user.email);
+        setUser(user);
+        setIsLoading(false);
+      }
     });
 
     return () => unsubscribe();
-    }, []);
+  }, [setUser]);
 
   const features = [
     {
@@ -499,6 +518,7 @@ export default function Login({ setUser }) {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Email address"
+                  autoComplete="off"
                   style={{
                     flex: 1, background: "transparent", border: "none", outline: "none",
                     color: "white", fontSize: "1rem", padding: "16px 0"
@@ -521,6 +541,7 @@ export default function Login({ setUser }) {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Password"
+                  autoComplete="off"
                   style={{
                     flex: 1, background: "transparent", border: "none", outline: "none",
                     color: "white", fontSize: "1rem", padding: "16px 0"
