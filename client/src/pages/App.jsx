@@ -34,10 +34,10 @@ fetch('https://placeai-sqjj.onrender.com/api/ping').catch(() => {});
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
+  console.log("App user:", user);
   return (
     <BrowserRouter>
-      {!user ? (
+      {!user ? 
         <Routes>
           <Route path="/" element={<Login setUser={setUser} />} />
           <Route path="/signup" element={<Signup setUser={setUser} />} />
