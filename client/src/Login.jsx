@@ -125,20 +125,24 @@ export default function Login() {
   };
 
   const handleGoogleLogin = async () => {
-  setError("");
-  setIsLoading(true);
-  
-  try {
+    setError("");
+    setIsLoading(true);
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    // Use redirect instead of popup
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${YOUR_CLIENT_ID}&redirect_uri=${window.location.origin}/auth/google/callback&response_type=code&scope=email profile`;
-  } catch (err) {
-    console.error(err);
-    setError("Failed to sign in with Google.");
-    setIsLoading(false);
-  }
-};
+    
+    // Suppress CORS warnings during popup
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    console.warn = (...args) => {
+      const msg = args[0]?.toString?.() || "";
+      if (msg.includes("Cross-Origin") || msg.includes("window")) return;
+      originalWarn.apply(console, args);
+    };
+    console.error = (...args) => {
+      const msg = args[0]?.toString?.() || "";
+      if (msg.includes("Cross-Origin") || msg.includes("window")) return;
+      originalError.apply(console, args);
+    };
     
     try {
       await signInWithPopup(auth, provider);
