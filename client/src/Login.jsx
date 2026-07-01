@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 // --- FIREBASE IMPORTS ---
 import { auth } from "./firebase.js"; 
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from "firebase/auth";
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -44,27 +44,28 @@ export default function Login() {
 
     async function initVanta() {
       try {
-        // Suppress CORS console warnings globally (from Firebase auth & Vanta)
+        // Suppress CORS console warnings globally (permanent for entire session)
         const originalWarn = console.warn;
         const originalError = console.error;
         
-        console.warn = (...args) => {
-          const msg = args[0]?.toString?.() || "";
-          if (msg.includes("Cross-Origin") || msg.includes("window.close")) return;
+        // Override console.warn globally
+        console.warn = function(...args) {
+          const msg = (args[0]?.toString?.() || args.join(" "));
+          if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
           originalWarn.apply(console, args);
         };
         
-        console.error = (...args) => {
-          const msg = args[0]?.toString?.() || "";
-          if (msg.includes("Cross-Origin") || msg.includes("window.close")) return;
+        // Override console.error globally  
+        console.error = function(...args) {
+          const msg = (args[0]?.toString?.() || args.join(" "));
+          if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
           originalError.apply(console, args);
         };
 
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
         
-        console.warn = originalWarn;
-        console.error = originalError;
+        // Keep suppression active - don't restore!
 
         if (cancelled || !vantaRef.current || vantaEffect.current) return;
 
@@ -129,39 +130,33 @@ export default function Login() {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
     
-    // Suppress CORS warnings during popup
-    const originalWarn = console.warn;
-    const originalError = console.error;
-    
-    console.warn = (...args) => {
-      const msg = args[0]?.toString?.() || "";
-      if (msg.includes("Cross-Origin") || msg.includes("window")) return;
-      originalWarn.apply(console, args);
-    };
-    console.error = (...args) => {
-      const msg = args[0]?.toString?.() || "";
-      if (msg.includes("Cross-Origin") || msg.includes("window")) return;
-      originalError.apply(console, args);
-    };
-    
     try {
-      await signInWithPopup(auth, provider);
-      console.warn = originalWarn;
-      console.error = originalError;
-      navigate("/dashboard");
+      // Use redirect instead of popup (avoids CORS issues)
+      await signInWithRedirect(auth, provider);
+      // After redirect back, getRedirectResult will be called in useEffect below
     } catch (err) {
-      console.warn = originalWarn;
-      console.error = originalError;
-      
-      if (err.code !== "auth/popup-closed-by-user") {
-        setError("Failed to sign in with Google. Please try again.");
-      }
-    } finally {
-      console.warn = originalWarn;
-      console.error = originalError;
+      console.error(err);
+      setError("Failed to sign in with Google. Please try again.");
       setIsLoading(false);
     }
   };
+
+  // Handle redirect result on component mount
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          navigate("/dashboard");
+        }
+      })
+      .catch((error) => {
+        if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+          console.error(error);
+          setError("Failed to sign in with Google. Please try again.");
+        }
+        setIsLoading(false);
+      });
+  }, [navigate]);
 
   const features = [
     {
