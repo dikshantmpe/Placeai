@@ -221,6 +221,20 @@ export default function Login() {
         }}>
           
           <div style={{ transform: "translateZ(30px)" }}>
+            {/* Crackin Ai Logo MOVED HERE */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
+              <div style={{
+                width: "40px", height: "40px", borderRadius: "10px",
+                background: "linear-gradient(135deg, #7c3aed, #ff3f81)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: "800", fontSize: "1.2rem",
+                boxShadow: "0 0 20px rgba(255,63,129,0.4)"
+              }}>C</div>
+              <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700", letterSpacing: "0.5px" }}>
+                Crackin <span style={{ color: "#ff7aab" }}>Ai</span>
+              </h2>
+            </div>
+
             <h1 style={{ fontSize: "3.5rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 0.5rem 0" }}>
               Prepare <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Smarter.</span>
             </h1>
@@ -348,20 +362,6 @@ export default function Login() {
                 : "rotateY(-22deg) rotateX(4deg) translateZ(0px) scale(0.95)", 
               transition: "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)"
           }}>
-            
-            {/* UPDATED LOGO: Crackin Ai */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2.5rem" }}>
-              <div style={{
-                width: "40px", height: "40px", borderRadius: "10px",
-                background: "linear-gradient(135deg, #7c3aed, #ff3f81)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: "800", fontSize: "1.2rem",
-                boxShadow: "0 0 20px rgba(255,63,129,0.4)"
-              }}>C</div>
-              <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700", letterSpacing: "0.5px" }}>
-                Crackin <span style={{ color: "#ff7aab" }}>Ai</span>
-              </h2>
-            </div>
 
             <h1 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 0.5rem 0", lineHeight: 1.15 }}>
               Welcome Back
