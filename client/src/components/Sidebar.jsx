@@ -19,13 +19,10 @@ export default function Sidebar() {
     }
   };
 
-  // UPDATED: Helper function to check if a link is active, even on nested routes
   const isActive = (path) => {
-    // Exact match for Home to prevent it from highlighting on every page
     if (path === "/") {
       return location.pathname === "/";
     }
-    // Matches the exact path OR any sub-route (e.g., /challenge or /challenge/home)
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
@@ -37,9 +34,12 @@ export default function Sidebar() {
       height: "100vh",
       position: "sticky",
       top: 0,
-      background: "linear-gradient(180deg, rgba(18, 15, 26, 0.95), rgba(12, 10, 20, 0.95))",
-      backdropFilter: "blur(20px)",
-      borderRight: "1px solid rgba(255,255,255,0.05)",
+      /* Enhanced Deep Glass Background */
+      background: "linear-gradient(145deg, rgba(25, 22, 36, 0.6), rgba(12, 10, 20, 0.8))",
+      backdropFilter: "blur(24px) saturate(150%)",
+      WebkitBackdropFilter: "blur(24px) saturate(150%)",
+      borderRight: "1px solid rgba(255, 255, 255, 0.08)",
+      boxShadow: "5px 0 30px rgba(0, 0, 0, 0.4)",
       display: "flex",
       flexDirection: "column",
       padding: "1.5rem 1rem",
@@ -49,10 +49,10 @@ export default function Sidebar() {
     }}>
       
       <style>{`
-        /* Glassmorphic hover effects for the navigation links */
+        /* Glassmorphic Nav Links */
         .sidebar-link {
           padding: 12px 16px;
-          border-radius: 12px;
+          border-radius: 14px;
           color: #9b9ba8;
           text-decoration: none;
           display: flex;
@@ -60,25 +60,29 @@ export default function Sidebar() {
           gap: 12px;
           font-weight: 600;
           font-size: 0.95rem;
-          transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
           border: 1px solid transparent;
+          margin-bottom: 2px;
         }
         
-        .sidebar-link:hover {
-          background: rgba(255,255,255,0.03);
+        /* Floating Glass Hover */
+        .sidebar-link:hover:not(.active) {
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           color: #ffffff;
-          transform: translateX(4px);
+          transform: translateX(6px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         
-        /* The vibrant style for the currently selected page */
+        /* Active State matching Login Inputs */
         .sidebar-link.active {
-          background: linear-gradient(90deg, rgba(124,58,237,0.1), rgba(255,63,129,0.05));
-          border: 1px solid rgba(255,63,129,0.2);
-          color: #ff7aab;
-          box-shadow: inset 3px 0 0 #ff3f81;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 63, 129, 0.4);
+          color: #ffffff;
+          box-shadow: 0 0 20px rgba(255, 63, 129, 0.2), inset 0 0 10px rgba(255, 63, 129, 0.1);
         }
 
-        /* Custom scrollbar for the sidebar */
+        /* Custom scrollbar */
         aside::-webkit-scrollbar {
           width: 4px;
         }
@@ -104,8 +108,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", flex: 1 }}>
-        {/* ADDED: Home Button */}
+      <nav style={{ display: "flex", flexDirection: "column", gap: "0.25rem", flex: 1 }}>
         <Link to="/" className={`sidebar-link ${isActive("/") ? "active" : ""}`}>
           <span style={{ fontSize: "1.1rem" }}>🏠</span> Home
         </Link>
@@ -132,12 +135,13 @@ export default function Sidebar() {
         </Link>
       </nav>
 
-      {/* Pro Upgrade Box */}
+      {/* Pro Upgrade Box - Glassmorphic Update */}
       <div style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))", 
+        background: "linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01))", 
+        backdropFilter: "blur(12px)",
         padding: "1.25rem", borderRadius: "16px",
-        border: "1px solid rgba(255,255,255,0.08)", marginBottom: "1.25rem",
-        boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)"
+        border: "1px solid rgba(255, 255, 255, 0.12)", marginBottom: "1.25rem",
+        boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5), inset 1px 1px 3px rgba(255, 255, 255, 0.1)"
       }}>
         <div style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "4px", color: "#e2e8f0", display: "flex", alignItems: "center", gap: "6px" }}>
           👑 Go Pro
@@ -162,8 +166,8 @@ export default function Sidebar() {
       <button 
         onClick={handleLogout} 
         style={{
-          width: "100%", padding: "14px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)",
-          background: "rgba(255,255,255,0.02)", color: "#9b9ba8", fontWeight: 600, cursor: "pointer",
+          width: "100%", padding: "14px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(255,255,255,0.03)", color: "#9b9ba8", fontWeight: 600, cursor: "pointer",
           display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", transition: "all 0.2s ease"
         }}
         onMouseEnter={(e) => {
@@ -173,9 +177,9 @@ export default function Sidebar() {
           e.target.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.15)";
         }}
         onMouseLeave={(e) => {
-          e.target.style.background = "rgba(255,255,255,0.02)";
+          e.target.style.background = "rgba(255,255,255,0.03)";
           e.target.style.color = "#9b9ba8";
-          e.target.style.borderColor = "rgba(255,255,255,0.1)";
+          e.target.style.borderColor = "rgba(255,255,255,0.08)";
           e.target.style.boxShadow = "none";
         }}
       >
