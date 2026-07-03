@@ -36,6 +36,7 @@ export default function Login({ setUser }) {
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
   const authCheckStarted = useRef(false);
+  const authStateChecked = useRef(false);
 
   // Clear autofill on mount
   useEffect(() => {
@@ -53,64 +54,76 @@ export default function Login({ setUser }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Check auth status - only once
+  // Check auth status IMMEDIATELY
   useEffect(() => {
     if (authCheckStarted.current) return;
     authCheckStarted.current = true;
 
+    console.log("🔍 Auth check started...");
+
     const checkAuth = async () => {
       try {
-        console.log("🔍 Checking for Google redirect result...");
-        // First check if coming back from Google redirect
+        console.log("🔴 Checking for Google redirect result...");
+        
+        // Check if we're coming back from a Google redirect
         const result = await getRedirectResult(auth);
         
         if (result && result.user) {
-          console.log("✅ Google redirect successful:", result.user.email);
+          console.log("✅ Google redirect result found:", result.user.email);
           setUser(result.user);
           navigate("/dashboard", { replace: true });
           return;
         }
         
-        console.log("⏳ No redirect result, checking auth state...");
+        console.log("⏳ No redirect result found");
         
-        // If no redirect result, set up listener for auth state changes
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          console.log("🔐 Auth state changed:", user?.email || "No user");
-          
-          if (user) {
-            console.log("✅ User authenticated:", user.email);
-            setUser(user);
-            setIsCheckingAuth(false);
-            navigate("/dashboard", { replace: true });
-            unsubscribe(); // Stop listening once user is found
-          } else {
-            // No user found, show login form
-            console.log("📝 No auth, showing login form");
-            setIsCheckingAuth(false);
-            unsubscribe(); // Stop listening
-          }
-        });
-
-        // Set timeout to stop loading after 5 seconds max
-        const timeout = setTimeout(() => {
-          console.log("⏱️ Auth check timeout, showing login form");
-          setIsCheckingAuth(false);
-          unsubscribe();
-        }, 5000);
-
-        return () => {
-          clearTimeout(timeout);
-          unsubscribe();
-        };
       } catch (err) {
-        console.error("❌ Auth check error:", err);
-        setError("Authentication check failed. Please refresh and try again.");
-        setIsCheckingAuth(false);
+        console.error("❌ Redirect result error:", err);
       }
+
+      // Set up persistent auth listener
+      // This will catch:
+      // 1. Already logged in users
+      // 2. Users who just completed Google auth
+      // 3. Auth state changes
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        console.log("🔐 Auth state changed:", user?.email || "No user");
+        
+        if (user) {
+          console.log("✅ User authenticated:", user.email);
+          setUser(user);
+          // Wait a moment for state to settle before navigating
+          await new Promise(resolve => setTimeout(resolve, 500));
+          navigate("/dashboard", { replace: true });
+        } else {
+          console.log("📝 No user authenticated, showing login form");
+          // Only show login form if user is definitely not authenticated
+          if (authStateChecked.current) {
+            setIsCheckingAuth(false);
+          }
+          authStateChecked.current = true;
+        }
+      });
+
+      // Important: Don't unsubscribe immediately
+      // Keep listening in case auth state updates
+      // This is necessary for Google OAuth redirect flow
     };
 
     checkAuth();
   }, [setUser, navigate]);
+
+  // Fallback timeout - only if auth check truly stalls
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (isCheckingAuth && authStateChecked.current) {
+        console.log("⏱️ Fallback timeout - showing login form");
+        setIsCheckingAuth(false);
+      }
+    }, 3000); // Reduced from 5s to 3s for better UX
+
+    return () => clearTimeout(fallbackTimer);
+  }, [isCheckingAuth]);
 
   // Vanta initialization
   useEffect(() => {
@@ -200,6 +213,7 @@ export default function Login({ setUser }) {
   const handleGoogleLogin = async () => {
     setError("");
     setIsLoading(true);
+    console.log("🔴 Google login button clicked, initiating redirect...");
     
     try {
       if (!auth) {
@@ -212,9 +226,8 @@ export default function Login({ setUser }) {
       provider.addScope('profile');
       provider.addScope('email');
       
-      console.log("🔴 Initiating Google login...");
       await signInWithRedirect(auth, provider);
-      // This will redirect and page will unload
+      // Page will redirect to Google
     } catch (err) {
       console.error("❌ Google login error:", err);
       setError("Failed to initiate Google sign-in. Please try again.");
@@ -222,7 +235,7 @@ export default function Login({ setUser }) {
     }
   };
 
-  // Show loading screen while checking for redirect result
+  // Show loading screen while checking auth
   if (isCheckingAuth) {
     return (
       <div style={{
