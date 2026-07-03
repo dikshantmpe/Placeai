@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { auth } from "../firebase.js"; 
 import { signOut } from "firebase/auth"; 
 
-// --- Custom Component for Aggressive 3D Glass Effects ---
+// --- Custom Component for Inverted 3D Glass Effects ---
 const SidebarLink = ({ to, icon, label, isActive }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -22,18 +22,18 @@ const SidebarLink = ({ to, icon, label, isActive }) => {
         fontWeight: "600",
         fontSize: "0.95rem",
         marginBottom: "6px",
-        transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)", /* Bouncy transition */
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)", 
         transformStyle: "preserve-3d",
         
         // Colors
         color: isActive ? "#ffffff" : (isHovered ? "#ffffff" : "#9b9ba8"),
         
-        // --- NEW: Visible resting tiles instead of invisible backgrounds ---
+        // Backgrounds
         background: isActive 
-          ? "rgba(255, 63, 129, 0.1)" // Pink tint for active
+          ? "rgba(255, 63, 129, 0.1)" 
           : isHovered 
             ? "rgba(255, 255, 255, 0.08)" 
-            : "rgba(255, 255, 255, 0.02)", // Faint glass tile when resting
+            : "rgba(255, 255, 255, 0.02)", 
             
         // Glass Borders
         border: isActive 
@@ -42,29 +42,32 @@ const SidebarLink = ({ to, icon, label, isActive }) => {
             ? "1px solid rgba(255, 255, 255, 0.2)" 
             : "1px solid rgba(255, 255, 255, 0.03)",
             
-        // Glows and Shadows
+        // Shadows: Popped out by default, glowing when flat
         boxShadow: isActive 
           ? "0 0 20px rgba(255, 63, 129, 0.3), inset 0 0 10px rgba(255, 63, 129, 0.15)" 
           : isHovered 
-            ? "10px 15px 25px -5px rgba(0,0,0,0.5), inset 1px 1px 4px rgba(255,255,255,0.2)" 
-            : "none",
+            ? "0 0 15px rgba(255,255,255,0.1), inset 1px 1px 4px rgba(255,255,255,0.2)" 
+            : "12px 18px 25px -5px rgba(0,0,0,0.6), inset 1px 1px 4px rgba(255,255,255,0.1)",
             
-        // --- NEW: Exaggerated 3D Tilt Transform ---
-        transform: isHovered && !isActive
-          ? "perspective(1000px) rotateY(12deg) rotateX(4deg) translateZ(15px) scale(1.05)"
-          : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
+        // --- NEW: INVERTED & AMPLIFIED 3D Transform ---
+        transform: isActive
+          ? "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)" // Flat when active
+          : isHovered 
+            ? "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1.02)" // Flattens out on hover
+            : "perspective(1000px) rotateY(22deg) rotateX(8deg) translateZ(20px) scale(0.92)" // Highly tilted by default
       }}
     >
       <span style={{ 
         fontSize: "1.15rem", 
-        transform: isHovered && !isActive ? "translateZ(12px)" : "none", 
-        transition: "transform 0.3s" 
+        // Elements pop out ONLY when tilted (not hovered, not active)
+        transform: (!isHovered && !isActive) ? "translateZ(18px)" : "none", 
+        transition: "transform 0.4s" 
       }}>
         {icon}
       </span>
       <span style={{ 
-        transform: isHovered && !isActive ? "translateZ(6px)" : "none", 
-        transition: "transform 0.3s",
+        transform: (!isHovered && !isActive) ? "translateZ(10px)" : "none", 
+        transition: "transform 0.4s",
         letterSpacing: "0.3px"
       }}>
         {label}
@@ -103,7 +106,6 @@ export default function Sidebar() {
       height: "100vh",
       position: "sticky",
       top: 0,
-      // --- NEW: Highly transparent base to let the grid show through ---
       background: "linear-gradient(to right, rgba(15, 12, 25, 0.4), rgba(15, 12, 25, 0.1))",
       backdropFilter: "blur(30px) saturate(200%)",
       WebkitBackdropFilter: "blur(30px) saturate(200%)",
@@ -115,7 +117,7 @@ export default function Sidebar() {
       color: "white",
       overflowY: "auto",
       zIndex: 50,
-      perspective: "1500px" // Required for the 3D child elements
+      perspective: "1500px" 
     }}>
       
       <style>{`
@@ -152,22 +154,34 @@ export default function Sidebar() {
       </nav>
 
       {/* Pro Upgrade Box */}
-      <div style={{
+      <div 
+        onMouseEnter={() => setIsProHovered(true)}
+        onMouseLeave={() => setIsProHovered(false)}
+        style={{
         background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))", 
         backdropFilter: "blur(12px)",
         padding: "1.25rem", borderRadius: "16px",
         border: "1px solid rgba(255, 255, 255, 0.15)", marginBottom: "1.25rem",
-        boxShadow: "0 15px 35px -10px rgba(0,0,0,0.6), inset 1px 1px 4px rgba(255, 255, 255, 0.2)"
+        boxShadow: isProHovered
+          ? "0 4px 15px rgba(0,0,0,0.3), inset 1px 1px 4px rgba(255, 255, 255, 0.2)"
+          : "15px 20px 35px -10px rgba(0,0,0,0.8), inset 1px 1px 4px rgba(255, 255, 255, 0.2)",
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        transformStyle: "preserve-3d",
+        transform: isProHovered
+          ? "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1.02)"
+          : "perspective(1000px) rotateY(18deg) rotateX(6deg) translateZ(15px) scale(0.92)"
       }}>
-        <div style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "4px", color: "#e2e8f0", display: "flex", alignItems: "center", gap: "6px" }}>
+        <div style={{ fontSize: "0.95rem", fontWeight: 800, marginBottom: "4px", color: "#e2e8f0", display: "flex", alignItems: "center", gap: "6px",
+           transform: isProHovered ? "none" : "translateZ(12px)", transition: "transform 0.4s"
+        }}>
           👑 Go Pro
         </div>
-        <div style={{ fontSize: "0.8rem", color: "#9b9ba8", marginBottom: "1rem", lineHeight: "1.4" }}>
+        <div style={{ fontSize: "0.8rem", color: "#9b9ba8", marginBottom: "1rem", lineHeight: "1.4",
+           transform: isProHovered ? "none" : "translateZ(8px)", transition: "transform 0.4s"
+        }}>
           Unlock premium AI features and exclusive content.
         </div>
         <button 
-          onMouseEnter={() => setIsProHovered(true)}
-          onMouseLeave={() => setIsProHovered(false)}
           style={{
             width: "100%", padding: "10px", borderRadius: "10px", border: "none",
             background: "linear-gradient(90deg, #7c3aed, #ff3f81)", color: "white",
@@ -175,11 +189,8 @@ export default function Sidebar() {
             boxShadow: isProHovered 
               ? "0 8px 25px rgba(255,63,129,0.6)" 
               : "0 4px 15px rgba(255,63,129,0.3)",
-            transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-            transformStyle: "preserve-3d",
-            transform: isProHovered
-              ? "perspective(1000px) rotateY(10deg) rotateX(4deg) translateZ(12px) scale(1.05)"
-              : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
+            transform: isProHovered ? "none" : "translateZ(16px)",
+            transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
         }}>
           Upgrade Now
         </button>
@@ -194,27 +205,27 @@ export default function Sidebar() {
           width: "100%", padding: "14px", borderRadius: "14px", 
           fontWeight: 600, cursor: "pointer", display: "flex", 
           justifyContent: "center", alignItems: "center", gap: "8px", 
-          transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
           transformStyle: "preserve-3d",
           
           background: isLogoutHovered ? "rgba(239, 68, 68, 0.15)" : "rgba(255,255,255,0.03)",
           color: isLogoutHovered ? "#f87171" : "#9b9ba8",
           border: isLogoutHovered ? "1px solid rgba(239, 68, 68, 0.4)" : "1px solid rgba(255,255,255,0.08)",
           boxShadow: isLogoutHovered 
-            ? "10px 15px 25px -5px rgba(239, 68, 68, 0.2), inset 1px 1px 4px rgba(239, 68, 68, 0.3)" 
-            : "none",
+            ? "0 0 15px rgba(239, 68, 68, 0.2), inset 1px 1px 4px rgba(239, 68, 68, 0.3)" 
+            : "12px 18px 25px -5px rgba(0,0,0,0.5)",
           transform: isLogoutHovered
-            ? "perspective(1000px) rotateY(10deg) rotateX(4deg) translateZ(12px) scale(1.05)"
-            : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
+            ? "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1.02)"
+            : "perspective(1000px) rotateY(20deg) rotateX(6deg) translateZ(15px) scale(0.92)"
         }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-             style={{ transform: isLogoutHovered ? "translateZ(8px)" : "none", transition: "transform 0.3s" }}>
+             style={{ transform: !isLogoutHovered ? "translateZ(12px)" : "none", transition: "transform 0.4s" }}>
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
-        <span style={{ transform: isLogoutHovered ? "translateZ(4px)" : "none", transition: "transform 0.3s" }}>
+        <span style={{ transform: !isLogoutHovered ? "translateZ(8px)" : "none", transition: "transform 0.4s" }}>
           Logout
         </span>
       </button>
