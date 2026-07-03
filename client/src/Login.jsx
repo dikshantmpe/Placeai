@@ -35,7 +35,7 @@ export default function Login({ setUser }) {
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
-  const redirectChecked = useRef(false);
+  const authCheckStarted = useRef(false);
 
   // Clear autofill on mount
   useEffect(() => {
@@ -53,29 +53,63 @@ export default function Login({ setUser }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Check for Google redirect result FIRST - only once
+  // Check auth status - only once
   useEffect(() => {
-    if (redirectChecked.current) return;
-    redirectChecked.current = true;
+    if (authCheckStarted.current) return;
+    authCheckStarted.current = true;
 
-    const checkRedirectResult = async () => {
+    const checkAuth = async () => {
       try {
+        console.log("🔍 Checking for Google redirect result...");
+        // First check if coming back from Google redirect
         const result = await getRedirectResult(auth);
+        
         if (result && result.user) {
-          console.log("✅ Google auth successful:", result.user.email);
+          console.log("✅ Google redirect successful:", result.user.email);
           setUser(result.user);
           navigate("/dashboard", { replace: true });
           return;
         }
+        
+        console.log("⏳ No redirect result, checking auth state...");
+        
+        // If no redirect result, set up listener for auth state changes
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          console.log("🔐 Auth state changed:", user?.email || "No user");
+          
+          if (user) {
+            console.log("✅ User authenticated:", user.email);
+            setUser(user);
+            setIsCheckingAuth(false);
+            navigate("/dashboard", { replace: true });
+            unsubscribe(); // Stop listening once user is found
+          } else {
+            // No user found, show login form
+            console.log("📝 No auth, showing login form");
+            setIsCheckingAuth(false);
+            unsubscribe(); // Stop listening
+          }
+        });
+
+        // Set timeout to stop loading after 5 seconds max
+        const timeout = setTimeout(() => {
+          console.log("⏱️ Auth check timeout, showing login form");
+          setIsCheckingAuth(false);
+          unsubscribe();
+        }, 5000);
+
+        return () => {
+          clearTimeout(timeout);
+          unsubscribe();
+        };
       } catch (err) {
-        console.error("Google redirect error:", err);
-        setError("Google sign-in failed. Please try again.");
-      } finally {
+        console.error("❌ Auth check error:", err);
+        setError("Authentication check failed. Please refresh and try again.");
         setIsCheckingAuth(false);
       }
     };
 
-    checkRedirectResult();
+    checkAuth();
   }, [setUser, navigate]);
 
   // Vanta initialization
@@ -178,10 +212,11 @@ export default function Login({ setUser }) {
       provider.addScope('profile');
       provider.addScope('email');
       
+      console.log("🔴 Initiating Google login...");
       await signInWithRedirect(auth, provider);
-      // Page will redirect, this code won't execute after redirect
+      // This will redirect and page will unload
     } catch (err) {
-      console.error("Google login error:", err);
+      console.error("❌ Google login error:", err);
       setError("Failed to initiate Google sign-in. Please try again.");
       setIsLoading(false);
     }
