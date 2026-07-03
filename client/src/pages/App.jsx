@@ -13,7 +13,6 @@ import Chatbot from "../Chatbot";
 import Login from "../Login";
 import Profile from "../Profile";
 import Home from "../Home";
-import RightSidebar from "../components/RightSidebar";
 import Signup from "../Signup";
 
 export default function App() {
@@ -138,10 +137,6 @@ fetch('https://placeai-sqjj.onrender.com/api/ping').catch(() => {});
             </Routes>
             <Chatbot />
           </div>
-
-          {/* Right sidebar — desktop only */}
-          {!isMobile && <RightSidebar user={user} />}
-
         </div>
       )}
     </BrowserRouter>
