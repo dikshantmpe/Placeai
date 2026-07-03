@@ -5,7 +5,7 @@ import { signOut } from "firebase/auth";
 
 export default function Sidebar() {
   const navigate = useNavigate(); 
-  const location = useLocation(); // Allows us to see which page is active
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -19,14 +19,21 @@ export default function Sidebar() {
     }
   };
 
-  // Helper function to check if a link is the current active page
-  const isActive = (path) => location.pathname === path;
+  // UPDATED: Helper function to check if a link is active, even on nested routes
+  const isActive = (path) => {
+    // Exact match for Home to prevent it from highlighting on every page
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    // Matches the exact path OR any sub-route (e.g., /challenge or /challenge/home)
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   return (
     <aside style={{
       width: "260px",
-      minWidth: "260px", /* Safeguard: prevents overlapping */
-      flexShrink: 0,     /* Safeguard: prevents squishing */
+      minWidth: "260px",
+      flexShrink: 0,
       height: "100vh",
       position: "sticky",
       top: 0,
@@ -81,7 +88,7 @@ export default function Sidebar() {
         }
       `}</style>
 
-      {/* Brand Logo - Updated to use your glowing image */}
+      {/* Brand Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "3rem", padding: "0 0.5rem" }}>
         <div style={{
           width: "40px", height: "40px", borderRadius: "10px",
@@ -96,8 +103,12 @@ export default function Sidebar() {
         </h2>
       </div>
 
-      {/* Navigation Links - FIXED WITH ACTUAL ROUTES */}
+      {/* Navigation Links */}
       <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", flex: 1 }}>
+        {/* ADDED: Home Button */}
+        <Link to="/" className={`sidebar-link ${isActive("/") ? "active" : ""}`}>
+          <span style={{ fontSize: "1.1rem" }}>🏠</span> Home
+        </Link>
         <Link to="/dashboard" className={`sidebar-link ${isActive("/dashboard") ? "active" : ""}`}>
           <span style={{ fontSize: "1.1rem" }}>📊</span> Dashboard
         </Link>
@@ -121,7 +132,7 @@ export default function Sidebar() {
         </Link>
       </nav>
 
-      {/* Pro Upgrade Box - Glassmorphic Update */}
+      {/* Pro Upgrade Box */}
       <div style={{
         background: "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))", 
         padding: "1.25rem", borderRadius: "16px",
