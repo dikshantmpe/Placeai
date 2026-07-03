@@ -17,19 +17,33 @@ function loadScript(src) {
   });
 }
 
+// --- 1. NEW: Title Case Formatter for Names ---
+const formatName = (name) => {
+  if (!name) return "Aditya";
+  return name
+    .split(/[ ._]+/) // Splits by space, dot, or underscore (handles email prefixes cleanly)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
 export default function Home({ user }) {
   const streak = parseInt(localStorage.getItem("streak") || "0");
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
 
-  // Extract name from Firebase and enforce correct identification
-  let firstName = user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "Aditya singh";
-  if (firstName.toLowerCase() === "dikshant") {
-    firstName = "Aditya singh";
+  // --- 2. FIREBASE NAME FIX & FORMATTING ---
+  let rawName = user?.displayName || user?.email?.split("@")[0] || "Aditya Singh";
+  
+  // Override legacy aliases with preferred display name
+  if (rawName.toLowerCase().includes("dikshant")) {
+    rawName = "Aditya Singh";
   }
 
-  // 1. Initialize Vanta.js Background
+  // Enforces clean Title Case (e.g., "Aditya Singh")
+  const displayName = formatName(rawName);
+
+  // Initialize Vanta.js Background
   useEffect(() => {
     setMounted(true);
     let cancelled = false;
@@ -72,7 +86,7 @@ export default function Home({ user }) {
     };
   }, []);
 
-  // 2. Data for the Stat Cards
+  // Data for the Stat Cards
   const stats = [
     { title: "DSA Problems", value: "0", sub: "/ 450", trend: "+0 this week", icon: "💻", color: "rgba(239, 68, 68, 0.15)", stroke: "#ef4444", textIcon: "↑" },
     { title: "Aptitude Quizzes", value: "0", sub: " Taken", trend: "+0 this week", icon: "🧠", color: "rgba(168, 85, 247, 0.15)", stroke: "#a855f7", textIcon: "↑" },
@@ -114,7 +128,7 @@ export default function Home({ user }) {
           z-index: 10;
         }
 
-        /* Restored Translucent Glossy Panels */
+        /* Translucent Glossy Panels */
         .glass-panel {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
           backdrop-filter: blur(20px);
@@ -187,7 +201,7 @@ export default function Home({ user }) {
         }}>
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
           <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
-            {firstName} • Ready to work
+            {displayName} • Ready to work
           </span>
         </div>
       </header>
