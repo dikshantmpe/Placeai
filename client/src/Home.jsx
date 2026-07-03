@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
-// Helper function to load the background animation scripts
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -17,33 +16,28 @@ function loadScript(src) {
   });
 }
 
-// --- 1. NEW: Title Case Formatter for Names ---
-const formatName = (name) => {
-  if (!name) return "Aditya";
-  return name
-    .split(/[ ._]+/) // Splits by space, dot, or underscore (handles email prefixes cleanly)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
-
 export default function Home({ user }) {
   const streak = parseInt(localStorage.getItem("streak") || "0");
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
 
-  // --- 2. FIREBASE NAME FIX & FORMATTING ---
-  let rawName = user?.displayName || user?.email?.split("@")[0] || "Aditya Singh";
-  
-  // Override legacy aliases with preferred display name
+  // --- BULLETPROOF NAME EXTRACTION ---
+  // 1. Try Firebase Display Name
+  // 2. Fallback to Email prefix (replacing dots/underscores with spaces)
+  // 3. Fallback to default
+  let rawName = "Aditya";
+  if (user?.displayName) {
+    rawName = user.displayName;
+  } else if (user?.email) {
+    rawName = user.email.split("@")[0].replace(/[._-]/g, " ");
+  }
+
+  // Optional: Clean up known aliases
   if (rawName.toLowerCase().includes("dikshant")) {
     rawName = "Aditya Singh";
   }
 
-  // Enforces clean Title Case (e.g., "Aditya Singh")
-  const displayName = formatName(rawName);
-
-  // Initialize Vanta.js Background
   useEffect(() => {
     setMounted(true);
     let cancelled = false;
@@ -86,7 +80,6 @@ export default function Home({ user }) {
     };
   }, []);
 
-  // Data for the Stat Cards
   const stats = [
     { title: "DSA Problems", value: "0", sub: "/ 450", trend: "+0 this week", icon: "💻", color: "rgba(239, 68, 68, 0.15)", stroke: "#ef4444", textIcon: "↑" },
     { title: "Aptitude Quizzes", value: "0", sub: " Taken", trend: "+0 this week", icon: "🧠", color: "rgba(168, 85, 247, 0.15)", stroke: "#a855f7", textIcon: "↑" },
@@ -112,13 +105,12 @@ export default function Home({ user }) {
         style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
       />
       
-      {/* Lightened Gradient Overlay to let Vanta pop through */}
+      {/* Gradient Overlay */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
         background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(10,8,18,0.75) 80%)"
       }} />
 
-      {/* Embedded CSS for the Grid and Highly Translucent Glassmorphism */}
       <style>{`
         .bento-grid {
           display: grid;
@@ -128,7 +120,6 @@ export default function Home({ user }) {
           z-index: 10;
         }
 
-        /* Translucent Glossy Panels */
         .glass-panel {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
           backdrop-filter: blur(20px);
@@ -172,7 +163,6 @@ export default function Home({ user }) {
           0% { stroke-dasharray: 0 100; }
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 1200px) {
           .bento-hero { grid-column: span 12 !important; }
           .bento-progress { grid-column: span 12 !important; display: flex; flex-direction: row !important; align-items: center; justify-content: space-around; }
@@ -193,15 +183,20 @@ export default function Home({ user }) {
           <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Your AI-driven placement roadmap.</p>
         </div>
         
-        {/* Profile Pill */}
+        {/* Profile Pill - CSS Capitalization Applied Here */}
         <div style={{
           display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
           backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
           padding: "8px 16px", borderRadius: "100px"
         }}>
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
-          <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
-            {displayName} • Ready to work
+          <span style={{ 
+            fontSize: "0.85rem", 
+            fontWeight: "600", 
+            color: "#e2e8f0",
+            textTransform: "capitalize" /* Forces Title Case via CSS */
+          }}>
+            {rawName} • Ready to work
           </span>
         </div>
       </header>
@@ -209,9 +204,8 @@ export default function Home({ user }) {
       {/* Bento Grid Container */}
       <div className="bento-grid">
         
-        {/* 1. Main Hero Panel (Span 8) */}
+        {/* 1. Main Hero Panel */}
         <div className="glass-panel bento-hero" style={{ gridColumn: "span 8", position: "relative", overflow: "hidden" }}>
-          {/* Subtle Pink Glow in the right corner */}
           <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(255,63,129,0.15), transparent 70%)", pointerEvents: "none" }} />
           
           <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", alignItems: "flex-start" }}>
@@ -256,12 +250,11 @@ export default function Home({ user }) {
           </div>
         </div>
 
-        {/* 2. Overall Progress Panel (Span 4) */}
+        {/* 2. Overall Progress Panel */}
         <div className="glass-panel bento-progress" style={{ gridColumn: "span 4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
           <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 2rem 0", color: "#e2e8f0" }}>Readiness Score</h3>
           
           <div style={{ position: "relative", width: "160px", height: "160px" }}>
-            {/* SVG Circular Progress Bar */}
             <svg viewBox="0 0 36 36" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
               <path 
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
@@ -280,8 +273,6 @@ export default function Home({ user }) {
                 </linearGradient>
               </defs>
             </svg>
-            
-            {/* Center Percentage Text */}
             <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "white", lineHeight: "1" }}>
                 35<span style={{ fontSize: "1.2rem", color: "#9b9ba8" }}>%</span>
@@ -294,7 +285,7 @@ export default function Home({ user }) {
           </p>
         </div>
 
-        {/* 3. Small Stat Cards (Span 3 each) */}
+        {/* 3. Small Stat Cards */}
         {stats.map((stat, i) => (
           <div key={i} className="glass-panel bento-stat" style={{ gridColumn: "span 3", padding: "1.5rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
@@ -317,7 +308,7 @@ export default function Home({ user }) {
           </div>
         ))}
 
-        {/* 4. Actionable Next Steps (Span 12) */}
+        {/* 4. Actionable Next Steps */}
         <div style={{ gridColumn: "span 12", marginTop: "1rem" }}>
           <h3 style={{ fontSize: "1.4rem", fontWeight: "800", margin: "0 0 1.5rem 0", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ width: "4px", height: "20px", background: "#ff3f81", borderRadius: "4px" }} />
@@ -326,7 +317,6 @@ export default function Home({ user }) {
           
           <div className="action-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
             
-            {/* Action Card 1 */}
             <Link to="/dsa" className="glass-panel" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", textDecoration: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div style={{ background: "rgba(239, 68, 68, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#fca5a5", fontSize: "0.8rem", fontWeight: "700" }}>HIGH PRIORITY</div>
@@ -339,7 +329,6 @@ export default function Home({ user }) {
               </div>
             </Link>
 
-            {/* Action Card 2 */}
             <Link to="/resume" className="glass-panel" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", textDecoration: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#93c5fd", fontSize: "0.8rem", fontWeight: "700" }}>QUICK WIN</div>
@@ -352,7 +341,6 @@ export default function Home({ user }) {
               </div>
             </Link>
 
-            {/* Action Card 3 */}
             <Link to="/interview" className="glass-panel" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", textDecoration: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div style={{ background: "rgba(168, 85, 247, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#d8b4fe", fontSize: "0.8rem", fontWeight: "700" }}>PRACTICE</div>
