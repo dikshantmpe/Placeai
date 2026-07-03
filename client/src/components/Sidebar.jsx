@@ -1,28 +1,96 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; 
 import { auth } from "../firebase.js"; 
 import { signOut } from "firebase/auth"; 
 
+// --- 1. Custom Component to Force 3D Animations ---
+const SidebarLink = ({ to, icon, label, isActive }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <Link
+      to={to}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        padding: "12px 16px",
+        borderRadius: "14px",
+        textDecoration: "none",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        fontWeight: "600",
+        fontSize: "0.95rem",
+        marginBottom: "4px",
+        transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+        transformStyle: "preserve-3d",
+        
+        // Colors
+        color: isActive ? "#ffffff" : (isHovered ? "#ffffff" : "#9b9ba8"),
+        
+        // Glass Backgrounds
+        background: isActive 
+          ? "rgba(255, 255, 255, 0.08)" 
+          : isHovered 
+            ? "rgba(255, 255, 255, 0.04)" 
+            : "transparent",
+            
+        // Glass Borders
+        border: isActive 
+          ? "1px solid rgba(255, 63, 129, 0.4)" 
+          : isHovered 
+            ? "1px solid rgba(255, 255, 255, 0.08)" 
+            : "1px solid transparent",
+            
+        // Glows and Shadows
+        boxShadow: isActive 
+          ? "0 0 20px rgba(255, 63, 129, 0.2), inset 0 0 10px rgba(255, 63, 129, 0.1)" 
+          : isHovered 
+            ? "10px 15px 25px -5px rgba(0,0,0,0.3), inset 1px 1px 3px rgba(255,255,255,0.1)" 
+            : "none",
+            
+        // 3D Tilt Transform
+        transform: isHovered && !isActive
+          ? "perspective(1000px) rotateY(6deg) rotateX(2deg) translateZ(12px) scale(1.02)"
+          : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
+      }}
+    >
+      <span style={{ 
+        fontSize: "1.1rem", 
+        transform: isHovered && !isActive ? "translateZ(10px)" : "none", 
+        transition: "transform 0.4s" 
+      }}>
+        {icon}
+      </span>
+      <span style={{ 
+        transform: isHovered && !isActive ? "translateZ(5px)" : "none", 
+        transition: "transform 0.4s" 
+      }}>
+        {label}
+      </span>
+    </Link>
+  );
+};
+
 export default function Sidebar() {
   const navigate = useNavigate(); 
   const location = useLocation();
+  const [isProHovered, setIsProHovered] = useState(false);
+  const [isLogoutHovered, setIsLogoutHovered] = useState(false);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       localStorage.clear();
       sessionStorage.clear();
-      console.log("Logged out successfully");
       window.location.replace("/"); 
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
-  const isActive = (path) => {
-    if (path === "/") {
-      return location.pathname === "/";
-    }
+  const checkActive = (path) => {
+    if (path === "/") return location.pathname === "/";
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
@@ -44,53 +112,14 @@ export default function Sidebar() {
       padding: "1.5rem 1rem",
       color: "white",
       overflowY: "auto",
-      zIndex: 50
+      zIndex: 50,
+      perspective: "1500px" // Enforces 3D space for children
     }}>
       
+      {/* Scrollbar Style */}
       <style>{`
-        /* Glassmorphic Nav Links with 3D Tilt Setup */
-        .sidebar-link {
-          padding: 12px 16px;
-          border-radius: 14px;
-          color: #9b9ba8;
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-weight: 600;
-          font-size: 0.95rem;
-          transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-          border: 1px solid transparent;
-          margin-bottom: 2px;
-          transform-style: preserve-3d;
-          transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1);
-        }
-        
-        /* 3D Floating Glass Hover (Tilts towards the main content) */
-        .sidebar-link:hover:not(.active) {
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: #ffffff;
-          transform: perspective(1000px) rotateY(6deg) rotateX(2deg) translateZ(12px) scale(1.02);
-          box-shadow: 10px 15px 25px -5px rgba(0,0,0,0.3), inset 1px 1px 3px rgba(255,255,255,0.1);
-        }
-        
-        /* Active State */
-        .sidebar-link.active {
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 63, 129, 0.4);
-          color: #ffffff;
-          box-shadow: 0 0 20px rgba(255, 63, 129, 0.2), inset 0 0 10px rgba(255, 63, 129, 0.1);
-        }
-
-        /* Custom scrollbar */
-        aside::-webkit-scrollbar {
-          width: 4px;
-        }
-        aside::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1);
-          border-radius: 4px;
-        }
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
       `}</style>
 
       {/* Brand Logo */}
@@ -108,32 +137,16 @@ export default function Sidebar() {
         </h2>
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation Links using the new robust component */}
       <nav style={{ display: "flex", flexDirection: "column", gap: "0.25rem", flex: 1 }}>
-        <Link to="/" className={`sidebar-link ${isActive("/") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>🏠</span> Home
-        </Link>
-        <Link to="/dashboard" className={`sidebar-link ${isActive("/dashboard") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>📊</span> Dashboard
-        </Link>
-        <Link to="/dsa" className={`sidebar-link ${isActive("/dsa") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>💻</span> DSA Tracker
-        </Link>
-        <Link to="/resume" className={`sidebar-link ${isActive("/resume") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>📄</span> Resume Analyzer
-        </Link>
-        <Link to="/interview" className={`sidebar-link ${isActive("/interview") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>🎤</span> Mock Interview
-        </Link>
-        <Link to="/quiz" className={`sidebar-link ${isActive("/quiz") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>🧠</span> Aptitude Quiz
-        </Link>
-        <Link to="/company" className={`sidebar-link ${isActive("/company") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>🏢</span> Company Questions
-        </Link>
-        <Link to="/challenge" className={`sidebar-link ${isActive("/challenge") ? "active" : ""}`}>
-          <span style={{ fontSize: "1.1rem" }}>🔥</span> Daily Challenge
-        </Link>
+        <SidebarLink to="/" icon="🏠" label="Home" isActive={checkActive("/")} />
+        <SidebarLink to="/dashboard" icon="📊" label="Dashboard" isActive={checkActive("/dashboard")} />
+        <SidebarLink to="/dsa" icon="💻" label="DSA Tracker" isActive={checkActive("/dsa")} />
+        <SidebarLink to="/resume" icon="📄" label="Resume Analyzer" isActive={checkActive("/resume")} />
+        <SidebarLink to="/interview" icon="🎤" label="Mock Interview" isActive={checkActive("/interview")} />
+        <SidebarLink to="/quiz" icon="🧠" label="Aptitude Quiz" isActive={checkActive("/quiz")} />
+        <SidebarLink to="/company" icon="🏢" label="Company Questions" isActive={checkActive("/company")} />
+        <SidebarLink to="/challenge" icon="🔥" label="Daily Challenge" isActive={checkActive("/challenge")} />
       </nav>
 
       {/* Pro Upgrade Box */}
@@ -150,53 +163,58 @@ export default function Sidebar() {
         <div style={{ fontSize: "0.8rem", color: "#9b9ba8", marginBottom: "1rem", lineHeight: "1.4" }}>
           Unlock premium AI features and exclusive content.
         </div>
-        <button style={{
-          width: "100%", padding: "10px", borderRadius: "10px", border: "none",
-          background: "linear-gradient(90deg, #7c3aed, #ff3f81)", color: "white",
-          fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 15px rgba(255,63,129,0.3)",
-          transition: "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
-          transformStyle: "preserve-3d",
-          transform: "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
-        }}
-        onMouseEnter={e => e.target.style.transform = "perspective(1000px) rotateY(6deg) rotateX(2deg) translateZ(10px) scale(1.02)"}
-        onMouseLeave={e => e.target.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"}
-        >
+        <button 
+          onMouseEnter={() => setIsProHovered(true)}
+          onMouseLeave={() => setIsProHovered(false)}
+          style={{
+            width: "100%", padding: "10px", borderRadius: "10px", border: "none",
+            background: "linear-gradient(90deg, #7c3aed, #ff3f81)", color: "white",
+            fontWeight: 700, cursor: "pointer", 
+            boxShadow: isProHovered 
+              ? "0 8px 25px rgba(255,63,129,0.5)" 
+              : "0 4px 15px rgba(255,63,129,0.3)",
+            transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            transformStyle: "preserve-3d",
+            transform: isProHovered
+              ? "perspective(1000px) rotateY(6deg) rotateX(2deg) translateZ(10px) scale(1.02)"
+              : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
+        }}>
           Upgrade Now
         </button>
       </div>
 
       {/* Logout Button */}
       <button 
-        onClick={handleLogout} 
+        onClick={handleLogout}
+        onMouseEnter={() => setIsLogoutHovered(true)}
+        onMouseLeave={() => setIsLogoutHovered(false)}
         style={{
-          width: "100%", padding: "14px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.03)", color: "#9b9ba8", fontWeight: 600, cursor: "pointer",
-          display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", 
+          width: "100%", padding: "14px", borderRadius: "14px", 
+          fontWeight: 600, cursor: "pointer", display: "flex", 
+          justifyContent: "center", alignItems: "center", gap: "8px", 
           transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
           transformStyle: "preserve-3d",
-          transform: "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = "rgba(239, 68, 68, 0.1)";
-          e.target.style.color = "#f87171";
-          e.target.style.borderColor = "rgba(239, 68, 68, 0.3)";
-          e.target.style.boxShadow = "10px 15px 25px -5px rgba(239, 68, 68, 0.15), inset 1px 1px 3px rgba(239, 68, 68, 0.2)";
-          e.target.style.transform = "perspective(1000px) rotateY(6deg) rotateX(2deg) translateZ(10px) scale(1.02)";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = "rgba(255,255,255,0.03)";
-          e.target.style.color = "#9b9ba8";
-          e.target.style.borderColor = "rgba(255,255,255,0.08)";
-          e.target.style.boxShadow = "none";
-          e.target.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)";
+          
+          background: isLogoutHovered ? "rgba(239, 68, 68, 0.1)" : "rgba(255,255,255,0.03)",
+          color: isLogoutHovered ? "#f87171" : "#9b9ba8",
+          border: isLogoutHovered ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid rgba(255,255,255,0.08)",
+          boxShadow: isLogoutHovered 
+            ? "10px 15px 25px -5px rgba(239, 68, 68, 0.15), inset 1px 1px 3px rgba(239, 68, 68, 0.2)" 
+            : "none",
+          transform: isLogoutHovered
+            ? "perspective(1000px) rotateY(6deg) rotateX(2deg) translateZ(10px) scale(1.02)"
+            : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)"
         }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+             style={{ transform: isLogoutHovered ? "translateZ(8px)" : "none", transition: "transform 0.4s" }}>
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
-        Logout
+        <span style={{ transform: isLogoutHovered ? "translateZ(4px)" : "none", transition: "transform 0.4s" }}>
+          Logout
+        </span>
       </button>
 
     </aside>
