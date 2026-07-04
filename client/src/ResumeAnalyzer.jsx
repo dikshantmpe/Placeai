@@ -1,6 +1,32 @@
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { auth } from "./firebase.js"; // Ensure path is correct
+import { auth } from "./firebase.js"; 
+import { onAuthStateChanged } from "firebase/auth";
+
+// Helper function to load Vanta scripts safely
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+}
+
+// Title Case Formatter
+const formatName = (name) => {
+  if (!name) return "Guest";
+  return name
+    .split(/[^a-zA-Z0-9]+/)
+    .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : "")
+    .join(" ");
+};
 
 export default function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
@@ -8,6 +34,71 @@ export default function ResumeAnalyzer() {
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState(null);
+
+  const vantaRef = useRef(null);
+  const vantaEffect = useRef(null);
+
+  // Authenticate User for Profile Pill
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) setFirebaseUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  let rawName = "Guest";
+  if (firebaseUser?.displayName) {
+    rawName = firebaseUser.displayName;
+  } else if (firebaseUser?.email) {
+    rawName = firebaseUser.email.split("@")[0];
+  }
+  const displayName = formatName(rawName);
+
+  // Initialize Vanta.js Background
+  useEffect(() => {
+    let cancelled = false;
+
+    async function initVanta() {
+      try {
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
+        
+        if (cancelled || !vantaRef.current || vantaEffect.current) return;
+
+        if (window.VANTA && window.VANTA.NET) {
+          vantaEffect.current = window.VANTA.NET({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            color: 0xff3f81, 
+            backgroundColor: 0x0a0812, 
+            points: 11.0,
+            maxDistance: 22.0,
+            spacing: 17.0,
+            showDots: true,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load Vanta background:", err);
+      }
+    }
+
+    initVanta();
+
+    return () => {
+      cancelled = true;
+      if (vantaEffect.current) {
+        vantaEffect.current.destroy();
+        vantaEffect.current = null;
+      }
+    };
+  }, []);
 
   const handleUpload = async () => {
     if (!file) return alert("Please select a PDF first!");
@@ -31,7 +122,7 @@ export default function ResumeAnalyzer() {
       console.error("Backend fetch failed. Loading Demo Feedback instead...", err);
       setIsDemoMode(true);
       
-      // Fallback AI Feedback if backend is asleep
+      // Fallback AI Feedback
       setTimeout(() => {
         setFeedback(`OVERALL SCORE:
 82/100
@@ -52,7 +143,7 @@ SUGGESTIONS:
 - Reframe your interest in linguistics and communication studies as a soft skill demonstrating strong analytical and comprehensive listening abilities.
 - Consistently use the name Aditya Singh across all headers and project pages to avoid confusion with past aliases.`);
         setLoading(false);
-      }, 1500); // Simulate network delay
+      }, 1500); 
     }
   };
 
@@ -65,10 +156,10 @@ SUGGESTIONS:
 
   const renderFeedback = () => {
     const sectionColors = {
-      "STRENGTHS:": "#10b981",    // Brand Emerald
-      "WEAKNESSES:": "#f43f5e",   // Brand Rose
-      "SUGGESTIONS:": "#f59e0b",  // Brand Amber
-      "OVERALL SCORE:": "#7c3aed",// Brand Purple
+      "STRENGTHS:": "#10b981",    
+      "WEAKNESSES:": "#f43f5e",   
+      "SUGGESTIONS:": "#f59e0b",  
+      "OVERALL SCORE:": "#7c3aed",
     };
 
     return feedback.split("\n").map((line, i) => {
@@ -84,7 +175,7 @@ SUGGESTIONS:
               background: sectionColors[header],
               boxShadow: `0 0 10px ${sectionColors[header]}80`
             }} />
-            <h3 style={{ color: sectionColors[header], margin: 0, fontSize: "14px",
+            <h3 style={{ color: sectionColors[header], margin: 0, fontSize: "0.9rem",
               fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {line}
             </h3>
@@ -97,45 +188,55 @@ SUGGESTIONS:
             display: "flex", alignItems: "flex-start", gap: "10px",
             margin: "8px 0", paddingLeft: "14px"
           }}>
-            <span style={{ color: "#ff3f81", marginTop: "2px", fontSize: "14px" }}>▸</span>
-            <p style={{ margin: 0, color: "#e2e8f0", fontSize: "14px", lineHeight: "1.7", fontWeight: "400" }}>
+            <span style={{ color: "#ff3f81", marginTop: "2px", fontSize: "0.9rem" }}>▸</span>
+            <p style={{ margin: 0, color: "#e2e8f0", fontSize: "0.95rem", lineHeight: "1.6", fontWeight: "500" }}>
               {line.slice(2)}
             </p>
           </div>
         );
       }
       if (line.trim()) {
-        return <p key={i} style={{ color: "#e2e8f0", fontSize: "28px", fontWeight: "800", margin: "8px 0", paddingLeft: "14px" }}>{line}</p>;
+        return <p key={i} style={{ color: "#e2e8f0", fontSize: "2rem", fontWeight: "800", margin: "8px 0", paddingLeft: "14px" }}>{line}</p>;
       }
       return null;
     });
   };
 
   return (
-    <div className="resume-container">
-      <style>{`
-        .resume-container {
-          padding: 1.5rem;
-          width: 100%;
-          min-width: 0; /* Prevents flexbox overlapping */
-          box-sizing: border-box;
-          color: white;
-          font-family: 'Inter', sans-serif;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          overflow-x: hidden;
-        }
+    <div style={{
+      flex: 1,
+      minHeight: "100vh",
+      position: "relative",
+      padding: "2.5rem 3rem",
+      color: "#ffffff",
+      fontFamily: "'Inter', sans-serif",
+      overflowY: "auto",
+      overflowX: "hidden"
+    }}>
+      
+      {/* Background Layer (Vanta) */}
+      <div 
+        ref={vantaRef} 
+        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
+      />
+      
+      {/* Gradient Overlay for Text Readability */}
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+        background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(10,8,18,0.75) 80%)"
+      }} />
 
-        .glass-card {
-          background: linear-gradient(145deg, rgba(20, 15, 25, 0.7), rgba(10, 8, 15, 0.9));
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+      <style>{`
+        .glass-panel {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px;
-          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+          border-radius: 24px;
+          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.05);
           position: relative;
-          overflow: hidden;
+          z-index: 10;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .upload-zone {
@@ -172,7 +273,7 @@ SUGGESTIONS:
           padding: 16px 32px;
           border-radius: 14px;
           cursor: pointer;
-          font-size: 15px;
+          font-size: 1rem;
           font-weight: 700;
           box-shadow: 0 4px 20px rgba(255,63,129,0.3);
           transition: all 0.3s ease;
@@ -197,118 +298,157 @@ SUGGESTIONS:
         }
 
         @keyframes spin { 
-          from { transform: rotate(0deg); } 
           to { transform: rotate(360deg); } 
-        }
-
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
         }
       `}</style>
 
-      {/* Warning Banner */}
-      {isDemoMode && (
-        <div style={{
-          background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.4)",
-          color: "#fcd34d", padding: "12px 16px", borderRadius: "12px",
-          display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "600"
-        }}>
-          <span>⚠️</span> 
-          <span>Backend offline. Generating demo AI feedback instead.</span>
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={{ marginBottom: "0.5rem" }}>
-        <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 8px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "3px", background: "linear-gradient(90deg, #7c3aed, transparent)", borderRadius: "2px" }}></span>
-          Resume <span style={{ background: "linear-gradient(90deg, #7c3aed, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Analyzer</span>
-        </h2>
-        <p style={{ color: "#9b9ba8", margin: 0, fontSize: "14px", fontWeight: "500" }}>Upload your resume and get instant AI-powered feedback.</p>
-      </div>
-
-      <div style={{ maxWidth: "800px", width: "100%" }}>
-        {/* Upload Area */}
-        <div
-          className={`upload-zone ${dragOver ? "drag-over" : ""} ${file ? "has-file" : ""}`}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          onClick={() => document.getElementById("resumeInput").click()}
-        >
-          <input id="resumeInput" type="file" accept=".pdf"
-            onChange={(e) => setFile(e.target.files[0])}
-            style={{ display: "none" }} />
-
-          {file ? (
+      {/* Main Content Container */}
+      <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        
+        {/* Warning Banner */}
+        {isDemoMode && (
+          <div className="glass-panel" style={{
+            background: "rgba(245, 158, 11, 0.05)",
+            borderColor: "rgba(245, 158, 11, 0.2)",
+            padding: "16px 24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}>
+            <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "8px", borderRadius: "8px" }}>⚠️</div> 
             <div>
-              <div style={{ fontSize: "56px", marginBottom: "16px", filter: "drop-shadow(0 0 15px rgba(16,185,129,0.4))" }}>📄</div>
-              <p style={{ color: "#10b981", fontWeight: "700", fontSize: "16px", margin: "0 0 6px" }}>{file.name}</p>
-              <p style={{ color: "#9b9ba8", fontSize: "13px", margin: 0, fontWeight: "500" }}>
-                {(file.size / 1024).toFixed(1)} KB · Click to swap file
-              </p>
+              <h4 style={{ margin: "0 0 4px 0", color: "#fcd34d", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
+              <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.85rem" }}>Backend offline. Generating demo AI feedback instead.</p>
             </div>
-          ) : (
-            <div>
-              <div style={{ fontSize: "56px", marginBottom: "16px", opacity: 0.8 }}>📁</div>
-              <p style={{ color: "#e2e8f0", fontWeight: "700", fontSize: "16px", margin: "0 0 8px" }}>
-                Drag & Drop your resume here
-              </p>
-              <p style={{ color: "#6b6b78", fontSize: "14px", margin: "0 0 20px" }}>
-                or click to browse your files
-              </p>
-              <span style={{
-                background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-                color: "#9b9ba8", padding: "8px 20px", borderRadius: "10px", fontSize: "12px", fontWeight: "600"
-              }}>
-                PDF format only
-              </span>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Analyze Button */}
-        <div style={{ marginTop: "1.5rem" }}>
-          <button onClick={handleUpload} disabled={loading || !file} className="brand-btn">
-            {loading ? (
-              <>
-                <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "18px" }}>⟳</span>
-                Processing with AI...
-              </>
-            ) : (
-              <>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                Analyze Resume
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Feedback Results */}
-      {feedback && (
-        <div className="glass-card" style={{ marginTop: "1rem", padding: "2rem", maxWidth: "800px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem",
-            paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "12px",
-              background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(255,63,129,0.2))", 
-              border: "1px solid rgba(124,58,237,0.3)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px",
-              boxShadow: "0 0 20px rgba(124,58,237,0.2)" }}>
-              🤖
-            </div>
-            <div>
-              <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "700", color: "#e2e8f0" }}>AI Feedback Report</h3>
-              <p style={{ margin: 0, color: "#a78bfa", fontSize: "12px", fontWeight: "600", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
-            </div>
+        {/* Unified Header with Profile Pill */}
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
+          <div>
+            <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "14px", letterSpacing: "-0.5px" }}>
+              <span style={{ width: "28px", height: "4px", background: "linear-gradient(90deg, #7c3aed, transparent)", borderRadius: "2px" }}></span>
+              Resume <span style={{ background: "linear-gradient(90deg, #7c3aed, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Analyzer</span>
+            </h2>
+            <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Upload your resume and get instant AI-powered feedback.</p>
           </div>
           
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {renderFeedback()}
+          <div style={{
+            display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
+            backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
+            padding: "8px 16px", borderRadius: "100px"
+          }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
+            <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
+              {displayName} • Ready to work
+            </span>
           </div>
+        </header>
+
+        {/* Content Layout */}
+        <div style={{ display: "flex", gap: "2rem", flexDirection: window.innerWidth < 1024 ? "column" : "row" }}>
+          
+          {/* Left Column: Upload Section */}
+          <div className="glass-panel" style={{ flex: "1 1 50%", padding: "2.5rem", borderRadius: "20px", display: "flex", flexDirection: "column" }}>
+            <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.2rem", fontWeight: "700", color: "#e2e8f0" }}>Upload Document</h3>
+            
+            <div
+              className={`upload-zone ${dragOver ? "drag-over" : ""} ${file ? "has-file" : ""}`}
+              style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById("resumeInput").click()}
+            >
+              <input id="resumeInput" type="file" accept=".pdf"
+                onChange={(e) => setFile(e.target.files[0])}
+                style={{ display: "none" }} />
+
+              {file ? (
+                <div>
+                  <div style={{ fontSize: "64px", marginBottom: "16px", filter: "drop-shadow(0 0 15px rgba(16,185,129,0.4))" }}>📄</div>
+                  <p style={{ color: "#10b981", fontWeight: "700", fontSize: "1.1rem", margin: "0 0 8px" }}>{file.name}</p>
+                  <p style={{ color: "#9b9ba8", fontSize: "0.9rem", margin: 0, fontWeight: "500" }}>
+                    {(file.size / 1024).toFixed(1)} KB · Click to swap file
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: "64px", marginBottom: "16px", opacity: 0.8 }}>📁</div>
+                  <p style={{ color: "#e2e8f0", fontWeight: "700", fontSize: "1.1rem", margin: "0 0 8px" }}>
+                    Drag & Drop your resume here
+                  </p>
+                  <p style={{ color: "#6b6b78", fontSize: "0.95rem", margin: "0 0 24px" }}>
+                    or click to browse your files
+                  </p>
+                  <span style={{
+                    background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+                    color: "#9b9ba8", padding: "8px 24px", borderRadius: "10px", fontSize: "0.85rem", fontWeight: "600"
+                  }}>
+                    PDF format only
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: "2rem" }}>
+              <button onClick={handleUpload} disabled={loading || !file} className="brand-btn">
+                {loading ? (
+                  <>
+                    <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1.2rem" }}>⟳</span>
+                    Analyzing with AI...
+                  </>
+                ) : (
+                  <>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Start Analysis
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Feedback Section */}
+          <div className="glass-panel" style={{ flex: "1 1 50%", padding: "2.5rem", borderRadius: "20px", display: "flex", flexDirection: "column" }}>
+             {!feedback && !loading ? (
+               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.5, textAlign: "center" }}>
+                 <div style={{ fontSize: "48px", marginBottom: "1rem" }}>✨</div>
+                 <h3 style={{ margin: "0 0 8px", color: "#e2e8f0", fontSize: "1.2rem" }}>Awaiting Document</h3>
+                 <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.95rem", maxWidth: "250px" }}>Upload a PDF resume to generate a comprehensive AI breakdown.</p>
+               </div>
+             ) : loading ? (
+               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
+                 <div style={{ width: "40px", height: "40px", border: "3px solid rgba(255,63,129,0.3)", borderTop: "3px solid #ff3f81", borderRadius: "50%", animation: "spin 1s linear infinite", marginBottom: "1.5rem" }} />
+                 <h3 style={{ margin: "0 0 8px", color: "#e2e8f0", fontSize: "1.2rem", animation: "pulse-glow 1.5s infinite" }}>Scanning Document...</h3>
+                 <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.95rem" }}>Cross-referencing with industry standards.</p>
+                 <style>{`@keyframes pulse-glow { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }`}</style>
+               </div>
+             ) : (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "2rem",
+                  paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                  <div style={{ width: "48px", height: "48px", borderRadius: "14px",
+                    background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(255,63,129,0.2))", 
+                    border: "1px solid rgba(124,58,237,0.3)",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px",
+                    boxShadow: "0 0 20px rgba(124,58,237,0.2)" }}>
+                    🤖
+                  </div>
+                  <div>
+                    <h3 style={{ margin: "0 0 4px 0", fontSize: "1.2rem", fontWeight: "800", color: "#e2e8f0" }}>Analysis Complete</h3>
+                    <p style={{ margin: 0, color: "#a78bfa", fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
+                  </div>
+                </div>
+                
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {renderFeedback()}
+                </div>
+              </div>
+             )}
+          </div>
+          
         </div>
-      )}
+      </div>
     </div>
   );
 }
