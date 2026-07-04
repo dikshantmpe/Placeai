@@ -78,24 +78,28 @@ export default function DSATracker() {
       try {
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
+        
+        // Ensure the ref exists before attaching Vanta
         if (cancelled || !vantaRef.current || vantaEffect.current) return;
 
-        vantaEffect.current = window.VANTA.NET({
-          el: vantaRef.current,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          scale: 1.0,
-          scaleMobile: 1.0,
-          color: 0xff3f81, 
-          backgroundColor: 0x0a0812, 
-          points: 11.0,
-          maxDistance: 22.0,
-          spacing: 17.0,
-          showDots: true,
-        });
+        if (window.VANTA && window.VANTA.NET) {
+          vantaEffect.current = window.VANTA.NET({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            color: 0xff3f81, 
+            backgroundColor: 0x0a0812, 
+            points: 11.0,
+            maxDistance: 22.0,
+            spacing: 17.0,
+            showDots: true,
+          });
+        }
       } catch (err) {
         console.error("Failed to load Vanta background:", err);
       }
@@ -159,16 +163,6 @@ export default function DSATracker() {
   const percent = filtered.length ? Math.round((doneCount / filtered.length) * 100) : 0;
   const totalDone = problems.filter(p => p.status).length;
 
-  if (loading) return (
-    <div style={{ padding: "2rem", width: "100%", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#0a0812" }}>
-      <div style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#fff", fontWeight: "700", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>
-        <div style={{ width: "24px", height: "24px", border: "3px solid rgba(255,63,129,0.3)", borderTop: "3px solid #ff3f81", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        Decrypting DSA Sheet...
-      </div>
-    </div>
-  );
-
   return (
     <div style={{
       flex: 1,
@@ -181,13 +175,12 @@ export default function DSATracker() {
       overflowX: "hidden"
     }}>
       
-      {/* Background Layer (Vanta) */}
+      {/* 1. BACKGROUND ALWAYS RENDERS FIRST */}
       <div 
         ref={vantaRef} 
         style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
       />
       
-      {/* Gradient Overlay for Text Readability */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
         background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(10,8,18,0.75) 80%)"
@@ -271,190 +264,195 @@ export default function DSATracker() {
         .problems-mobile { display: none; }
         .problems-desktop { display: block; }
 
+        @keyframes spin { 
+          to { transform: rotate(360deg); } 
+        }
+
         @media (max-width: 768px) {
           .problems-desktop { display: none; }
           .problems-mobile { display: block; }
         }
       `}</style>
 
-      {/* Main Content Container */}
-      <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        
-        {/* WARNING BANNER FOR DEMO MODE */}
-        {isDemoMode && (
-          <div className="glass-panel" style={{
-            background: "rgba(245, 158, 11, 0.05)",
-            borderColor: "rgba(245, 158, 11, 0.2)",
-            padding: "16px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}>
-            <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "8px", borderRadius: "8px" }}>⚠️</div> 
-            <div>
-              <h4 style={{ margin: "0 0 4px 0", color: "#fcd34d", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
-              <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
-            </div>
+      {/* 2. SHOW LOADING SCREEN OR DASHBOARD OVER THE BACKGROUND */}
+      {loading ? (
+        <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
+          <div style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#fff", fontWeight: "700", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>
+            <div style={{ width: "24px", height: "24px", border: "3px solid rgba(255,63,129,0.3)", borderTop: "3px solid #ff3f81", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+            Decrypting DSA Sheet...
           </div>
-        )}
-
-        {/* Unified Header with Profile Pill */}
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
-          <div>
-            <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "14px", letterSpacing: "-0.5px" }}>
-              <span style={{ width: "28px", height: "4px", background: "linear-gradient(90deg, #ff3f81, #7c3aed)", borderRadius: "2px" }}></span>
-              DSA <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Tracker</span>
-            </h2>
-            <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
-          </div>
+        </div>
+      ) : (
+        <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           
-          {/* Profile Pill restored! */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
-            padding: "8px 16px", borderRadius: "100px"
-          }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
-            <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
-              {displayName} • Ready to work
-            </span>
-          </div>
-        </header>
-
-        {/* Stats Row */}
-        <div className="dsa-stats-grid">
-          {[
-            { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#ff3f81", icon: "⟨/⟩" },
-            { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#a78bfa", icon: "🎯" },
-            { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#10b981", icon: "📊" },
-          ].map((s, i) => (
-            <div key={i} className="glass-panel" style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "20px" }}>
+          {/* WARNING BANNER FOR DEMO MODE */}
+          {isDemoMode && (
+            <div className="glass-panel" style={{
+              background: "rgba(245, 158, 11, 0.05)",
+              borderColor: "rgba(245, 158, 11, 0.2)",
+              padding: "16px 24px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}>
+              <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "8px", borderRadius: "8px" }}>⚠️</div> 
               <div>
-                <p style={{ color: "#9b9ba8", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-                  <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "white", lineHeight: "1" }}>{s.value}</span>
-                  <span style={{ fontSize: "0.9rem", color: "#6b6b78", fontWeight: "600" }}>{s.total}</span>
-                </div>
+                <h4 style={{ margin: "0 0 4px 0", color: "#fcd34d", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
+                <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
               </div>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "12px",
-                background: `linear-gradient(135deg, ${s.color}20, transparent)`, 
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", 
-                border: `1px solid ${s.color}40`, color: s.color, boxShadow: `0 0 20px ${s.color}20`
-              }}>{s.icon}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Global Progress Bar */}
-        <div className="glass-panel" style={{ padding: "1.5rem 2rem", borderRadius: "20px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-            <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: "700" }}>Overall Sheet Progress</span>
-            <span style={{ fontSize: "0.9rem", color: "#ff3f81", fontWeight: "800" }}>{percent}%</span>
-          </div>
-          <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "10px", height: "10px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)" }}>
-            <div style={{
-              width: `${percent}%`, background: "linear-gradient(90deg, #7c3aed, #ff3f81)",
-              height: "100%", borderRadius: "10px", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-              boxShadow: "0 0 20px rgba(255,63,129,0.6)"
-            }} />
-          </div>
-        </div>
-
-        {/* Topic Filters */}
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", margin: "0.5rem 0" }}>
-          {topics.map(t => {
-            const topicDone = t === "All" ? problems.filter(p => p.status).length : problems.filter(p => p.topic === t && p.status).length;
-            const topicTotal = t === "All" ? problems.length : problems.filter(p => p.topic === t).length;
-            return (
-              <button key={t} onClick={() => setFilter(t)} className={`topic-btn ${filter === t ? "active" : ""}`}>
-                {t} <span style={{ opacity: filter === t ? 1 : 0.5, fontSize: "0.75rem", marginLeft: "6px", fontWeight: filter === t ? "700" : "500" }}>{topicDone}/{topicTotal}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Problem List (Desktop) */}
-        <div className="problems-desktop glass-panel" style={{ padding: "0", overflow: "hidden" }}>
-          
-          {/* Table Header */}
-          <div style={{
-            display: "grid", gridTemplateColumns: "44px 1fr 120px 100px 80px",
-            padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(0,0,0,0.3)",
-            fontSize: "0.75rem", color: "#6b6b78", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
-          }}>
-            <span></span>
-            <span>Problem Title</span>
-            <span>Topic</span>
-            <span>Difficulty</span>
-            <span>Status</span>
-          </div>
-
-          {filtered.length === 0 ? (
-            <div style={{ padding: "5rem", textAlign: "center", color: "#6b6b78", fontWeight: "600", fontSize: "1rem" }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: 0.5 }}>📭</div>
-              No problems found for this topic.
-            </div>
-          ) : (
-            <div>
-              {filtered.map((p, i) => (
-                <div key={p._id} className={`table-row ${p.status ? "completed" : ""}`}>
-                  
-                  {/* Glowing Checkbox */}
-                  <div onClick={() => toggleStatus(p._id)} style={{
-                    width: "24px", height: "24px", borderRadius: "8px", cursor: "pointer",
-                    background: p.status ? "linear-gradient(135deg, #10b981, #059669)" : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${p.status ? "#10b981" : "rgba(255,255,255,0.15)"}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)", color: "white", 
-                    boxShadow: p.status ? "0 0 15px rgba(16,185,129,0.5)" : "inset 0 2px 4px rgba(0,0,0,0.2)"
-                  }}>
-                    {p.status && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                  </div>
-
-                  {/* Problem Link */}
-                  <button onClick={() => navigate(`/problem/${p._id}`)} style={{
-                    color: p.status ? "#6b6b78" : "#ffffff", fontSize: "0.95rem", fontWeight: "600",
-                    textDecoration: p.status ? "line-through" : "none",
-                    background: "transparent", border: "none", cursor: "pointer",
-                    textAlign: "left", padding: 0, transition: "color 0.2s"
-                  }}>
-                    <span style={{ color: "#6b6b78", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
-                      {String(i + 1).padStart(2, "0")}.
-                    </span>
-                    {p.title}
-                  </button>
-
-                  {/* Topic Pill */}
-                  <span style={{ fontSize: "0.8rem", color: "#9b9ba8", fontWeight: "600" }}>{p.topic}</span>
-
-                  {/* Difficulty Badge */}
-                  <span style={{
-                    fontSize: "0.7rem", fontWeight: "800", padding: "6px 12px",
-                    borderRadius: "6px", display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    color: diffColor[p.difficulty], background: diffBg[p.difficulty],
-                    border: `1px solid ${diffColor[p.difficulty]}40`, letterSpacing: "0.5px", textTransform: "uppercase"
-                  }}>
-                    {p.difficulty}
-                  </span>
-
-                  {/* Status Indicator */}
-                  <span style={{
-                    fontSize: "0.85rem", color: p.status ? "#10b981" : "#6b6b78",
-                    fontWeight: "800", display: "flex", alignItems: "center", gap: "6px"
-                  }}>
-                    {p.status ? (
-                      <>Done <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg></>
-                    ) : "—"}
-                  </span>
-                </div>
-              ))}
             </div>
           )}
-        </div>
 
-      </div>
+          {/* Unified Header with Profile Pill */}
+          <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
+            <div>
+              <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "14px", letterSpacing: "-0.5px" }}>
+                <span style={{ width: "28px", height: "4px", background: "linear-gradient(90deg, #ff3f81, #7c3aed)", borderRadius: "2px" }}></span>
+                DSA <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Tracker</span>
+              </h2>
+              <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
+            </div>
+            
+            <div style={{
+              display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
+              backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
+              padding: "8px 16px", borderRadius: "100px"
+            }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
+              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
+                {displayName} • Ready to work
+              </span>
+            </div>
+          </header>
+
+          {/* Stats Row */}
+          <div className="dsa-stats-grid">
+            {[
+              { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#ff3f81", icon: "⟨/⟩" },
+              { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#a78bfa", icon: "🎯" },
+              { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#10b981", icon: "📊" },
+            ].map((s, i) => (
+              <div key={i} className="glass-panel" style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "20px" }}>
+                <div>
+                  <p style={{ color: "#9b9ba8", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                    <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "white", lineHeight: "1" }}>{s.value}</span>
+                    <span style={{ fontSize: "0.9rem", color: "#6b6b78", fontWeight: "600" }}>{s.total}</span>
+                  </div>
+                </div>
+                <div style={{
+                  width: "48px", height: "48px", borderRadius: "12px",
+                  background: `linear-gradient(135deg, ${s.color}20, transparent)`, 
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", 
+                  border: `1px solid ${s.color}40`, color: s.color, boxShadow: `0 0 20px ${s.color}20`
+                }}>{s.icon}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Global Progress Bar */}
+          <div className="glass-panel" style={{ padding: "1.5rem 2rem", borderRadius: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
+              <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: "700" }}>Overall Sheet Progress</span>
+              <span style={{ fontSize: "0.9rem", color: "#ff3f81", fontWeight: "800" }}>{percent}%</span>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "10px", height: "10px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{
+                width: `${percent}%`, background: "linear-gradient(90deg, #7c3aed, #ff3f81)",
+                height: "100%", borderRadius: "10px", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                boxShadow: "0 0 20px rgba(255,63,129,0.6)"
+              }} />
+            </div>
+          </div>
+
+          {/* Topic Filters */}
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", margin: "0.5rem 0" }}>
+            {topics.map(t => {
+              const topicDone = t === "All" ? problems.filter(p => p.status).length : problems.filter(p => p.topic === t && p.status).length;
+              const topicTotal = t === "All" ? problems.length : problems.filter(p => p.topic === t).length;
+              return (
+                <button key={t} onClick={() => setFilter(t)} className={`topic-btn ${filter === t ? "active" : ""}`}>
+                  {t} <span style={{ opacity: filter === t ? 1 : 0.5, fontSize: "0.75rem", marginLeft: "6px", fontWeight: filter === t ? "700" : "500" }}>{topicDone}/{topicTotal}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Problem List (Desktop) */}
+          <div className="problems-desktop glass-panel" style={{ padding: "0", overflow: "hidden" }}>
+            
+            <div style={{
+              display: "grid", gridTemplateColumns: "44px 1fr 120px 100px 80px",
+              padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(0,0,0,0.3)",
+              fontSize: "0.75rem", color: "#6b6b78", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
+            }}>
+              <span></span>
+              <span>Problem Title</span>
+              <span>Topic</span>
+              <span>Difficulty</span>
+              <span>Status</span>
+            </div>
+
+            {filtered.length === 0 ? (
+              <div style={{ padding: "5rem", textAlign: "center", color: "#6b6b78", fontWeight: "600", fontSize: "1rem" }}>
+                <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: 0.5 }}>📭</div>
+                No problems found for this topic.
+              </div>
+            ) : (
+              <div>
+                {filtered.map((p, i) => (
+                  <div key={p._id} className={`table-row ${p.status ? "completed" : ""}`}>
+                    
+                    <div onClick={() => toggleStatus(p._id)} style={{
+                      width: "24px", height: "24px", borderRadius: "8px", cursor: "pointer",
+                      background: p.status ? "linear-gradient(135deg, #10b981, #059669)" : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${p.status ? "#10b981" : "rgba(255,255,255,0.15)"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)", color: "white", 
+                      boxShadow: p.status ? "0 0 15px rgba(16,185,129,0.5)" : "inset 0 2px 4px rgba(0,0,0,0.2)"
+                    }}>
+                      {p.status && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                    </div>
+
+                    <button onClick={() => navigate(`/problem/${p._id}`)} style={{
+                      color: p.status ? "#6b6b78" : "#ffffff", fontSize: "0.95rem", fontWeight: "600",
+                      textDecoration: p.status ? "line-through" : "none",
+                      background: "transparent", border: "none", cursor: "pointer",
+                      textAlign: "left", padding: 0, transition: "color 0.2s"
+                    }}>
+                      <span style={{ color: "#6b6b78", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
+                        {String(i + 1).padStart(2, "0")}.
+                      </span>
+                      {p.title}
+                    </button>
+
+                    <span style={{ fontSize: "0.8rem", color: "#9b9ba8", fontWeight: "600" }}>{p.topic}</span>
+
+                    <span style={{
+                      fontSize: "0.7rem", fontWeight: "800", padding: "6px 12px",
+                      borderRadius: "6px", display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      color: diffColor[p.difficulty], background: diffBg[p.difficulty],
+                      border: `1px solid ${diffColor[p.difficulty]}40`, letterSpacing: "0.5px", textTransform: "uppercase"
+                    }}>
+                      {p.difficulty}
+                    </span>
+
+                    <span style={{
+                      fontSize: "0.85rem", color: p.status ? "#10b981" : "#6b6b78",
+                      fontWeight: "800", display: "flex", alignItems: "center", gap: "6px"
+                    }}>
+                      {p.status ? (
+                        <>Done <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg></>
+                      ) : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
