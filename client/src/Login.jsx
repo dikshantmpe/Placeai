@@ -52,7 +52,7 @@ export default function Login({ setUser }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Simplified Auth Listener (No redirect checks needed)
+  // Simplified Auth Listener (Routes to Home now)
   useEffect(() => {
     console.log("🔍 Auth listener mounted...");
     
@@ -60,7 +60,7 @@ export default function Login({ setUser }) {
       if (user) {
         console.log("✅ Persistent user session detected:", user.email);
         setUser(user);
-        navigate("/dashboard", { replace: true });
+        navigate("/", { replace: true }); // <--- CHANGED TO "/"
       } else {
         console.log("📝 No active session found. Ready for login.");
         setIsCheckingAuth(false);
@@ -138,7 +138,7 @@ export default function Login({ setUser }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true }); // <--- CHANGED TO "/"
     } catch (err) {
       console.log(err.code);
       console.log(err.message);
@@ -174,7 +174,7 @@ export default function Login({ setUser }) {
       
       console.log("✅ Google Auth Successful:", result.user.email);
       setUser(result.user);
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true }); // <--- CHANGED TO "/"
       
     } catch (err) {
       console.error("❌ Google Popup Error:", err);
