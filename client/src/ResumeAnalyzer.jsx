@@ -143,7 +143,7 @@ SUGGESTIONS:
 - Reframe your interest in linguistics and communication studies as a soft skill demonstrating strong analytical and comprehensive listening abilities.
 - Consistently use the name Aditya Singh across all headers and project pages to avoid confusion with past aliases.`);
         setLoading(false);
-      }, 1500); 
+      }, 2000); // Increased slightly so you can see the cool new loading animation
     }
   };
 
@@ -159,10 +159,35 @@ SUGGESTIONS:
       "STRENGTHS:": "#10b981",    
       "WEAKNESSES:": "#f43f5e",   
       "SUGGESTIONS:": "#f59e0b",  
-      "OVERALL SCORE:": "#7c3aed",
     };
 
     return feedback.split("\n").map((line, i) => {
+      // 1. Intercept the Score line and render a big glowing block
+      if (line.match(/^\d+\/100$/)) {
+        return (
+          <div key={i} style={{ 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            background: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(255,63,129,0.05))', 
+            border: '1px solid rgba(124,58,237,0.3)', borderRadius: '20px', 
+            padding: '2rem', marginBottom: '2rem', boxShadow: '0 10px 30px rgba(124,58,237,0.1)' 
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: '3.5rem', fontWeight: '800', color: 'white', textShadow: '0 0 25px rgba(124,58,237,0.6)' }}>
+                {line.split('/')[0]}
+              </span>
+              <span style={{ fontSize: '1.5rem', color: '#9b9ba8', fontWeight: '600' }}>/100</span>
+              <p style={{ margin: '8px 0 0', color: '#a78bfa', fontSize: '0.85rem', fontWeight: '800', letterSpacing: '2px' }}>
+                ATS MATCH SCORE
+              </p>
+            </div>
+          </div>
+        );
+      }
+
+      // Hide the raw "OVERALL SCORE:" text since we built the custom block above
+      if (line === "OVERALL SCORE:") return null;
+
+      // 2. Render Section Headers (Strengths, Weaknesses, etc.)
       const header = Object.keys(sectionColors).find(h => line.startsWith(h));
       if (header) {
         return (
@@ -182,11 +207,13 @@ SUGGESTIONS:
           </div>
         );
       }
+
+      // 3. Render Bullet Points
       if (line.startsWith("- ")) {
         return (
           <div key={i} style={{
             display: "flex", alignItems: "flex-start", gap: "10px",
-            margin: "8px 0", paddingLeft: "14px"
+            margin: "10px 0", paddingLeft: "14px"
           }}>
             <span style={{ color: "#ff3f81", marginTop: "2px", fontSize: "0.9rem" }}>▸</span>
             <p style={{ margin: 0, color: "#e2e8f0", fontSize: "0.95rem", lineHeight: "1.6", fontWeight: "500" }}>
@@ -195,8 +222,10 @@ SUGGESTIONS:
           </div>
         );
       }
+
+      // 4. Render standard text
       if (line.trim()) {
-        return <p key={i} style={{ color: "#e2e8f0", fontSize: "2rem", fontWeight: "800", margin: "8px 0", paddingLeft: "14px" }}>{line}</p>;
+        return <p key={i} style={{ color: "#e2e8f0", fontSize: "0.95rem", lineHeight: "1.6", margin: "8px 0" }}>{line}</p>;
       }
       return null;
     });
@@ -299,6 +328,19 @@ SUGGESTIONS:
 
         @keyframes spin { 
           to { transform: rotate(360deg); } 
+        }
+        @keyframes reverse-spin { 
+          to { transform: rotate(-360deg); } 
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.05); }
+        }
+        @keyframes scan {
+          0% { top: 0; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
         }
       `}</style>
 
@@ -408,22 +450,56 @@ SUGGESTIONS:
             </div>
           </div>
 
-          {/* Right Column: Feedback Section */}
-          <div className="glass-panel" style={{ flex: "1 1 50%", padding: "2.5rem", borderRadius: "20px", display: "flex", flexDirection: "column" }}>
-             {!feedback && !loading ? (
-               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.5, textAlign: "center" }}>
-                 <div style={{ fontSize: "48px", marginBottom: "1rem" }}>✨</div>
-                 <h3 style={{ margin: "0 0 8px", color: "#e2e8f0", fontSize: "1.2rem" }}>Awaiting Document</h3>
-                 <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.95rem", maxWidth: "250px" }}>Upload a PDF resume to generate a comprehensive AI breakdown.</p>
-               </div>
-             ) : loading ? (
+          {/* Right Column: Dynamic Feedback Section */}
+          <div className="glass-panel" style={{ flex: "1 1 50%", padding: "2.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+             
+             {/* 1. Empty State (Before Upload) */}
+             {!feedback && !loading && (
                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
-                 <div style={{ width: "40px", height: "40px", border: "3px solid rgba(255,63,129,0.3)", borderTop: "3px solid #ff3f81", borderRadius: "50%", animation: "spin 1s linear infinite", marginBottom: "1.5rem" }} />
-                 <h3 style={{ margin: "0 0 8px", color: "#e2e8f0", fontSize: "1.2rem", animation: "pulse-glow 1.5s infinite" }}>Scanning Document...</h3>
-                 <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.95rem" }}>Cross-referencing with industry standards.</p>
-                 <style>{`@keyframes pulse-glow { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }`}</style>
+                 
+                 {/* Abstract AI Core Visual */}
+                 <div style={{ position: "relative", width: "110px", height: "110px", marginBottom: "2.5rem" }}>
+                   <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%)", animation: "pulse-glow 3s infinite" }} />
+                   <div style={{ position: "absolute", inset: "15px", borderRadius: "50%", border: "2px dashed rgba(255,63,129,0.3)", animation: "spin 10s linear infinite" }} />
+                   <div style={{ position: "absolute", inset: "25px", borderRadius: "50%", border: "2px dashed rgba(124,58,237,0.4)", animation: "reverse-spin 15s linear infinite" }} />
+                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", fontSize: "2.5rem", zIndex: 2 }}>✨</div>
+                 </div>
+
+                 <h3 style={{ margin: "0 0 12px", color: "#e2e8f0", fontSize: "1.3rem", fontWeight: "800" }}>Ready for Analysis</h3>
+                 <p style={{ margin: "0 0 2rem", color: "#9b9ba8", fontSize: "0.95rem", maxWidth: "300px", lineHeight: "1.5" }}>Upload your resume to unlock a deep AI evaluation of your profile.</p>
+
+                 {/* Feature Pills */}
+                 <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center", maxWidth: "350px" }}>
+                   {["ATS Compatibility", "Impact Metrics", "Skill Gaps", "Action Verbs"].map((tag, i) => (
+                     <span key={i} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: "8px 16px", borderRadius: "20px", fontSize: "0.75rem", color: "#a78bfa", fontWeight: "600", boxShadow: "0 4px 10px rgba(0,0,0,0.2)" }}>
+                       {tag}
+                     </span>
+                   ))}
+                 </div>
                </div>
-             ) : (
+             )}
+
+             {/* 2. Loading State (Scanning Animation) */}
+             {loading && (
+               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
+                 
+                 {/* Scanning Document Animation */}
+                 <div style={{ position: "relative", width: "80px", height: "100px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", marginBottom: "2rem", overflow: "hidden" }}>
+                   {/* Laser line */}
+                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "#ff3f81", boxShadow: "0 0 15px 3px rgba(255,63,129,0.6)", animation: "scan 2s ease-in-out infinite alternate" }} />
+                   {/* Skeleton lines */}
+                   <div style={{ position: "absolute", top: "20px", left: "15px", right: "30px", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px" }} />
+                   <div style={{ position: "absolute", top: "35px", left: "15px", right: "15px", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px" }} />
+                   <div style={{ position: "absolute", top: "50px", left: "15px", right: "40px", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px" }} />
+                 </div>
+
+                 <h3 style={{ margin: "0 0 8px", color: "#e2e8f0", fontSize: "1.2rem", fontWeight: "700" }}>Extracting Data...</h3>
+                 <p style={{ margin: 0, color: "#ff7aab", fontSize: "0.85rem", fontWeight: "600", animation: "pulse-glow 1.5s infinite" }}>Running against ATS criteria</p>
+               </div>
+             )}
+
+             {/* 3. Success State (Parsed Feedback) */}
+             {feedback && !loading && (
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "2rem",
                   paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
