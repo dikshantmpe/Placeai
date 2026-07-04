@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from "./firebase.js"; 
+import { onAuthStateChanged } from "firebase/auth";
 
 // Helper function to load Vanta scripts safely
 function loadScript(src) {
@@ -19,18 +20,26 @@ function loadScript(src) {
   });
 }
 
+// Title Case Formatter
+const formatName = (name) => {
+  if (!name) return "Guest";
+  return name
+    .split(/[^a-zA-Z0-9]+/)
+    .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : "")
+    .join(" ");
+};
+
 const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
 const diffColor = { Easy: "#10b981", Medium: "#f59e0b", Hard: "#ef4444" };
 const diffBg = { Easy: "rgba(16, 185, 129, 0.15)", Medium: "rgba(245, 158, 11, 0.15)", Hard: "rgba(239, 68, 68, 0.15)" };
 
-// Generate 45 Dummy Questions for the fallback
 const generateDummyData = () => {
   return Array.from({ length: 45 }).map((_, i) => ({
     _id: `demo-${i}`,
     title: `Standard Technical Interview Problem ${i + 1}`,
     topic: topics[(i % (topics.length - 1)) + 1],
     difficulty: i % 4 === 0 ? "Hard" : i % 2 === 0 ? "Medium" : "Easy",
-    status: i % 5 === 0 // Make roughly 20% of them "Done"
+    status: i % 5 === 0 
   }));
 };
 
@@ -40,10 +49,26 @@ export default function DSATracker() {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState(null);
   
-  // Vanta.js Refs
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
+
+  // Authenticate User for Profile Pill
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) setFirebaseUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  let rawName = "Guest";
+  if (firebaseUser?.displayName) {
+    rawName = firebaseUser.displayName;
+  } else if (firebaseUser?.email) {
+    rawName = firebaseUser.email.split("@")[0];
+  }
+  const displayName = formatName(rawName);
 
   // Initialize Vanta.js Background
   useEffect(() => {
@@ -169,7 +194,6 @@ export default function DSATracker() {
       }} />
 
       <style>{`
-        /* Premium Translucent Glass Panels */
         .glass-panel {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
           backdrop-filter: blur(20px);
@@ -190,7 +214,6 @@ export default function DSATracker() {
           z-index: 10;
         }
 
-        /* Frosted Glass Pills for Topics */
         .topic-btn {
           background: rgba(255, 255, 255, 0.03);
           color: #9b9ba8;
@@ -220,7 +243,6 @@ export default function DSATracker() {
           transform: translateY(-2px);
         }
 
-        /* Sleek Table Rows */
         .table-row {
           display: grid;
           grid-template-columns: 44px 1fr 120px 100px 80px;
@@ -276,28 +298,42 @@ export default function DSATracker() {
           </div>
         )}
 
-        {/* Header */}
-        <header style={{ marginBottom: "0.5rem" }}>
-          <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "14px", letterSpacing: "-0.5px" }}>
-            <span style={{ width: "28px", height: "4px", background: "linear-gradient(90deg, #ff3f81, #7c3aed)", borderRadius: "2px" }}></span>
-            DSA <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Tracker</span>
-          </h2>
-          <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
+        {/* Unified Header with Profile Pill */}
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
+          <div>
+            <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "14px", letterSpacing: "-0.5px" }}>
+              <span style={{ width: "28px", height: "4px", background: "linear-gradient(90deg, #ff3f81, #7c3aed)", borderRadius: "2px" }}></span>
+              DSA <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Tracker</span>
+            </h2>
+            <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
+          </div>
+          
+          {/* Profile Pill restored! */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
+            backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
+            padding: "8px 16px", borderRadius: "100px"
+          }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
+            <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
+              {displayName} • Ready to work
+            </span>
+          </div>
         </header>
 
         {/* Stats Row */}
         <div className="dsa-stats-grid">
           {[
-            { label: "Total Solved", value: totalDone, total: problems.length, color: "#ff3f81", icon: "⟨/⟩" },
-            { label: `${filter} Solved`, value: doneCount, total: filtered.length, color: "#a78bfa", icon: "🎯" },
-            { label: "Completion", value: `${percent}%`, total: "done", color: "#10b981", icon: "📊" },
+            { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#ff3f81", icon: "⟨/⟩" },
+            { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#a78bfa", icon: "🎯" },
+            { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#10b981", icon: "📊" },
           ].map((s, i) => (
             <div key={i} className="glass-panel" style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "20px" }}>
               <div>
                 <p style={{ color: "#9b9ba8", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
                   <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "white", lineHeight: "1" }}>{s.value}</span>
-                  <span style={{ fontSize: "0.9rem", color: "#6b6b78", fontWeight: "600" }}>/ {s.total}</span>
+                  <span style={{ fontSize: "0.9rem", color: "#6b6b78", fontWeight: "600" }}>{s.total}</span>
                 </div>
               </div>
               <div style={{
