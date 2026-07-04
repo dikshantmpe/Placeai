@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { auth } from "../firebase.js"; // Importing auth directly to bypass missing props
-import { onAuthStateChanged } from "firebase/auth";
 
-// Helper function to load the background animation scripts
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -19,46 +16,22 @@ function loadScript(src) {
   });
 }
 
-// Javascript-based Title Case Formatter (No CSS hacks)
-const formatName = (name) => {
-  if (!name) return "Guest";
-  return name
-    .split(/[^a-zA-Z0-9]+/) // Splits cleanly by dots, underscores, or spaces
-    .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : "")
-    .join(" ");
-};
-
-export default function Home({ user: propUser }) {
+export default function Home({ user }) {
   const streak = parseInt(localStorage.getItem("streak") || "0");
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
-  
-  // Local state to store the true Firebase user
-  const [firebaseUser, setFirebaseUser] = useState(propUser || null);
 
-  // --- GUARANTEED FIREBASE USER FETCH ---
-  useEffect(() => {
-    // This listener guarantees we get the user even if the prop is missing in App.js
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setFirebaseUser(currentUser);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Safely extract name from the verified Firebase user
-  let rawName = "";
-  if (firebaseUser?.displayName) {
-    rawName = firebaseUser.displayName;
-  } else if (firebaseUser?.email) {
-    rawName = firebaseUser.email.split("@")[0];
+  // --- BULLETPROOF NAME EXTRACTION ---
+  let rawName = "Guest";
+  if (user?.displayName) {
+    rawName = user.displayName;
+  } else if (user?.email) {
+    rawName = user.email.split("@")[0].replace(/[._-]/g, " ");
   }
 
   const displayName = formatName(rawName);
 
-  // Initialize Vanta.js Background
   useEffect(() => {
     setMounted(true);
     let cancelled = false;
@@ -101,7 +74,6 @@ export default function Home({ user: propUser }) {
     };
   }, []);
 
-  // Data for the Stat Cards
   const stats = [
     { title: "DSA Problems", value: "0", sub: "/ 450", trend: "+0 this week", icon: "💻", color: "rgba(239, 68, 68, 0.15)", stroke: "#ef4444", textIcon: "↑" },
     { title: "Aptitude Quizzes", value: "0", sub: " Taken", trend: "+0 this week", icon: "🧠", color: "rgba(168, 85, 247, 0.15)", stroke: "#a855f7", textIcon: "↑" },
@@ -127,13 +99,12 @@ export default function Home({ user: propUser }) {
         style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
       />
       
-      {/* Lightened Gradient Overlay to let Vanta pop through */}
+      {/* Gradient Overlay */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
         background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(10,8,18,0.75) 80%)"
       }} />
 
-      {/* Embedded CSS for the Grid and Highly Translucent Glassmorphism */}
       <style>{`
         .bento-grid {
           display: grid;
@@ -143,7 +114,6 @@ export default function Home({ user: propUser }) {
           z-index: 10;
         }
 
-        /* Translucent Glossy Panels */
         .glass-panel {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
           backdrop-filter: blur(20px);
@@ -187,7 +157,6 @@ export default function Home({ user: propUser }) {
           0% { stroke-dasharray: 0 100; }
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 1200px) {
           .bento-hero { grid-column: span 12 !important; }
           .bento-progress { grid-column: span 12 !important; display: flex; flex-direction: row !important; align-items: center; justify-content: space-around; }
@@ -208,7 +177,7 @@ export default function Home({ user: propUser }) {
           <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Your AI-driven placement roadmap.</p>
         </div>
         
-        {/* Profile Pill - Completely Cleaned Up */}
+        {/* Profile Pill - CSS Capitalization Applied Here */}
         <div style={{
           display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
           backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
@@ -218,9 +187,10 @@ export default function Home({ user: propUser }) {
           <span style={{ 
             fontSize: "0.85rem", 
             fontWeight: "600", 
-            color: "#e2e8f0" 
+            color: "#e2e8f0",
+            textTransform: "capitalize" /* Forces Title Case via CSS */
           }}>
-            {displayName} • Ready to work
+            {rawName} • Ready to work
           </span>
         </div>
       </header>
@@ -228,9 +198,8 @@ export default function Home({ user: propUser }) {
       {/* Bento Grid Container */}
       <div className="bento-grid">
         
-        {/* 1. Main Hero Panel (Span 8) */}
+        {/* 1. Main Hero Panel */}
         <div className="glass-panel bento-hero" style={{ gridColumn: "span 8", position: "relative", overflow: "hidden" }}>
-          {/* Subtle Pink Glow in the right corner */}
           <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(255,63,129,0.15), transparent 70%)", pointerEvents: "none" }} />
           
           <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", alignItems: "flex-start" }}>
@@ -275,12 +244,11 @@ export default function Home({ user: propUser }) {
           </div>
         </div>
 
-        {/* 2. Overall Progress Panel (Span 4) */}
+        {/* 2. Overall Progress Panel */}
         <div className="glass-panel bento-progress" style={{ gridColumn: "span 4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
           <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 2rem 0", color: "#e2e8f0" }}>Readiness Score</h3>
           
           <div style={{ position: "relative", width: "160px", height: "160px" }}>
-            {/* SVG Circular Progress Bar */}
             <svg viewBox="0 0 36 36" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
               <path 
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
@@ -299,8 +267,6 @@ export default function Home({ user: propUser }) {
                 </linearGradient>
               </defs>
             </svg>
-            
-            {/* Center Percentage Text */}
             <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "white", lineHeight: "1" }}>
                 35<span style={{ fontSize: "1.2rem", color: "#9b9ba8" }}>%</span>
@@ -313,7 +279,7 @@ export default function Home({ user: propUser }) {
           </p>
         </div>
 
-        {/* 3. Small Stat Cards (Span 3 each) */}
+        {/* 3. Small Stat Cards */}
         {stats.map((stat, i) => (
           <div key={i} className="glass-panel bento-stat" style={{ gridColumn: "span 3", padding: "1.5rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
@@ -336,7 +302,7 @@ export default function Home({ user: propUser }) {
           </div>
         ))}
 
-        {/* 4. Actionable Next Steps (Span 12) */}
+        {/* 4. Actionable Next Steps */}
         <div style={{ gridColumn: "span 12", marginTop: "1rem" }}>
           <h3 style={{ fontSize: "1.4rem", fontWeight: "800", margin: "0 0 1.5rem 0", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ width: "4px", height: "20px", background: "#ff3f81", borderRadius: "4px" }} />
@@ -345,7 +311,6 @@ export default function Home({ user: propUser }) {
           
           <div className="action-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
             
-            {/* Action Card 1 */}
             <Link to="/dsa" className="glass-panel" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", textDecoration: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div style={{ background: "rgba(239, 68, 68, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#fca5a5", fontSize: "0.8rem", fontWeight: "700" }}>HIGH PRIORITY</div>
@@ -358,7 +323,6 @@ export default function Home({ user: propUser }) {
               </div>
             </Link>
 
-            {/* Action Card 2 */}
             <Link to="/resume" className="glass-panel" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", textDecoration: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#93c5fd", fontSize: "0.8rem", fontWeight: "700" }}>QUICK WIN</div>
@@ -371,7 +335,6 @@ export default function Home({ user: propUser }) {
               </div>
             </Link>
 
-            {/* Action Card 3 */}
             <Link to="/interview" className="glass-panel" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", textDecoration: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
                 <div style={{ background: "rgba(168, 85, 247, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#d8b4fe", fontSize: "0.8rem", fontWeight: "700" }}>PRACTICE</div>
