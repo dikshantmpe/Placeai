@@ -120,10 +120,10 @@ export default function DSATracker() {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        let token = localStorage.getItem("token");
-        if (auth.currentUser) {
-          token = await auth.currentUser.getIdToken();
-        }
+        // IMPORTANT: this backend only understands its own custom JWT
+        // (issued by /api/auth/login, /api/auth/register, /api/auth/google),
+        // NOT a raw Firebase ID token. Always use the JWT saved in localStorage.
+        const token = localStorage.getItem("token");
 
         const res = await axios.get("https://placeai-sqjj.onrender.com/api/problems", {
           headers: { Authorization: `Bearer ${token}` }
@@ -147,8 +147,7 @@ export default function DSATracker() {
     if (isDemoMode) return; 
 
     try {
-      let token = localStorage.getItem("token");
-      if (auth.currentUser) token = await auth.currentUser.getIdToken();
+      const token = localStorage.getItem("token");
       
       await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }

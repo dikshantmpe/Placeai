@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import { auth } from "./firebase.js"; 
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
@@ -88,10 +89,20 @@ export default function Signup() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       await updateProfile(userCredential.user, {
         displayName: name
       });
+
+      // Exchange the newly created Firebase identity for your backend's JWT
+      // so API calls (e.g. DSATracker fetching /api/problems) can authenticate.
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
+        name: name,
+        email: email,
+        avatar: userCredential.user.photoURL || "",
+      });
+
+      localStorage.setItem("token", res.data.token);
 
       navigate("/dashboard");
     } catch (err) {
@@ -112,9 +123,21 @@ export default function Signup() {
     setError("");
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
-    
+
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      // Exchange the Firebase identity for your backend's JWT so API calls
+      // (e.g. DSATracker fetching /api/problems) can authenticate.
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
+        name: firebaseUser.displayName || firebaseUser.email.split("@")[0],
+        email: firebaseUser.email,
+        avatar: firebaseUser.photoURL || "",
+      });
+
+      localStorage.setItem("token", res.data.token);
+
       navigate("/dashboard");
     } catch (err) {
       console.error(err);

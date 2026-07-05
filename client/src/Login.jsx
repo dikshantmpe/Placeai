@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 // --- FIREBASE IMPORTS ---
 import { auth } from "./firebase.js"; 
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
@@ -137,7 +138,19 @@ export default function Login({ setUser }) {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setUser(userCredential.user);
+      const firebaseUser = userCredential.user;
+
+      // Exchange Firebase identity for your backend's JWT so API calls
+      // (e.g. DSATracker fetching /api/problems) can authenticate.
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
+        name: firebaseUser.displayName || firebaseUser.email.split("@")[0],
+        email: firebaseUser.email,
+        avatar: firebaseUser.photoURL || "",
+      });
+
+      localStorage.setItem("token", res.data.token);
+
+      setUser(firebaseUser);
       navigate("/", { replace: true }); // <--- CHANGED TO "/"
     } catch (err) {
       console.log(err.code);
@@ -171,9 +184,20 @@ export default function Login({ setUser }) {
       provider.setCustomParameters({ prompt: 'select_account' });
       
       const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      // Exchange Firebase identity for your backend's JWT so API calls
+      // (e.g. DSATracker fetching /api/problems) can authenticate.
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
+        name: firebaseUser.displayName || firebaseUser.email.split("@")[0],
+        email: firebaseUser.email,
+        avatar: firebaseUser.photoURL || "",
+      });
+
+      localStorage.setItem("token", res.data.token);
       
-      console.log("✅ Google Auth Successful:", result.user.email);
-      setUser(result.user);
+      console.log("✅ Google Auth Successful:", firebaseUser.email);
+      setUser(firebaseUser);
       navigate("/", { replace: true }); // <--- CHANGED TO "/"
       
     } catch (err) {
