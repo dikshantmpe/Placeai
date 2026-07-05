@@ -64,7 +64,7 @@ Constraints:
   },
   {
     title: "Valid Anagram",
-    topic: "Strings",
+    topic: "Arrays",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/valid-anagram/",
     description: `Given two strings s and t, return true if t is an anagram of s, and false otherwise.
@@ -81,7 +81,7 @@ Constraints:
   },
   {
     title: "Valid Parentheses",
-    topic: "Strings",
+    topic: "Stack",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/valid-parentheses/",
     description: `Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
@@ -156,7 +156,7 @@ Constraints:
   },
   {
     title: "Reverse Linked List",
-    topic: "Linked Lists",
+    topic: "Linked List",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/reverse-linked-list/",
     description: `Given the head of a singly linked list, reverse the list, and return the reversed list.
@@ -171,7 +171,7 @@ Constraints:
   },
   {
     title: "Linked List Cycle",
-    topic: "Linked Lists",
+    topic: "Linked List",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/linked-list-cycle/",
     description: `Given head, the head of a linked list, determine if the linked list has a cycle in it.
@@ -187,7 +187,7 @@ Explanation: There is a cycle in the linked list, where the tail connects to the
   },
   {
     title: "Merge Two Sorted Lists",
-    topic: "Linked Lists",
+    topic: "Linked List",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/merge-two-sorted-lists/",
     description: `You are given the heads of two sorted linked lists list1 and list2.
@@ -267,7 +267,7 @@ Explanation: The LCA of nodes 2 and 8 is 6.`
   },
   {
     title: "Climbing Stairs",
-    topic: "Dynamic Programming",
+    topic: "DP",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/climbing-stairs/",
     description: `You are climbing a staircase. It takes n steps to reach the top.
@@ -286,7 +286,7 @@ Constraints:
   },
   {
     title: "Coin Change",
-    topic: "Dynamic Programming",
+    topic: "DP",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/coin-change/",
     description: `You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
@@ -307,7 +307,7 @@ Constraints:
   },
   {
     title: "Longest Increasing Subsequence",
-    topic: "Dynamic Programming",
+    topic: "DP",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/longest-increasing-subsequence/",
     description: `Given an integer array nums, return the length of the longest strictly increasing subsequence.
@@ -371,7 +371,7 @@ Constraints:
 const moreProblems = [
   {
     title: "3Sum",
-    topic: "Two Pointers",
+    topic: "Arrays",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/3sum/",
     description: `Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
@@ -384,7 +384,7 @@ Output: [[-1,-1,2],[-1,0,1]]`
   },
   {
     title: "Container With Most Water",
-    topic: "Two Pointers",
+    topic: "Arrays",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/container-with-most-water/",
     description: `You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
@@ -397,7 +397,7 @@ Output: 49`
   },
   {
     title: "Longest Substring Without Repeating Characters",
-    topic: "Sliding Window",
+    topic: "Arrays",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
     description: `Given a string s, find the length of the longest substring without repeating characters.
@@ -409,7 +409,7 @@ Explanation: The answer is "abc", with the length of 3.`
   },
   {
     title: "Valid Palindrome",
-    topic: "Two Pointers",
+    topic: "Arrays",
     difficulty: "Easy",
     link: "https://leetcode.com/problems/valid-palindrome/",
     description: `A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.
@@ -420,7 +420,7 @@ Output: true`
   },
   {
     title: "Minimum Window Substring",
-    topic: "Sliding Window",
+    topic: "Arrays",
     difficulty: "Hard",
     link: "https://leetcode.com/problems/minimum-window-substring/",
     description: `Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such substring, return the empty string "".
@@ -479,7 +479,7 @@ Output: 1`
   },
   {
     title: "Remove Nth Node From End of List",
-    topic: "Linked Lists",
+    topic: "Linked List",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
     description: `Given the head of a linked list, remove the nth node from the end of the list and return its head.
@@ -490,7 +490,7 @@ Output: [1,2,3,5]`
   },
   {
     title: "Reorder List",
-    topic: "Linked Lists",
+    topic: "Linked List",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/reorder-list/",
     description: `You are given the head of a singly linked-list. The list can be represented as:
@@ -527,7 +527,7 @@ Output: true`
   },
   {
     title: "Implement Trie (Prefix Tree)",
-    topic: "Tries",
+    topic: "Trees",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/implement-trie-prefix-tree/",
     description: `A trie (pronounced as "try") or prefix tree is a tree data structure used to efficiently store and retrieve keys in a dataset of strings.
@@ -540,7 +540,7 @@ trie.search("apple");   // return True`
   },
   {
     title: "Top K Frequent Elements",
-    topic: "Heaps",
+    topic: "Stack",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/top-k-frequent-elements/",
     description: `Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.
@@ -551,7 +551,7 @@ Output: [1,2]`
   },
   {
     title: "Kth Largest Element in an Array",
-    topic: "Heaps",
+    topic: "Stack",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/kth-largest-element-in-an-array/",
     description: `Given an integer array nums and an integer k, return the kth largest element in the array.
@@ -563,7 +563,7 @@ Output: 5`
   },
   {
     title: "Combination Sum",
-    topic: "Backtracking",
+    topic: "Graphs",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/combination-sum/",
     description: `Given an array of distinct integers candidates and a target integer target, return a list of all unique combinations of candidates where the chosen numbers sum to target.
@@ -574,7 +574,7 @@ Output: [[2,2,3],[7]]`
   },
   {
     title: "Word Search",
-    topic: "Backtracking",
+    topic: "Graphs",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/word-search/",
     description: `Given an m x n grid of characters board and a string word, return true if word exists in the grid.
@@ -611,7 +611,7 @@ Output: true`
   },
   {
     title: "House Robber",
-    topic: "Dynamic Programming",
+    topic: "DP",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/house-robber/",
     description: `You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected.
@@ -624,7 +624,7 @@ Output: 4`
   },
   {
     title: "Decode Ways",
-    topic: "Dynamic Programming",
+    topic: "DP",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/decode-ways/",
     description: `A message containing letters from A-Z can be encoded into numbers using the following mapping:
@@ -639,7 +639,7 @@ Explanation: "12" could be decoded as "AB" (1 2) or "L" (12).`
   },
   {
     title: "Unique Paths",
-    topic: "Dynamic Programming",
+    topic: "DP",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/unique-paths/",
     description: `There is a robot on an m x n grid. The robot is initially located at the top-left corner (i.e., grid[0][0]). The robot tries to move to the bottom-right corner (i.e., grid[m - 1][n - 1]). The robot can only move either down or right at any point in time.
@@ -652,7 +652,7 @@ Output: 28`
   },
   {
     title: "Jump Game",
-    topic: "Greedy",
+    topic: "DP",
     difficulty: "Medium",
     link: "https://leetcode.com/problems/jump-game/",
     description: `You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
@@ -681,7 +681,7 @@ Output: [[1,5],[6,9]]`
 async function seedProblems() {
   try {
     const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
-    
+
     if (!mongoUri) {
       console.error("❌ MONGO_URI or MONGODB_URI not found in .env file");
       console.error("Make sure your .env file exists in the backend folder with MONGO_URI or MONGODB_URI set.");
@@ -690,16 +690,14 @@ async function seedProblems() {
 
     console.log("🔗 Connecting to MongoDB...");
     await mongoose.connect(mongoUri);
-    
+
     console.log("📝 Seeding problems...");
 
-      // ADD THESE TWO LINES HERE:
-      await Problem.deleteMany({});
-      console.log("🗑️ Cleared old problems without descriptions");
+    await Problem.deleteMany({});
+    console.log("🗑️ Cleared old problems without descriptions");
 
-      // Keep your existing insert line right below it:
-      const result = await Problem.insertMany([...problemsData, ...moreProblems]);
-    
+    const result = await Problem.insertMany([...problemsData, ...moreProblems]);
+
     console.log(`✅ Successfully seeded ${result.length} problems!`);
     await mongoose.disconnect();
     process.exit(0);
