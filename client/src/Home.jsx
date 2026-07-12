@@ -125,25 +125,16 @@ export default function Home({ user: propUser }) {
     { title: "Daily Streak", value: streak, sub: " Days", trend: "Keep it up! 🔥", icon: "🔥", color: "rgba(245, 158, 11, 0.15)", stroke: "#f59e0b", textIcon: "" }
   ];
 
-  const sidebarLinks = [
-    { name: "Home", icon: "🏠", active: true },
-    { name: "Dashboard", icon: "📊", active: false },
-    { name: "DSA Tracker", icon: "💻", active: false },
-    { name: "Resume Analyzer", icon: "📄", active: false },
-    { name: "Mock Interview", icon: "🎤", active: false },
-    { name: "Aptitude Quiz", icon: "🧠", active: false },
-    { name: "Company Questions", icon: "🏢", active: false },
-    { name: "Daily Challenge", icon: "🔥", active: false },
-  ];
-
   return (
     <div style={{
-      display: "flex",
+      flex: 1,
       minHeight: "100vh",
       position: "relative",
+      padding: "2.5rem 3rem",
       color: "#ffffff",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      overflow: "hidden",
+      overflowY: "auto",
+      overflowX: "hidden",
       background: "#070b14"
     }}>
       <style>{`
@@ -183,28 +174,6 @@ export default function Home({ user: propUser }) {
         }
         .stat-icon {
           transition: transform 0.3s ease;
-        }
-        .sidebar-link {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          border-radius: 12px;
-          color: #94a3b8;
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        .sidebar-link:hover {
-          background: rgba(59, 130, 246, 0.1);
-          color: #e2e8f0;
-        }
-        .sidebar-link.active {
-          background: rgba(59, 130, 246, 0.15);
-          border: 1px solid rgba(59, 130, 246, 0.25);
-          color: #60a5fa;
         }
         .brand-btn {
           background: linear-gradient(135deg, #2563eb, #3b82f6);
@@ -288,11 +257,9 @@ export default function Home({ user: propUser }) {
         @media (max-width: 768px) {
           .bento-stat { grid-column: span 12 !important; }
           .action-card-grid { grid-template-columns: 1fr !important; }
-          .sidebar { display: none !important; }
         }
       `}</style>
 
-      {/* Vanta Background */}
       <div 
         ref={vantaRef} 
         style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
@@ -302,289 +269,207 @@ export default function Home({ user: propUser }) {
         background: "radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 60%)"
       }} />
 
-      {/* SIDEBAR */}
-      <aside className="sidebar" style={{
-        width: "260px",
-        flexShrink: 0,
-        background: "rgba(15, 23, 42, 0.4)",
-        backdropFilter: "blur(24px)",
-        borderRight: "1px solid rgba(255, 255, 255, 0.06)",
-        padding: "1.5rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        zIndex: 10,
-        position: "relative"
-      }}>
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem", paddingLeft: "4px" }}>
-          <div style={{
-            width: "36px", height: "36px", borderRadius: "10px",
-            background: "linear-gradient(135deg, #1e40af, #3b82f6)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: "800", fontSize: "1rem", color: "white"
-          }}>
-            C
-          </div>
-          <div style={{ fontWeight: "700", fontSize: "1.1rem" }}>Crackin <span style={{ color: "#3b82f6" }}>AI</span></div>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem", position: "relative", zIndex: 10 }}>
+        <div>
+          <h1 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
+            Command Center
+          </h1>
+          <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Your AI-driven placement roadmap.</p>
         </div>
 
-        {/* Nav Links */}
-        {sidebarLinks.map((link) => (
-          <div key={link.name} className={`sidebar-link ${link.active ? "active" : ""}`}>
-            <span style={{ fontSize: "1.1rem" }}>{link.icon}</span>
-            <span>{link.name}</span>
-          </div>
-        ))}
-
-        {/* Go Pro Card */}
         <div style={{
-          marginTop: "auto",
-          background: "rgba(59, 130, 246, 0.08)",
-          border: "1px solid rgba(59, 130, 246, 0.15)",
-          borderRadius: "16px",
-          padding: "1.25rem",
-          marginBottom: "1rem"
+          display: "flex", alignItems: "center", gap: "12px",
+          background: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.08)", 
+          padding: "8px 16px", borderRadius: "100px"
         }}>
-          <div style={{ fontSize: "1.2rem", marginBottom: "4px" }}>👑</div>
-          <div style={{ fontWeight: "700", fontSize: "0.95rem", marginBottom: "4px" }}>Go Pro</div>
-          <div style={{ color: "#64748b", fontSize: "0.8rem", marginBottom: "1rem", lineHeight: "1.4" }}>
-            Unlock premium AI features and exclusive content.
-          </div>
-          <button style={{
-            width: "100%", padding: "10px", borderRadius: "10px",
-            background: "linear-gradient(135deg, #2563eb, #3b82f6)",
-            border: "none", color: "white", fontWeight: "600", fontSize: "0.85rem",
-            cursor: "pointer", transition: "all 0.2s ease"
-          }}>
-            Upgrade Now
-          </button>
+          <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px #22c55e" }} />
+          <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
+            {displayName} • Ready to work
+          </span>
         </div>
+      </header>
 
-        {/* Logout */}
-        <div className="sidebar-link" style={{ color: "#64748b" }}>
-          <span>↪</span>
-          <span>Logout</span>
-        </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <main style={{
-        flex: 1,
-        padding: "2rem 2.5rem",
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(12, 1fr)",
+        gap: "1.5rem",
         position: "relative",
-        zIndex: 10,
-        overflowY: "auto",
-        overflowX: "hidden"
+        zIndex: 10
       }}>
 
-        {/* Top Header */}
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-          <div>
-            <h1 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 0.25rem 0", letterSpacing: "-0.02em" }}>
-              Command Center
-            </h1>
-            <p style={{ color: "#64748b", margin: 0, fontSize: "0.95rem" }}>Your AI-driven placement roadmap.</p>
-          </div>
+        <div style={{ gridColumn: "span 8", perspective: "1200px" }}>
+          <div
+            ref={heroPanelRef}
+            onMouseEnter={handleHeroEnter}
+            onMouseMove={handleHeroMove}
+            onMouseLeave={handleHeroLeave}
+            className="hero-tilt glass-panel"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              transform: `rotateX(${heroTilt.rotateX}deg) rotateY(${heroTilt.rotateY}deg) translateZ(0)`,
+              willChange: "transform"
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(59,130,246,0.12), transparent 70%)", pointerEvents: "none" }} />
 
-          <div style={{
-            display: "flex", alignItems: "center", gap: "12px",
-            background: "rgba(15, 23, 42, 0.6)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255, 255, 255, 0.08)", 
-            padding: "8px 16px", borderRadius: "100px"
-          }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px #22c55e" }} />
-            <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
-              {displayName} • Ready to work
-            </span>
-          </div>
-        </header>
+            <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", alignItems: "flex-start" }}>
+              <div style={{ 
+                display: "inline-flex", alignItems: "center", gap: "8px",
+                background: "rgba(59, 130, 246, 0.1)", 
+                border: "1px solid rgba(59, 130, 246, 0.2)",
+                padding: "6px 14px", borderRadius: "8px", 
+                color: "#60a5fa", fontSize: "0.75rem", fontWeight: "700",
+                textTransform: "uppercase", letterSpacing: "0.05em",
+                marginBottom: "1.5rem" 
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                AI Placement Strategy
+              </div>
 
-        {/* Bento Grid */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, 1fr)",
-          gap: "1.5rem"
-        }}>
+              <h2 style={{ fontSize: "2.5rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0" }}>
+                Accelerate Your <br/>
+                <span style={{ color: "#3b82f6" }}>Placement Journey</span>
+              </h2>
 
-          {/* Hero Panel with Tilt */}
-          <div style={{ gridColumn: "span 8", perspective: "1200px" }}>
-            <div
-              ref={heroPanelRef}
-              onMouseEnter={handleHeroEnter}
-              onMouseMove={handleHeroMove}
-              onMouseLeave={handleHeroLeave}
-              className="hero-tilt glass-panel"
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                transform: `rotateX(${heroTilt.rotateX}deg) rotateY(${heroTilt.rotateY}deg) translateZ(0)`,
-                willChange: "transform"
-              }}
-            >
-              {/* Blue glow in corner */}
-              <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(59,130,246,0.12), transparent 70%)", pointerEvents: "none" }} />
+              <p style={{ color: "#94a3b8", fontSize: "1.05rem", maxWidth: "450px", lineHeight: "1.6", margin: "0 0 2.5rem 0" }}>
+                Your personalized AI command center. Leverage smart tools, track real-time progress, and master technical skills to crack your dream company.
+              </p>
 
-              <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", alignItems: "flex-start" }}>
-                <div style={{ 
-                  display: "inline-flex", alignItems: "center", gap: "8px",
-                  background: "rgba(59, 130, 246, 0.1)", 
-                  border: "1px solid rgba(59, 130, 246, 0.2)",
-                  padding: "6px 14px", borderRadius: "8px", 
-                  color: "#60a5fa", fontSize: "0.75rem", fontWeight: "700",
-                  textTransform: "uppercase", letterSpacing: "0.05em",
-                  marginBottom: "1.5rem" 
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  AI Placement Strategy
-                </div>
-
-                <h2 style={{ fontSize: "2.2rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0" }}>
-                  Accelerate Your <br/>
-                  <span style={{ color: "#3b82f6" }}>Placement Journey</span>
-                </h2>
-
-                <p style={{ color: "#94a3b8", fontSize: "1rem", maxWidth: "450px", lineHeight: "1.6", margin: "0 0 2rem 0" }}>
-                  Your personalized AI command center. Leverage smart tools, track real-time progress, and master technical skills to crack your dream company.
-                </p>
-
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  <Link to="/dsa" style={{ textDecoration: "none" }}>
-                    <button className="brand-btn">
-                      Start Practicing
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                  </Link>
-                  <Link to="/dashboard" style={{ textDecoration: "none" }}>
-                    <button style={{
-                      background: "rgba(15, 23, 42, 0.6)", color: "#e2e8f0",
-                      border: "1px solid rgba(255, 255, 255, 0.1)", padding: "14px 28px", borderRadius: "12px",
-                      fontWeight: "600", fontSize: "1rem", cursor: "pointer",
-                      backdropFilter: "blur(8px)", transition: "all 0.2s ease"
-                    }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(15, 23, 42, 0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }} onMouseLeave={e => { e.currentTarget.style.background = "rgba(15, 23, 42, 0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
-                      View Analytics
-                    </button>
-                  </Link>
-                </div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <Link to="/dsa" style={{ textDecoration: "none" }}>
+                  <button className="brand-btn">
+                    Start Practicing
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </Link>
+                <Link to="/dashboard" style={{ textDecoration: "none" }}>
+                  <button style={{
+                    background: "rgba(15, 23, 42, 0.6)", color: "#e2e8f0",
+                    border: "1px solid rgba(255, 255, 255, 0.1)", padding: "14px 28px", borderRadius: "12px",
+                    fontWeight: "600", fontSize: "1rem", cursor: "pointer",
+                    backdropFilter: "blur(8px)", transition: "all 0.2s ease"
+                  }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(15, 23, 42, 0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }} onMouseLeave={e => { e.currentTarget.style.background = "rgba(15, 23, 42, 0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
+                    View Analytics
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
-
-          {/* Readiness Score */}
-          <div className="glass-panel bento-progress" style={{ gridColumn: "span 4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 2rem 0", color: "#e2e8f0" }}>Readiness Score</h3>
-
-            <div style={{ position: "relative", width: "160px", height: "160px" }}>
-              <svg viewBox="0 0 36 36" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
-                <path 
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                  fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" 
-                />
-                <path 
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                  fill="none" stroke="url(#progressGradient)" strokeWidth="3" 
-                  strokeDasharray="35, 100" 
-                  style={{ animation: "progress 2s ease-out forwards" }} 
-                />
-                <defs>
-                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#2563eb" />
-                    <stop offset="100%" stopColor="#3b82f6" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "white", lineHeight: "1" }}>
-                  35<span style={{ fontSize: "1.2rem", color: "#64748b" }}>%</span>
-                </span>
-              </div>
-            </div>
-
-            <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: "1.5rem 0 0 0", lineHeight: "1.5" }}>
-              You are <strong style={{ color: "#3b82f6" }}>15% closer</strong> to your goal this week. Keep going!
-            </p>
-          </div>
-
-          {/* Stat Cards */}
-          {stats.map((stat, i) => {
-            const floatClass = i === 0 ? "float-anim" : i === 1 ? "float-anim-d1" : i === 2 ? "float-anim-d2" : "float-anim-d3";
-            return (
-              <div key={i} className={`stat-card ${floatClass}`} style={{ gridColumn: "span 3" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                  <div className="stat-icon" style={{
-                    width: "42px", height: "42px", borderRadius: "12px",
-                    background: stat.color, border: `1px solid ${stat.stroke}40`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "1.2rem", boxShadow: `0 0 15px ${stat.color}`
-                  }}>
-                    {stat.icon}
-                  </div>
-                </div>
-                <h4 style={{ color: "#64748b", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 0.5rem 0", fontWeight: "600" }}>{stat.title}</h4>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
-                  <span style={{ fontSize: "2rem", fontWeight: "800", color: "white" }}>{stat.value}</span>
-                  <span style={{ color: "#475569", fontSize: "0.9rem", fontWeight: "600" }}>{stat.sub}</span>
-                </div>
-                <div style={{ color: "#22c55e", fontSize: "0.8rem", fontWeight: "600", marginTop: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
-                   <span style={{ fontSize: "1rem" }}>{stat.textIcon}</span>
-                   {stat.trend}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* AI Recommended */}
-          <div style={{ gridColumn: "span 12", marginTop: "0.5rem" }}>
-            <h3 style={{ fontSize: "1.3rem", fontWeight: "800", margin: "0 0 1.5rem 0", display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ width: "4px", height: "20px", background: "#3b82f6", borderRadius: "4px" }} />
-              AI Recommended For You
-            </h3>
-
-            <div className="action-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
-
-              <Link to="/dsa" className="action-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                  <div style={{ background: "rgba(239, 68, 68, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#fca5a5", fontSize: "0.75rem", fontWeight: "700" }}>HIGH PRIORITY</div>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-                <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Mastering Arrays</h4>
-                <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>You missed 2 questions on Two Pointers yesterday. Review this pattern to boost your DSA score.</p>
-                <div className="action-arrow" style={{ marginTop: "auto", color: "#3b82f6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
-                  Start Module <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-              </Link>
-
-              <Link to="/resume" className="action-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                  <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#93c5fd", fontSize: "0.75rem", fontWeight: "700" }}>QUICK WIN</div>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-                <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Scan Your Resume</h4>
-                <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>Upload your latest PDF to check ATS compatibility and get AI formatting feedback.</p>
-                <div className="action-arrow" style={{ marginTop: "auto", color: "#3b82f6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
-                  Analyze Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-              </Link>
-
-              <Link to="/interview" className="action-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                  <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#d8b4fe", fontSize: "0.75rem", fontWeight: "700" }}>PRACTICE</div>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-                <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Behavioral Mock</h4>
-                <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>Practice the "Tell me about yourself" pitch with our voice AI before real interviews.</p>
-                <div className="action-arrow" style={{ marginTop: "auto", color: "#8b5cf6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
-                  Start Interview <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-              </Link>
-
-            </div>
-          </div>
-
         </div>
-      </main>
+
+        <div className="glass-panel bento-progress" style={{ gridColumn: "span 4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 2rem 0", color: "#e2e8f0" }}>Readiness Score</h3>
+
+          <div style={{ position: "relative", width: "160px", height: "160px" }}>
+            <svg viewBox="0 0 36 36" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
+              <path 
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" 
+              />
+              <path 
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                fill="none" stroke="url(#progressGradient)" strokeWidth="3" 
+                strokeDasharray="35, 100" 
+                style={{ animation: "progress 2s ease-out forwards" }} 
+              />
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#2563eb" />
+                  <stop offset="100%" stopColor="#3b82f6" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "white", lineHeight: "1" }}>
+                35<span style={{ fontSize: "1.2rem", color: "#64748b" }}>%</span>
+              </span>
+            </div>
+          </div>
+
+          <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: "1.5rem 0 0 0", lineHeight: "1.5" }}>
+            You are <strong style={{ color: "#3b82f6" }}>15% closer</strong> to your goal this week. Keep going!
+          </p>
+        </div>
+
+        {stats.map((stat, i) => {
+          const floatClass = i === 0 ? "float-anim" : i === 1 ? "float-anim-d1" : i === 2 ? "float-anim-d2" : "float-anim-d3";
+          return (
+            <div key={i} className={`stat-card ${floatClass}`} style={{ gridColumn: "span 3" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+                <div className="stat-icon" style={{
+                  width: "42px", height: "42px", borderRadius: "12px",
+                  background: stat.color, border: `1px solid ${stat.stroke}40`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.2rem", boxShadow: `0 0 15px ${stat.color}`
+                }}>
+                  {stat.icon}
+                </div>
+              </div>
+              <h4 style={{ color: "#64748b", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 0.5rem 0", fontWeight: "600" }}>{stat.title}</h4>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+                <span style={{ fontSize: "2rem", fontWeight: "800", color: "white" }}>{stat.value}</span>
+                <span style={{ color: "#475569", fontSize: "0.9rem", fontWeight: "600" }}>{stat.sub}</span>
+              </div>
+              <div style={{ color: "#22c55e", fontSize: "0.8rem", fontWeight: "600", marginTop: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
+                 <span style={{ fontSize: "1rem" }}>{stat.textIcon}</span>
+                 {stat.trend}
+              </div>
+            </div>
+          );
+        })}
+
+        <div style={{ gridColumn: "span 12", marginTop: "0.5rem" }}>
+          <h3 style={{ fontSize: "1.3rem", fontWeight: "800", margin: "0 0 1.5rem 0", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ width: "4px", height: "20px", background: "#3b82f6", borderRadius: "4px" }} />
+            AI Recommended For You
+          </h3>
+
+          <div className="action-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
+
+            <Link to="/dsa" className="action-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+                <div style={{ background: "rgba(239, 68, 68, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#fca5a5", fontSize: "0.75rem", fontWeight: "700" }}>HIGH PRIORITY</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+              <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Mastering Arrays</h4>
+              <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>You missed 2 questions on Two Pointers yesterday. Review this pattern to boost your DSA score.</p>
+              <div className="action-arrow" style={{ marginTop: "auto", color: "#3b82f6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+                Start Module <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </Link>
+
+            <Link to="/resume" className="action-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+                <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#93c5fd", fontSize: "0.75rem", fontWeight: "700" }}>QUICK WIN</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+              <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Scan Your Resume</h4>
+              <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>Upload your latest PDF to check ATS compatibility and get AI formatting feedback.</p>
+              <div className="action-arrow" style={{ marginTop: "auto", color: "#3b82f6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+                Analyze Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </Link>
+
+            <Link to="/interview" className="action-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+                <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#d8b4fe", fontSize: "0.75rem", fontWeight: "700" }}>PRACTICE</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+              <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Behavioral Mock</h4>
+              <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>Practice the "Tell me about yourself" pitch with our voice AI before real interviews.</p>
+              <div className="action-arrow" style={{ marginTop: "auto", color: "#8b5cf6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+                Start Interview <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </Link>
+
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
