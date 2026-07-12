@@ -66,12 +66,11 @@ export default function Login({ setUser }) {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
   const [hoveredCube, setHoveredCube] = useState(null);
-
-  // Tilt state: default left side inwards
+  
   const [tilt, setTilt] = useState({ rotateX: 2, rotateY: -8 });
   const [isPanelHovered, setIsPanelHovered] = useState(false);
   const loginPanelRef = useRef(null);
-
+  
   const navigate = useNavigate();
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
@@ -83,7 +82,6 @@ export default function Login({ setUser }) {
   ];
   const { displayedText } = useTypingEffect(taglines, 60, 2500);
 
-  // Clear autofill on mount
   useEffect(() => {
     setMounted(true);
     const timer = setTimeout(() => {
@@ -97,7 +95,6 @@ export default function Login({ setUser }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -110,7 +107,6 @@ export default function Login({ setUser }) {
     return () => unsubscribe();
   }, [navigate, setUser]);
 
-  // Vanta initialization - BLUE THEME
   useEffect(() => {
     let cancelled = false;
     async function initVanta() {
@@ -165,10 +161,9 @@ export default function Login({ setUser }) {
     };
   }, []);
 
-  // Tilt effect: default left side inwards, flatten on hover
   const handleMouseEnter = useCallback(() => {
     setIsPanelHovered(true);
-    setTilt({ rotateX: 0, rotateY: 0 }); // Flatten
+    setTilt({ rotateX: 0, rotateY: 0 });
   }, []);
 
   const handleMouseMove = useCallback((e) => {
@@ -178,7 +173,6 @@ export default function Login({ setUser }) {
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    // Subtle tilt while hovered (±2.5 deg)
     const rotateX = ((y - centerY) / centerY) * -2.5;
     const rotateY = ((x - centerX) / centerX) * 2.5;
     setTilt({ rotateX, rotateY });
@@ -186,7 +180,7 @@ export default function Login({ setUser }) {
 
   const handleMouseLeave = useCallback(() => {
     setIsPanelHovered(false);
-    setTilt({ rotateX: 2, rotateY: -8 }); // Return to left-side-inwards tilt
+    setTilt({ rotateX: 2, rotateY: -8 });
   }, []);
 
   const handleLogin = async (e) => {
@@ -249,7 +243,6 @@ export default function Login({ setUser }) {
     setError("GitHub login not configured yet.");
   };
 
-  // Loading screen
   if (isCheckingAuth) {
     return (
       <div style={{
@@ -267,8 +260,8 @@ export default function Login({ setUser }) {
             animation: "spin 1s linear infinite", margin: "0 auto 16px"
           }} />
           <p style={{ color: "#64748b", fontSize: "0.95rem" }}>Signing you in...</p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
+        <style dangerouslySetInnerHTML={{ __html: "@keyframes spin { to { transform: rotate(360deg); } }" }} />
       </div>
     );
   }
@@ -328,7 +321,7 @@ export default function Login({ setUser }) {
     },
     {
       icon: (
-        <svg width="20" height="20"viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
         </svg>
       ),
@@ -364,7 +357,7 @@ export default function Login({ setUser }) {
           box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 20px rgba(59, 130, 246, 0.1);
         }
         input::placeholder { color: #475569; }
-
+        
         .feature-card {
           background: rgba(15, 23, 42, 0.5);
           border: 1px solid rgba(255, 255, 255, 0.06);
@@ -407,7 +400,7 @@ export default function Login({ setUser }) {
         .cube-arrow {
           transition: transform 0.3s ease;
         }
-
+        
         .nav-link {
           color: #94a3b8;
           transition: color 0.2s ease;
@@ -416,7 +409,7 @@ export default function Login({ setUser }) {
           font-weight: 500;
         }
         .nav-link:hover { color: #e2e8f0; }
-
+        
         .social-btn {
           background: rgba(15, 23, 42, 0.6);
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -427,7 +420,7 @@ export default function Login({ setUser }) {
           background: rgba(15, 23, 42, 0.8);
           border-color: rgba(255, 255, 255, 0.15);
         }
-
+        
         .signin-btn {
           background: linear-gradient(135deg, #2563eb, #3b82f6);
           transition: all 0.3s ease;
@@ -440,12 +433,12 @@ export default function Login({ setUser }) {
           transform: translateY(-1px);
         }
         .signin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
+        
         .login-panel-tilt {
           transform-style: preserve-3d;
           transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-
+        
         .typing-cursor {
           display: inline-block;
           width: 3px;
@@ -459,7 +452,7 @@ export default function Login({ setUser }) {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
-
+        
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-6px); }
@@ -469,7 +462,11 @@ export default function Login({ setUser }) {
         .float-anim-d2 { animation: float 4s ease-in-out infinite; animation-delay: 1s; }
         .float-anim-d3 { animation: float 4s ease-in-out infinite; animation-delay: 1.5s; }
         .float-anim-d4 { animation: float 4s ease-in-out infinite; animation-delay: 2s; }
-
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 1024px) {
           .login-layout { flex-direction: column !important; padding: 1rem !important; }
           .left-section { max-width: 100% !important; }
@@ -481,14 +478,12 @@ export default function Login({ setUser }) {
         }
       `}</style>
 
-      {/* Vanta Background */}
       <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
         background: "radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 60%)"
       }} />
 
-      {/* Navbar */}
       <nav style={{
         position: "relative", zIndex: 20,
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -538,7 +533,6 @@ export default function Login({ setUser }) {
         </div>
       </nav>
 
-      {/* Main Content */}
       <div className="login-layout" style={{
         position: "relative", zIndex: 10,
         flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
@@ -548,9 +542,8 @@ export default function Login({ setUser }) {
         transition: "opacity 0.6s ease"
       }}>
 
-        {/* LEFT SECTION */}
         <div className="left-section" style={{ flex: "1", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "2rem" }}>
-
+          
           <div>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
@@ -561,7 +554,7 @@ export default function Login({ setUser }) {
             }}>
               AI POWERED PLACEMENT PREPARATION ✨
             </div>
-
+            
             <h1 style={{
               fontSize: "clamp(2.5rem, 5vw, 3.5rem)", fontWeight: "800",
               lineHeight: "1.15", margin: "0 0 1rem 0", letterSpacing: "-0.02em", minHeight: "1.2em"
@@ -569,7 +562,7 @@ export default function Login({ setUser }) {
               <span style={{ color: "#e2e8f0" }}>{displayedText}</span>
               <span className="typing-cursor" />
             </h1>
-
+            
             <p style={{
               color: "#94a3b8", fontSize: "1.05rem", lineHeight: "1.7", maxWidth: "480px", margin: 0
             }}>
@@ -577,7 +570,6 @@ export default function Login({ setUser }) {
             </p>
           </div>
 
-          {/* Feature Cards - 3D Cubes with Hover */}
           <div className="feature-grid" style={{
             display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem"
           }}>
@@ -614,7 +606,6 @@ export default function Login({ setUser }) {
           </div>
         </div>
 
-        {/* RIGHT SECTION - LOGIN FORM WITH TILT */}
         <div className="right-section" style={{ width: "420px", flexShrink: 0, perspective: "1200px" }}>
           <div 
             ref={loginPanelRef}
@@ -643,7 +634,6 @@ export default function Login({ setUser }) {
               </p>
             </div>
 
-            {/* Social Login */}
             <div style={{ display: "flex", gap: "12px", marginBottom: "1.5rem" }}>
               <button 
                 onClick={handleGoogleLogin}
@@ -680,7 +670,6 @@ export default function Login({ setUser }) {
               </button>
             </div>
 
-            {/* Divider */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
               <span style={{ color: "#475569", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>or continue with email</span>
@@ -699,7 +688,6 @@ export default function Login({ setUser }) {
                 </div>
               )}
 
-              {/* Email */}
               <div className="glass-input-blue" style={{
                 borderRadius: "12px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 14px"
               }}>
@@ -722,7 +710,6 @@ export default function Login({ setUser }) {
                 />
               </div>
 
-              {/* Password */}
               <div className="glass-input-blue" style={{
                 borderRadius: "12px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 14px"
               }}>
@@ -754,7 +741,6 @@ export default function Login({ setUser }) {
                 </button>
               </div>
 
-              {/* Remember / Forgot */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
                 <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}>
                   <input 
@@ -781,7 +767,6 @@ export default function Login({ setUser }) {
               </button>
             </form>
 
-            {/* Sign Up Link */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "1.5rem 0" }}>
               <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
               <span style={{ color: "#475569", fontSize: "0.8rem" }}>Don't have an account?</span>
@@ -793,3 +778,12 @@ export default function Login({ setUser }) {
               background: "transparent", border: "1px solid rgba(59, 130, 246, 0.3)",
               color: "#3b82f6", fontSize: "0.95rem", fontWeight: "600",
               textAlign: "center", textDecoration: "none", transition: "all 0.2s ease"
+            }}>
+              Sign Up for Free
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
