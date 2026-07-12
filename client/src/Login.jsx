@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 // --- FIREBASE IMPORTS ---
@@ -20,6 +20,42 @@ function loadScript(src) {
   });
 }
 
+// Custom hook for typing animation
+function useTypingEffect(texts, speed = 80, pause = 2000) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [textIndex, setTextIndex] = useState(0);
+
+  useEffect(() => {
+    const currentText = texts[textIndex];
+    let timer;
+
+    if (!isDeleting && currentIndex < currentText.length) {
+      timer = setTimeout(() => {
+        setDisplayedText(currentText.slice(0, currentIndex + 1));
+        setCurrentIndex(currentIndex + 1);
+      }, speed);
+    } else if (!isDeleting && currentIndex === currentText.length) {
+      timer = setTimeout(() => {
+        setIsDeleting(true);
+      }, pause);
+    } else if (isDeleting && currentIndex > 0) {
+      timer = setTimeout(() => {
+        setDisplayedText(currentText.slice(0, currentIndex - 1));
+        setCurrentIndex(currentIndex - 1);
+      }, speed / 2);
+    } else if (isDeleting && currentIndex === 0) {
+      setIsDeleting(false);
+      setTextIndex((prev) => (prev + 1) % texts.length);
+    }
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, isDeleting, textIndex, texts, speed, pause]);
+
+  return { displayedText, isDeleting };
+}
+
 export default function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,10 +65,22 @@ export default function Login({ setUser }) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [hoveredCube, setHoveredCube] = useState(null);
+
+  // Tilt state for login panel
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  const loginPanelRef = useRef(null);
 
   const navigate = useNavigate();
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
+
+  const taglines = [
+    "Prepare Smarter. Get Placed Faster.",
+    "Master DSA with AI.",
+    "Crack Interviews. Land Offers.",
+  ];
+  const { displayedText, isDeleting } = useTypingEffect(taglines, 60, 2500);
 
   // Clear autofill on mount
   useEffect(() => {
@@ -94,8 +142,8 @@ export default function Login({ setUser }) {
             minWidth: 200.0,
             scale: 1.0,
             scaleMobile: 1.0,
-            color: 0x3b82f6,        // Blue nodes
-            backgroundColor: 0x070b14, // Dark navy background
+            color: 0x3b82f6,
+            backgroundColor: 0x070b14,
             points: 10.0,
             maxDistance: 25.0,
             spacing: 18.0,
@@ -114,6 +162,23 @@ export default function Login({ setUser }) {
         vantaEffect.current = null;
       }
     };
+  }, []);
+
+  // Tilt effect handlers
+  const handleMouseMove = useCallback((e) => {
+    if (!loginPanelRef.current) return;
+    const rect = loginPanelRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -6;
+    const rotateY = ((x - centerX) / centerX) * 6;
+    setTilt({ rotateX, rotateY });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setTilt({ rotateX: 0, rotateY: 0 });
   }, []);
 
   const handleLogin = async (e) => {
@@ -211,7 +276,8 @@ export default function Login({ setUser }) {
       desc: "Track your DSA progress, solve curated problems and master algorithms.",
       color: "#3b82f6",
       bg: "rgba(59,130,246,0.12)",
-      border: "rgba(59,130,246,0.25)"
+      border: "rgba(59,130,246,0.25)",
+      arrowColor: "#3b82f6"
     },
     {
       icon: (
@@ -223,7 +289,8 @@ export default function Login({ setUser }) {
       desc: "AI-powered mock interviews with real-time feedback to improve performance.",
       color: "#8b5cf6",
       bg: "rgba(139,92,246,0.12)",
-      border: "rgba(139,92,246,0.25)"
+      border: "rgba(139,92,246,0.25)",
+      arrowColor: "#8b5cf6"
     },
     {
       icon: (
@@ -235,7 +302,8 @@ export default function Login({ setUser }) {
       desc: "Access real interview questions asked by top companies.",
       color: "#22c55e",
       bg: "rgba(34,197,94,0.12)",
-      border: "rgba(34,197,94,0.25)"
+      border: "rgba(34,197,94,0.25)",
+      arrowColor: "#22c55e"
     },
     {
       icon: (
@@ -247,7 +315,8 @@ export default function Login({ setUser }) {
       desc: "AI reviews your resume and gives actionable suggestions.",
       color: "#f59e0b",
       bg: "rgba(245,158,11,0.12)",
-      border: "rgba(245,158,11,0.25)"
+      border: "rgba(245,158,11,0.25)",
+      arrowColor: "#f59e0b"
     },
     {
       icon: (
@@ -259,7 +328,8 @@ export default function Login({ setUser }) {
       desc: "Practice aptitude, logical reasoning and verbal ability with AI quizzes.",
       color: "#ec4899",
       bg: "rgba(236,72,153,0.12)",
-      border: "rgba(236,72,153,0.25)"
+      border: "rgba(236,72,153,0.25)",
+      arrowColor: "#ec4899"
     },
   ];
 
@@ -291,13 +361,43 @@ export default function Login({ setUser }) {
           background: rgba(15, 23, 42, 0.5);
           border: 1px solid rgba(255, 255, 255, 0.06);
           backdrop-filter: blur(12px);
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+          transform-style: preserve-3d;
+          perspective: 1000px;
+          position: relative;
+          overflow: hidden;
+        }
+        .feature-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -100%;
+          width: 50%; height: 100%;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
+          transform: skewX(-25deg);
+          transition: left 0.6s ease;
+          pointer-events: none;
+        }
+        .feature-card:hover::before {
+          left: 150%;
+          transition: left 0.8s ease;
         }
         .feature-card:hover {
           background: rgba(15, 23, 42, 0.7);
           border-color: rgba(255, 255, 255, 0.12);
-          transform: translateY(-4px);
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+          transform: translateY(-8px) rotateX(-4deg) rotateY(4deg) scale(1.03);
+          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+        .feature-card:hover .cube-icon {
+          transform: translateZ(30px) scale(1.1);
+        }
+        .feature-card:hover .cube-arrow {
+          transform: translateX(6px);
+        }
+        .cube-icon {
+          transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .cube-arrow {
+          transition: transform 0.3s ease;
         }
 
         .nav-link {
@@ -332,6 +432,35 @@ export default function Login({ setUser }) {
           transform: translateY(-1px);
         }
         .signin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .login-panel-tilt {
+          transform-style: preserve-3d;
+          transition: transform 0.15s ease-out;
+        }
+
+        .typing-cursor {
+          display: inline-block;
+          width: 3px;
+          height: 1em;
+          background: #3b82f6;
+          margin-left: 4px;
+          animation: blink 0.8s infinite;
+          vertical-align: text-bottom;
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        .float-anim { animation: float 4s ease-in-out infinite; }
+        .float-anim-d1 { animation: float 4s ease-in-out infinite; animation-delay: 0.5s; }
+        .float-anim-d2 { animation: float 4s ease-in-out infinite; animation-delay: 1s; }
+        .float-anim-d3 { animation: float 4s ease-in-out infinite; animation-delay: 1.5s; }
+        .float-anim-d4 { animation: float 4s ease-in-out infinite; animation-delay: 2s; }
 
         @media (max-width: 1024px) {
           .login-layout { flex-direction: column !important; padding: 1rem !important; }
@@ -427,10 +556,10 @@ export default function Login({ setUser }) {
 
             <h1 style={{
               fontSize: "clamp(2.5rem, 5vw, 3.5rem)", fontWeight: "800",
-              lineHeight: "1.1", margin: "0 0 1rem 0", letterSpacing: "-0.02em"
+              lineHeight: "1.15", margin: "0 0 1rem 0", letterSpacing: "-0.02em", minHeight: "1.2em"
             }}>
-              Prepare <span style={{ color: "#3b82f6" }}>Smarter.</span><br />
-              Get Placed <span style={{ color: "#3b82f6" }}>Faster.</span>
+              <span style={{ color: "#e2e8f0" }}>{displayedText}</span>
+              <span className="typing-cursor" />
             </h1>
 
             <p style={{
@@ -440,43 +569,62 @@ export default function Login({ setUser }) {
             </p>
           </div>
 
-          {/* Feature Cards */}
+          {/* Feature Cards - 3D Cubes with Hover */}
           <div className="feature-grid" style={{
             display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem"
           }}>
-            {features.map((f, i) => (
-              <div key={i} className="feature-card" style={{
-                borderRadius: "16px", padding: "1.25rem", cursor: "pointer"
-              }}>
-                <div style={{
-                  width: "40px", height: "40px", borderRadius: "10px",
-                  background: f.bg, border: `1px solid ${f.border}`,
-                  color: f.color, display: "flex", alignItems: "center", justifyContent: "center",
-                  marginBottom: "12px"
-                }}>
-                  {f.icon}
+            {features.map((f, i) => {
+              const floatClass = i === 0 ? "float-anim" : i === 1 ? "float-anim-d1" : i === 2 ? "float-anim-d2" : i === 3 ? "float-anim-d3" : "float-anim-d4";
+              return (
+                <div 
+                  key={i} 
+                  className={`feature-card ${floatClass}`}
+                  onMouseEnter={() => setHoveredCube(i)}
+                  onMouseLeave={() => setHoveredCube(null)}
+                  style={{
+                    borderRadius: "16px", padding: "1.25rem", cursor: "pointer",
+                    transform: hoveredCube === i ? "translateY(-8px) rotateX(-4deg) rotateY(4deg) scale(1.03)" : undefined,
+                  }}
+                >
+                  <div className="cube-icon" style={{
+                    width: "40px", height: "40px", borderRadius: "10px",
+                    background: f.bg, border: `1px solid ${f.border}`,
+                    color: f.color, display: "flex", alignItems: "center", justifyContent: "center",
+                    marginBottom: "12px",
+                    boxShadow: hoveredCube === i ? `0 0 20px ${f.bg}` : "none"
+                  }}>
+                    {f.icon}
+                  </div>
+                  <div style={{ fontWeight: "700", fontSize: "0.9rem", marginBottom: "6px" }}>{f.title}</div>
+                  <div style={{ color: "#64748b", fontSize: "0.78rem", lineHeight: "1.5" }}>{f.desc}</div>
+                  <div className="cube-arrow" style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "4px", color: f.arrowColor, fontSize: "0.8rem", fontWeight: "600" }}>
+                    Learn more <span style={{ fontSize: "1rem" }}>→</span>
+                  </div>
                 </div>
-                <div style={{ fontWeight: "700", fontSize: "0.9rem", marginBottom: "6px" }}>{f.title}</div>
-                <div style={{ color: "#64748b", fontSize: "0.78rem", lineHeight: "1.5" }}>{f.desc}</div>
-                <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "4px", color: f.color, fontSize: "0.8rem", fontWeight: "600" }}>
-                  Learn more <span style={{ fontSize: "1rem" }}>→</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* RIGHT SECTION - LOGIN FORM */}
-        <div className="right-section" style={{ width: "420px", flexShrink: 0 }}>
-          <div style={{
-            background: "rgba(15, 23, 42, 0.6)",
-            backdropFilter: "blur(24px) saturate(140%)",
-            WebkitBackdropFilter: "blur(24px) saturate(140%)",
-            borderRadius: "24px",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
-            padding: "2.5rem",
-          }}>
+        {/* RIGHT SECTION - LOGIN FORM WITH TILT */}
+        <div className="right-section" style={{ width: "420px", flexShrink: 0, perspective: "1200px" }}>
+          <div 
+            ref={loginPanelRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="login-panel-tilt"
+            style={{
+              background: "rgba(15, 23, 42, 0.6)",
+              backdropFilter: "blur(24px) saturate(140%)",
+              WebkitBackdropFilter: "blur(24px) saturate(140%)",
+              borderRadius: "24px",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
+              padding: "2.5rem",
+              transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateZ(0)`,
+              willChange: "transform"
+            }}
+          >
             <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
               <h2 style={{ fontSize: "1.5rem", fontWeight: "700", margin: "0 0 0.5rem 0" }}>
                 Welcome Back! 👋
