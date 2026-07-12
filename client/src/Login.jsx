@@ -67,8 +67,9 @@ export default function Login({ setUser }) {
   const [mounted, setMounted] = useState(false);
   const [hoveredCube, setHoveredCube] = useState(null);
 
-  // Tilt state for login panel
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  // Tilt state: default left side inwards
+  const [tilt, setTilt] = useState({ rotateX: 2, rotateY: -8 });
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
   const loginPanelRef = useRef(null);
 
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function Login({ setUser }) {
     "Master DSA with AI.",
     "Crack Interviews. Land Offers.",
   ];
-  const { displayedText, isDeleting } = useTypingEffect(taglines, 60, 2500);
+  const { displayedText } = useTypingEffect(taglines, 60, 2500);
 
   // Clear autofill on mount
   useEffect(() => {
@@ -164,21 +165,28 @@ export default function Login({ setUser }) {
     };
   }, []);
 
-  // Tilt effect handlers
+  // Tilt effect: default left side inwards, flatten on hover
+  const handleMouseEnter = useCallback(() => {
+    setIsPanelHovered(true);
+    setTilt({ rotateX: 0, rotateY: 0 }); // Flatten
+  }, []);
+
   const handleMouseMove = useCallback((e) => {
-    if (!loginPanelRef.current) return;
+    if (!loginPanelRef.current || !isPanelHovered) return;
     const rect = loginPanelRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -6;
-    const rotateY = ((x - centerX) / centerX) * 6;
+    // Subtle tilt while hovered (±2.5 deg)
+    const rotateX = ((y - centerY) / centerY) * -2.5;
+    const rotateY = ((x - centerX) / centerX) * 2.5;
     setTilt({ rotateX, rotateY });
-  }, []);
+  }, [isPanelHovered]);
 
   const handleMouseLeave = useCallback(() => {
-    setTilt({ rotateX: 0, rotateY: 0 });
+    setIsPanelHovered(false);
+    setTilt({ rotateX: 2, rotateY: -8 }); // Return to left-side-inwards tilt
   }, []);
 
   const handleLogin = async (e) => {
@@ -320,7 +328,7 @@ export default function Login({ setUser }) {
     },
     {
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20"viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
         </svg>
       ),
@@ -435,7 +443,7 @@ export default function Login({ setUser }) {
 
         .login-panel-tilt {
           transform-style: preserve-3d;
-          transition: transform 0.15s ease-out;
+          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .typing-cursor {
@@ -610,6 +618,7 @@ export default function Login({ setUser }) {
         <div className="right-section" style={{ width: "420px", flexShrink: 0, perspective: "1200px" }}>
           <div 
             ref={loginPanelRef}
+            onMouseEnter={handleMouseEnter}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className="login-panel-tilt"
@@ -784,12 +793,3 @@ export default function Login({ setUser }) {
               background: "transparent", border: "1px solid rgba(59, 130, 246, 0.3)",
               color: "#3b82f6", fontSize: "0.95rem", fontWeight: "600",
               textAlign: "center", textDecoration: "none", transition: "all 0.2s ease"
-            }}>
-              Sign Up for Free
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
