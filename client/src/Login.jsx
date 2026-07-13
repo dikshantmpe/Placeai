@@ -140,7 +140,7 @@ export default function Login({ setUser }) {
             scale: 1.0,
             scaleMobile: 1.0,
             color: 0x3b82f6,
-            backgroundColor: 0x070b14,
+            backgroundColor: 0x000000,
             points: 10.0,
             maxDistance: 25.0,
             spacing: 18.0,
@@ -249,14 +249,14 @@ export default function Login({ setUser }) {
         minHeight: "100vh", width: "100%", position: "relative", overflow: "hidden",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        color: "#ffffff", background: "#070b14",
+        color: "#ffffff", background: "#000000",
       }}>
         <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
         <div style={{ position: "relative", zIndex: 10, textAlign: "center" }}>
           <div style={{
             width: "48px", height: "48px", borderRadius: "50%",
-            border: "3px solid rgba(59,130,246,0.3)",
-            borderTop: "3px solid #3b82f6",
+            border: "3px solid rgba(20,184,166,0.3)",
+            borderTop: "3px solid #14b8a6",
             animation: "spin 1s linear infinite", margin: "0 auto 16px"
           }} />
           <p style={{ color: "#64748b", fontSize: "0.95rem" }}>Signing you in...</p>
@@ -275,10 +275,10 @@ export default function Login({ setUser }) {
       ),
       title: "DSA Tracker",
       desc: "Track your DSA progress, solve curated problems and master algorithms.",
-      color: "#3b82f6",
+      color: "#14b8a6",
       bg: "rgba(59,130,246,0.12)",
       border: "rgba(59,130,246,0.25)",
-      arrowColor: "#3b82f6"
+      arrowColor: "#14b8a6"
     },
     {
       icon: (
@@ -341,25 +341,25 @@ export default function Login({ setUser }) {
       minHeight: "100vh", width: "100%", position: "relative", overflow: "hidden",
       display: "flex", flexDirection: "column",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      color: "#ffffff", background: "#070b14",
+      color: "#ffffff", background: "#000000",
     }}>
       <style>{`
         .glass-input-blue {
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid rgba(59, 130, 246, 0.15);
+          background: rgba(0, 0, 0, 0.7);
+          border: 1px solid rgba(20, 184, 166, 0.15);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           transition: all 0.25s ease;
         }
         .glass-input-blue:focus-within {
-          background: rgba(15, 23, 42, 0.8);
-          border-color: rgba(59, 130, 246, 0.5);
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 20px rgba(59, 130, 246, 0.1);
+          background: rgba(0, 0, 0, 0.85);
+          border-color: rgba(20, 184, 166, 0.5);
+          box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15), 0 0 20px rgba(20, 184, 166, 0.1);
         }
         input::placeholder { color: #475569; }
         
         .feature-card {
-          background: rgba(15, 23, 42, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           border: 1px solid rgba(255, 255, 255, 0.06);
           backdrop-filter: blur(12px);
           transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -383,10 +383,10 @@ export default function Login({ setUser }) {
           transition: left 0.8s ease;
         }
         .feature-card:hover {
-          background: rgba(15, 23, 42, 0.7);
+          background: rgba(0, 0, 0, 0.8);
           border-color: rgba(255, 255, 255, 0.12);
           transform: translateY(-8px) rotateX(-4deg) rotateY(4deg) scale(1.03);
-          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.1);
+          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(20, 184, 166, 0.1);
         }
         .feature-card:hover .cube-icon {
           transform: translateZ(30px) scale(1.1);
@@ -411,25 +411,25 @@ export default function Login({ setUser }) {
         .nav-link:hover { color: #e2e8f0; }
         
         .social-btn {
-          background: rgba(15, 23, 42, 0.6);
+          background: rgba(0, 0, 0, 0.7);
           border: 1px solid rgba(255, 255, 255, 0.08);
           transition: all 0.2s ease;
           cursor: pointer;
         }
         .social-btn:hover {
-          background: rgba(15, 23, 42, 0.8);
+          background: rgba(0, 0, 0, 0.85);
           border-color: rgba(255, 255, 255, 0.15);
         }
         
         .signin-btn {
-          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          background: linear-gradient(135deg, #0d9488, #14b8a6);
           transition: all 0.3s ease;
           border: none;
           cursor: pointer;
         }
         .signin-btn:hover {
-          background: linear-gradient(135deg, #1d4ed8, #2563eb);
-          box-shadow: 0 8px 30px -6px rgba(37, 99, 235, 0.5);
+          background: linear-gradient(135deg, #0f766e, #0d9488);
+          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
           transform: translateY(-1px);
         }
         .signin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -443,7 +443,7 @@ export default function Login({ setUser }) {
           display: inline-block;
           width: 3px;
           height: 1em;
-          background: #3b82f6;
+          background: #14b8a6;
           margin-left: 4px;
           animation: blink 0.8s infinite;
           vertical-align: text-bottom;
@@ -481,7 +481,7 @@ export default function Login({ setUser }) {
       <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 60%)"
+        background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
       }} />
 
       <nav style={{
@@ -493,7 +493,7 @@ export default function Login({ setUser }) {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{
             width: "40px", height: "40px", borderRadius: "10px",
-            background: "linear-gradient(135deg, #1e40af, #3b82f6)",
+            background: "linear-gradient(135deg, #115e59, #14b8a6)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: "800", fontSize: "1.1rem", color: "white"
           }}>
@@ -514,7 +514,7 @@ export default function Login({ setUser }) {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button style={{
             width: "36px", height: "36px", borderRadius: "50%",
-            background: "rgba(15, 23, 42, 0.6)", border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(0, 0, 0, 0.7)", border: "1px solid rgba(255,255,255,0.08)",
             display: "flex", alignItems: "center", justifyContent: "center",
             color: "#94a3b8", cursor: "pointer", backdropFilter: "blur(8px)"
           }}>
@@ -524,7 +524,7 @@ export default function Login({ setUser }) {
           </button>
           <button style={{
             padding: "8px 20px", borderRadius: "8px",
-            background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+            background: "linear-gradient(135deg, #0d9488, #14b8a6)",
             border: "none", color: "white", fontWeight: "600", fontSize: "0.85rem",
             cursor: "pointer", transition: "all 0.2s ease"
           }}>
@@ -548,8 +548,8 @@ export default function Login({ setUser }) {
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "6px 16px", borderRadius: "20px",
-              background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)",
-              color: "#60a5fa", fontSize: "0.75rem", fontWeight: "600",
+              background: "rgba(20, 184, 166, 0.1)", border: "1px solid rgba(20, 184, 166, 0.2)",
+              color: "#2dd4bf", fontSize: "0.75rem", fontWeight: "600",
               letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "1.5rem"
             }}>
               AI POWERED PLACEMENT PREPARATION ✨
@@ -614,7 +614,7 @@ export default function Login({ setUser }) {
             onMouseLeave={handleMouseLeave}
             className="login-panel-tilt"
             style={{
-              background: "rgba(15, 23, 42, 0.6)",
+              background: "rgba(0, 0, 0, 0.7)",
               backdropFilter: "blur(24px) saturate(140%)",
               WebkitBackdropFilter: "blur(24px) saturate(140%)",
               borderRadius: "24px",
@@ -691,7 +691,7 @@ export default function Login({ setUser }) {
               <div className="glass-input-blue" style={{
                 borderRadius: "12px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 14px"
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
                   <rect x="2" y="4" width="20" height="16" rx="2" />
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                 </svg>
@@ -713,7 +713,7 @@ export default function Login({ setUser }) {
               <div className="glass-input-blue" style={{
                 borderRadius: "12px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 14px"
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
@@ -749,12 +749,12 @@ export default function Login({ setUser }) {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     style={{ 
                       width: "16px", height: "16px", borderRadius: "4px",
-                      accentColor: "#3b82f6", cursor: "pointer"
+                      accentColor: "#14b8a6", cursor: "pointer"
                     }}
                   />
                   Remember me
                 </label>
-                <a href="#" style={{ color: "#3b82f6", fontSize: "0.85rem", textDecoration: "none", fontWeight: "500" }}>
+                <a href="#" style={{ color: "#14b8a6", fontSize: "0.85rem", textDecoration: "none", fontWeight: "500" }}>
                   Forgot Password?
                 </a>
               </div>
@@ -775,8 +775,8 @@ export default function Login({ setUser }) {
 
             <Link to="/signup" style={{
               display: "block", width: "100%", padding: "12px", borderRadius: "12px",
-              background: "transparent", border: "1px solid rgba(59, 130, 246, 0.3)",
-              color: "#3b82f6", fontSize: "0.95rem", fontWeight: "600",
+              background: "transparent", border: "1px solid rgba(20, 184, 166, 0.3)",
+              color: "#14b8a6", fontSize: "0.95rem", fontWeight: "600",
               textAlign: "center", textDecoration: "none", transition: "all 0.2s ease"
             }}>
               Sign Up for Free
