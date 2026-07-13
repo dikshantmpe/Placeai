@@ -292,7 +292,7 @@ export default function Dashboard() {
 
           <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
             <div>
-              <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+              <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
                 Progress <span style={{ color: "#3b82f6" }}>Dashboard</span>
               </h2>
               <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Your overall placement preparation at a glance.</p>
@@ -349,33 +349,60 @@ export default function Dashboard() {
                     Analytics Overview
                   </div>
 
-                  <h2 style={{ fontSize: "2.2rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0" }}>
+                  <h2 style={{ fontSize: "2rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0" }}>
                     Track Your <span style={{ color: "#3b82f6" }}>Progress</span>
                   </h2>
 
-                  <p style={{ color: "#94a3b8", fontSize: "1rem", maxWidth: "450px", lineHeight: "1.6", margin: "0 0 1.5rem 0" }}>
+                  <p style={{ color: "#94a3b8", fontSize: "0.9rem", maxWidth: "400px", lineHeight: "1.5", margin: "0 0 1.5rem 0" }}>
                     Monitor your DSA mastery, quiz performance, and company-wise preparation stats in real-time.
                   </p>
 
-                  <div style={{ display: "flex", gap: "1.5rem" }}>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "2rem", fontWeight: "800", color: "#3b82f6" }}>{data.dsa.done}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.8rem" }}>DSA Solved</div>
+                  <div style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "repeat(4, 1fr)", 
+                    gap: "1rem",
+                    width: "100%",
+                    maxWidth: "500px"
+                  }}>
+                    <div style={{ 
+                      textAlign: "center", 
+                      padding: "0.75rem",
+                      background: "rgba(15, 23, 42, 0.4)",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(255,255,255,0.06)"
+                    }}>
+                      <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#3b82f6", lineHeight: "1.2" }}>{data.dsa.done}</div>
+                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>DSA Solved</div>
                     </div>
-                    <div style={{ width: "1px", background: "rgba(255,255,255,0.08)" }} />
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "2rem", fontWeight: "800", color: "#8b5cf6" }}>{data.quiz.total}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.8rem" }}>Quizzes Done</div>
+                    <div style={{ 
+                      textAlign: "center", 
+                      padding: "0.75rem",
+                      background: "rgba(15, 23, 42, 0.4)",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(255,255,255,0.06)"
+                    }}>
+                      <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#8b5cf6", lineHeight: "1.2" }}>{data.quiz.total}</div>
+                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>Quizzes Done</div>
                     </div>
-                    <div style={{ width: "1px", background: "rgba(255,255,255,0.08)" }} />
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "2rem", fontWeight: "800", color: "#22c55e" }}>{totalCompany}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.8rem" }}>Company Qs</div>
+                    <div style={{ 
+                      textAlign: "center", 
+                      padding: "0.75rem",
+                      background: "rgba(15, 23, 42, 0.4)",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(255,255,255,0.06)"
+                    }}>
+                      <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#22c55e", lineHeight: "1.2" }}>{totalCompany}</div>
+                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>Company Qs</div>
                     </div>
-                    <div style={{ width: "1px", background: "rgba(255,255,255,0.08)" }} />
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "2rem", fontWeight: "800", color: "#f59e0b" }}>{streak || 3}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.8rem" }}>Day Streak</div>
+                    <div style={{ 
+                      textAlign: "center", 
+                      padding: "0.75rem",
+                      background: "rgba(15, 23, 42, 0.4)",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(255,255,255,0.06)"
+                    }}>
+                      <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#f59e0b", lineHeight: "1.2" }}>{streak || 3}</div>
+                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>Day Streak</div>
                     </div>
                   </div>
                 </div>
@@ -440,7 +467,7 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "12px" }}>
-                  <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "white", lineHeight: 1 }}>{s.value}</span>
+                  <span style={{ fontSize: "2rem", fontWeight: "800", color: "white", lineHeight: 1 }}>{s.value}</span>
                   <span style={{ fontSize: "0.85rem", color: "#475569", fontWeight: "600" }}>{s.sub}</span>
                 </div>
 
