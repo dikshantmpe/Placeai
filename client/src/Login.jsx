@@ -109,10 +109,13 @@ export default function Login({ setUser }) {
 
   useEffect(() => {
     let cancelled = false;
+    let originalWarn;
+    let originalError;
+    
     async function initVanta() {
       try {
-        const originalWarn = console.warn;
-        const originalError = console.error;
+        originalWarn = console.warn;
+        originalError = console.error;
         console.warn = function(...args) {
           const msg = (args[0]?.toString?.() || args.join(" "));
           if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
@@ -158,6 +161,8 @@ export default function Login({ setUser }) {
         vantaEffect.current.destroy();
         vantaEffect.current = null;
       }
+      if (originalWarn) console.warn = originalWarn;
+      if (originalError) console.error = originalError;
     };
   }, []);
 
