@@ -72,8 +72,8 @@ export default function Home({ user: propUser }) {
           minWidth: 200.0,
           scale: 1.0,
           scaleMobile: 1.0,
-          color: 0x3b82f6,
-          backgroundColor: 0x070b14,
+          color: 0x14b8a6,
+          backgroundColor: 0x000000,
           points: 10.0,
           maxDistance: 25.0,
           spacing: 18.0,
@@ -119,7 +119,7 @@ export default function Home({ user: propUser }) {
   }, []);
 
   const stats = [
-    { title: "DSA Problems", value: "0", sub: "/ 450", trend: "+0 this week", icon: "💻", color: "rgba(59, 130, 246, 0.15)", stroke: "#3b82f6", textIcon: "↑" },
+    { title: "DSA Problems", value: "0", sub: "/ 450", trend: "+0 this week", icon: "💻", color: "rgba(20, 184, 166, 0.15)", stroke: "#14b8a6", textIcon: "↑" },
     { title: "Aptitude Quizzes", value: "0", sub: " Taken", trend: "+0 this week", icon: "🧠", color: "rgba(139, 92, 246, 0.15)", stroke: "#8b5cf6", textIcon: "↑" },
     { title: "Mock Interviews", value: "0", sub: " Completed", trend: "+0 this week", icon: "🎤", color: "rgba(34, 197, 94, 0.15)", stroke: "#22c55e", textIcon: "↑" },
     { title: "Daily Streak", value: streak, sub: " Days", trend: "Keep it up! 🔥", icon: "🔥", color: "rgba(245, 158, 11, 0.15)", stroke: "#f59e0b", textIcon: "" }
@@ -135,27 +135,49 @@ export default function Home({ user: propUser }) {
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       overflowY: "auto",
       overflowX: "hidden",
-      background: "#070b14"
+      background: "#000000"
     }}>
       <style>{`
+        /* --- SCROLLBAR STYLES (Grey) --- */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        ::-webkit-scrollbar-corner {
+          background: #0a0a0a;
+        }
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #4b5563 #0a0a0a;
+        }
+
         .glass-panel {
-          background: rgba(15, 23, 42, 0.6);
-          backdrop-filter: blur(20px) saturate(140%);
-          -webkit-backdrop-filter: blur(20px) saturate(140%);
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(24px) saturate(140%);
+          -webkit-backdrop-filter: blur(24px) saturate(140%);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 20px;
+          border-radius: 24px;
           padding: 2rem;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.03);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
         .glass-panel:hover {
-          background: rgba(15, 23, 42, 0.7);
+          background: rgba(0, 0, 0, 0.8);
           border-color: rgba(255, 255, 255, 0.12);
           transform: translateY(-4px);
-          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06);
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
         }
         .stat-card {
-          background: rgba(15, 23, 42, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           backdrop-filter: blur(16px);
           border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 16px;
@@ -164,10 +186,10 @@ export default function Home({ user: propUser }) {
           transform-style: preserve-3d;
         }
         .stat-card:hover {
-          background: rgba(15, 23, 42, 0.65);
+          background: rgba(0, 0, 0, 0.8);
           border-color: rgba(255, 255, 255, 0.1);
           transform: translateY(-6px) rotateX(-3deg) rotateY(3deg) scale(1.02);
-          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(20, 184, 166, 0.08);
         }
         .stat-card:hover .stat-icon {
           transform: translateZ(20px) scale(1.1);
@@ -176,7 +198,7 @@ export default function Home({ user: propUser }) {
           transition: transform 0.3s ease;
         }
         .brand-btn {
-          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          background: linear-gradient(135deg, #0d9488, #14b8a6);
           color: white;
           border: none;
           padding: 14px 28px;
@@ -188,19 +210,19 @@ export default function Home({ user: propUser }) {
           align-items: center;
           gap: 8px;
           transition: all 0.3s ease;
-          box-shadow: 0 8px 25px -5px rgba(37, 99, 235, 0.4);
+          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
         }
         .brand-btn:hover {
-          background: linear-gradient(135deg, #1d4ed8, #2563eb);
+          background: linear-gradient(135deg, #0f766e, #0d9488);
           transform: translateY(-2px);
-          box-shadow: 0 12px 30px -5px rgba(37, 99, 235, 0.6);
+          box-shadow: 0 12px 30px -6px rgba(13, 148, 136, 0.6);
         }
         .hero-tilt {
           transform-style: preserve-3d;
           transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .action-card {
-          background: rgba(15, 23, 42, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           backdrop-filter: blur(16px);
           border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 16px;
@@ -227,10 +249,10 @@ export default function Home({ user: propUser }) {
           transition: left 0.8s ease;
         }
         .action-card:hover {
-          background: rgba(15, 23, 42, 0.65);
+          background: rgba(0, 0, 0, 0.8);
           border-color: rgba(255, 255, 255, 0.1);
           transform: translateY(-4px);
-          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(20, 184, 166, 0.08);
         }
         .action-card:hover .action-arrow {
           transform: translateX(4px);
@@ -266,21 +288,29 @@ export default function Home({ user: propUser }) {
       />
       <div style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 60%)"
+        background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
       }} />
 
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem", position: "relative", zIndex: 10 }}>
-        <div>
-          <h1 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
-            Command Center
-          </h1>
-          <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Your AI-driven placement roadmap.</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "linear-gradient(135deg, #115e59, #14b8a6)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: "800", fontSize: "1.1rem", color: "white"
+          }}>
+            C
+          </div>
+          <div>
+            <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
+            <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
+          </div>
         </div>
 
         <div style={{
           display: "flex", alignItems: "center", gap: "12px",
-          background: "rgba(15, 23, 42, 0.6)",
-          backdropFilter: "blur(10px)",
+          background: "rgba(0, 0, 0, 0.7)",
+          backdropFilter: "blur(12px)",
           border: "1px solid rgba(255, 255, 255, 0.08)", 
           padding: "8px 16px", borderRadius: "100px"
         }}>
@@ -313,15 +343,15 @@ export default function Home({ user: propUser }) {
               willChange: "transform"
             }}
           >
-            <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(59,130,246,0.12), transparent 70%)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(20,184,166,0.1), transparent 70%)", pointerEvents: "none" }} />
 
             <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", alignItems: "flex-start" }}>
               <div style={{ 
                 display: "inline-flex", alignItems: "center", gap: "8px",
-                background: "rgba(59, 130, 246, 0.1)", 
-                border: "1px solid rgba(59, 130, 246, 0.2)",
+                background: "rgba(20, 184, 166, 0.1)", 
+                border: "1px solid rgba(20, 184, 166, 0.2)",
                 padding: "6px 14px", borderRadius: "8px", 
-                color: "#60a5fa", fontSize: "0.75rem", fontWeight: "700",
+                color: "#2dd4bf", fontSize: "0.75rem", fontWeight: "700",
                 textTransform: "uppercase", letterSpacing: "0.05em",
                 marginBottom: "1.5rem" 
               }}>
@@ -331,7 +361,7 @@ export default function Home({ user: propUser }) {
 
               <h2 style={{ fontSize: "2.5rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0" }}>
                 Accelerate Your <br/>
-                <span style={{ color: "#3b82f6" }}>Placement Journey</span>
+                <span style={{ color: "#14b8a6" }}>Placement Journey</span>
               </h2>
 
               <p style={{ color: "#94a3b8", fontSize: "1.05rem", maxWidth: "450px", lineHeight: "1.6", margin: "0 0 2.5rem 0" }}>
@@ -347,11 +377,11 @@ export default function Home({ user: propUser }) {
                 </Link>
                 <Link to="/dashboard" style={{ textDecoration: "none" }}>
                   <button style={{
-                    background: "rgba(15, 23, 42, 0.6)", color: "#e2e8f0",
+                    background: "rgba(0, 0, 0, 0.7)", color: "#e2e8f0",
                     border: "1px solid rgba(255, 255, 255, 0.1)", padding: "14px 28px", borderRadius: "12px",
                     fontWeight: "600", fontSize: "1rem", cursor: "pointer",
                     backdropFilter: "blur(8px)", transition: "all 0.2s ease"
-                  }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(15, 23, 42, 0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }} onMouseLeave={e => { e.currentTarget.style.background = "rgba(15, 23, 42, 0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
+                  }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(0, 0, 0, 0.85)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }} onMouseLeave={e => { e.currentTarget.style.background = "rgba(0, 0, 0, 0.7)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
                     View Analytics
                   </button>
                 </Link>
@@ -377,8 +407,8 @@ export default function Home({ user: propUser }) {
               />
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#2563eb" />
-                  <stop offset="100%" stopColor="#3b82f6" />
+                  <stop offset="0%" stopColor="#0d9488" />
+                  <stop offset="100%" stopColor="#14b8a6" />
                 </linearGradient>
               </defs>
             </svg>
@@ -391,7 +421,7 @@ export default function Home({ user: propUser }) {
           </div>
 
           <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: "1.5rem 0 0 0", lineHeight: "1.5" }}>
-            You are <strong style={{ color: "#3b82f6" }}>15% closer</strong> to your goal this week. Keep going!
+            You are <strong style={{ color: "#14b8a6" }}>15% closer</strong> to your goal this week. Keep going!
           </p>
         </div>
 
@@ -424,7 +454,7 @@ export default function Home({ user: propUser }) {
 
         <div style={{ gridColumn: "span 12", marginTop: "0.5rem" }}>
           <h3 style={{ fontSize: "1.3rem", fontWeight: "800", margin: "0 0 1.5rem 0", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ width: "4px", height: "20px", background: "#3b82f6", borderRadius: "4px" }} />
+            <span style={{ width: "4px", height: "20px", background: "#14b8a6", borderRadius: "4px" }} />
             AI Recommended For You
           </h3>
 
@@ -437,19 +467,19 @@ export default function Home({ user: propUser }) {
               </div>
               <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Mastering Arrays</h4>
               <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>You missed 2 questions on Two Pointers yesterday. Review this pattern to boost your DSA score.</p>
-              <div className="action-arrow" style={{ marginTop: "auto", color: "#3b82f6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+              <div className="action-arrow" style={{ marginTop: "auto", color: "#14b8a6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
                 Start Module <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </Link>
 
             <Link to="/resume" className="action-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#93c5fd", fontSize: "0.75rem", fontWeight: "700" }}>QUICK WIN</div>
+                <div style={{ background: "rgba(20, 184, 166, 0.1)", padding: "8px 12px", borderRadius: "8px", color: "#5eead4", fontSize: "0.75rem", fontWeight: "700" }}>QUICK WIN</div>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
               <h4 style={{ color: "white", fontSize: "1.05rem", margin: "0 0 0.5rem 0", fontWeight: "700" }}>Scan Your Resume</h4>
               <p style={{ color: "#94a3b8", fontSize: "0.88rem", margin: "0 0 1.5rem 0", lineHeight: "1.5" }}>Upload your latest PDF to check ATS compatibility and get AI formatting feedback.</p>
-              <div className="action-arrow" style={{ marginTop: "auto", color: "#3b82f6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+              <div className="action-arrow" style={{ marginTop: "auto", color: "#14b8a6", fontSize: "0.88rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
                 Analyze Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </Link>
