@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-// FIXED: Locked in the correct path for your folder structure
 import { auth } from "./firebase.js"; 
 
 const roles = ["Frontend Developer", "Backend Developer", "Full Stack Developer", "Data Structures & Algorithms", "System Design"];
@@ -43,7 +42,6 @@ export default function MockInterview() {
       console.error("Backend fetch failed. Engaging Demo Interviewer...", err);
       setIsDemoMode(true);
       
-      // Fallback Demo Initial Response
       setTimeout(() => {
         setMessages([
           ...firstMessage, 
@@ -64,7 +62,6 @@ export default function MockInterview() {
     setLoading(true);
 
     if (isDemoMode) {
-      // Fake AI response if backend is offline
       setTimeout(() => {
         const fakeReplies = [
           "That's a very interesting approach. Can you elaborate on why you chose that specific technology over other alternatives?",
@@ -107,25 +104,55 @@ export default function MockInterview() {
         .mock-container {
           padding: 1.5rem;
           width: 100%;
-          min-width: 0; /* Prevents flexbox overlapping */
+          min-width: 0;
           box-sizing: border-box;
           color: white;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
           overflow-x: hidden;
+          background: #000000;
+          min-height: 100vh;
+        }
+
+        /* --- SCROLLBAR STYLES (Grey) --- */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        ::-webkit-scrollbar-corner {
+          background: #0a0a0a;
+        }
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #4b5563 #0a0a0a;
         }
 
         .glass-card {
-          background: linear-gradient(145deg, rgba(20, 15, 25, 0.7), rgba(10, 8, 15, 0.9));
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(24px) saturate(140%);
+          -webkit-backdrop-filter: blur(24px) saturate(140%);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px;
-          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+          border-radius: 24px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
           position: relative;
           overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card:hover {
+          background: rgba(0, 0, 0, 0.8);
+          border-color: rgba(255, 255, 255, 0.12);
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
         }
 
         .roles-grid {
@@ -142,7 +169,7 @@ export default function MockInterview() {
         }
 
         .brand-btn {
-          background: linear-gradient(90deg, #7c3aed, #ff3f81);
+          background: linear-gradient(135deg, #0d9488, #14b8a6);
           color: white;
           border: none;
           padding: 16px 32px;
@@ -150,7 +177,7 @@ export default function MockInterview() {
           cursor: pointer;
           font-size: 15px;
           font-weight: 700;
-          box-shadow: 0 4px 20px rgba(255,63,129,0.3);
+          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
           transition: all 0.3s ease;
           width: 100%;
           display: flex;
@@ -161,10 +188,9 @@ export default function MockInterview() {
         
         .brand-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(124,58,237,0.4), 0 8px 30px rgba(255,63,129,0.4);
+          box-shadow: 0 12px 30px -6px rgba(13, 148, 136, 0.6);
         }
 
-        /* Custom scrollbar for chat */
         .chat-window::-webkit-scrollbar { width: 6px; }
         .chat-window::-webkit-scrollbar-track { background: transparent; }
         .chat-window::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -175,10 +201,9 @@ export default function MockInterview() {
         }
       `}</style>
 
-      {/* Warning Banner */}
       {isDemoMode && (
         <div style={{
-          background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.4)",
+          background: "rgba(245, 158, 11, 0.05)", border: "1px solid rgba(245, 158, 11, 0.2)",
           color: "#fcd34d", padding: "12px 16px", borderRadius: "12px",
           display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "600"
         }}>
@@ -187,50 +212,62 @@ export default function MockInterview() {
         </div>
       )}
 
-      {/* Header */}
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "linear-gradient(135deg, #115e59, #14b8a6)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: "800", fontSize: "1.1rem", color: "white"
+          }}>
+            C
+          </div>
+          <div>
+            <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
+            <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
+          </div>
+        </div>
+      </header>
+
       <div style={{ marginBottom: "0.5rem" }}>
-        <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 8px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "3px", background: "linear-gradient(90deg, #3b82f6, transparent)", borderRadius: "2px" }}></span>
-          Mock <span style={{ background: "linear-gradient(90deg, #3b82f6, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Interview</span>
+        <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+          Mock <span style={{ color: "#14b8a6" }}>Interview</span>
         </h2>
-        <p style={{ color: "#9b9ba8", margin: 0, fontSize: "14px", fontWeight: "500" }}>Practice with an AI interviewer and get real feedback.</p>
+        <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Practice with an AI interviewer and get real feedback.</p>
       </div>
 
       <div style={{ maxWidth: "900px", width: "100%" }}>
         {!started ? (
-          /* Setup Card */
           <div className="glass-card" style={{ padding: "2.5rem 2rem" }}>
 
-            {/* Role icons preview */}
             <div className="roles-grid">
               {["🌐", "⚙️", "🔗", "⟨/⟩", "🏗️"].map((icon, i) => (
                 <div key={i} onClick={() => setRole(roles[i])} style={{
                   padding: "16px 12px", borderRadius: "14px",
-                  background: role === roles[i] ? "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(255,63,129,0.1))" : "rgba(255,255,255,0.02)",
-                  border: `1px solid ${role === roles[i] ? "#ff3f81" : "rgba(255,255,255,0.05)"}`,
-                  boxShadow: role === roles[i] ? "0 0 15px rgba(255,63,129,0.2)" : "none",
+                  background: role === roles[i] ? "rgba(20, 184, 166, 0.1)" : "rgba(0, 0, 0, 0.3)",
+                  border: `1px solid ${role === roles[i] ? "#14b8a6" : "rgba(255,255,255,0.06)"}`,
+                  boxShadow: role === roles[i] ? "0 0 15px rgba(20,184,166,0.2)" : "none",
                   cursor: "pointer", textAlign: "center", transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
                   transform: role === roles[i] ? "translateY(-4px)" : "none"
                 }}>
-                  <div style={{ fontSize: "28px", marginBottom: "10px", filter: role === roles[i] ? "drop-shadow(0 0 8px rgba(255,63,129,0.5))" : "none" }}>{icon}</div>
-                  <p style={{ margin: 0, fontSize: "12px", color: role === roles[i] ? "#fff" : "#9b9ba8",
+                  <div style={{ fontSize: "28px", marginBottom: "10px", filter: role === roles[i] ? "drop-shadow(0 0 8px rgba(20,184,166,0.5))" : "none" }}>{icon}</div>
+                  <p style={{ margin: 0, fontSize: "12px", color: role === roles[i] ? "#fff" : "#94a3b8",
                     fontWeight: role === roles[i] ? "700" : "500" }}>{roles[i]}</p>
                 </div>
               ))}
             </div>
 
-            {/* Difficulty */}
             <div style={{ marginBottom: "2.5rem" }}>
-              <label style={{ fontSize: "12px", color: "#6b6b78", display: "block", marginBottom: "12px",
+              <label style={{ fontSize: "12px", color: "#64748b", display: "block", marginBottom: "12px",
                 textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "700" }}>Select Difficulty</label>
               <div className="diff-grid">
                 {difficulties.map(d => (
                   <button key={d} onClick={() => setDifficulty(d)} style={{
                     padding: "14px", borderRadius: "12px", border: "none", cursor: "pointer",
-                    background: difficulty === d ? diffBg[d] : "rgba(255,255,255,0.03)",
-                    color: difficulty === d ? diffColor[d] : "#9b9ba8",
+                    background: difficulty === d ? diffBg[d] : "rgba(0, 0, 0, 0.3)",
+                    color: difficulty === d ? diffColor[d] : "#94a3b8",
                     fontWeight: difficulty === d ? "700" : "500", fontSize: "14px",
-                    border: `1px solid ${difficulty === d ? diffColor[d] + "80" : "rgba(255,255,255,0.1)"}`,
+                    border: `1px solid ${difficulty === d ? diffColor[d] + "80" : "rgba(255,255,255,0.06)"}`,
                     boxShadow: difficulty === d ? `0 0 15px ${diffColor[d]}30` : "none",
                     transition: "all 0.2s"
                   }}>
@@ -240,17 +277,16 @@ export default function MockInterview() {
               </div>
             </div>
 
-            {/* Summary */}
             <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "12px", padding: "16px 20px",
               marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center",
-              border: "1px solid rgba(255,255,255,0.05)" }}>
-              <div style={{ fontSize: "14px", color: "#9b9ba8" }}>
+              border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ fontSize: "14px", color: "#94a3b8" }}>
                 <span style={{ color: "#fff", fontWeight: "700" }}>{role}</span>
                 <span style={{ margin: "0 12px", color: "#444" }}>|</span>
                 <span style={{ color: diffColor[difficulty], fontWeight: "700" }}>{difficulty}</span>
               </div>
-              <span style={{ fontSize: "13px", color: "#10b981", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "8px", height: "8px", background: "#10b981", borderRadius: "50%", boxShadow: "0 0 10px #10b981" }}></span>
+              <span style={{ fontSize: "13px", color: "#22c55e", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "8px", height: "8px", background: "#22c55e", borderRadius: "50%", boxShadow: "0 0 10px #22c55e" }}></span>
                 AI Ready
               </span>
             </div>
@@ -260,20 +296,18 @@ export default function MockInterview() {
             </button>
           </div>
         ) : (
-          /* Chat UI */
           <div className="glass-card" style={{ display: "flex", flexDirection: "column", height: "600px" }}>
 
-            {/* Chat Header */}
             <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)",
               background: "rgba(0,0,0,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                 <div style={{ width: "42px", height: "42px", borderRadius: "12px",
-                  background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(255,63,129,0.2))", 
+                  background: "rgba(20, 184, 166, 0.1)", 
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", 
-                  border: "1px solid rgba(124,58,237,0.4)", boxShadow: "0 0 15px rgba(124,58,237,0.2)" }}>🤖</div>
+                  border: "1px solid rgba(20, 184, 166, 0.25)", boxShadow: "0 0 15px rgba(20,184,166,0.1)" }}>🤖</div>
                 <div>
                   <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#e2e8f0" }}>AI Interviewer</p>
-                  <p style={{ margin: 0, fontSize: "12px", color: "#9b9ba8", fontWeight: "500", marginTop: "2px" }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8", fontWeight: "500", marginTop: "2px" }}>
                     {role} · <span style={{ color: diffColor[difficulty], fontWeight: "700" }}>{difficulty}</span>
                   </p>
                 </div>
@@ -288,7 +322,6 @@ export default function MockInterview() {
               </button>
             </div>
 
-            {/* Messages */}
             <div className="chat-window" style={{ flex: 1, overflowY: "auto", padding: "1.5rem",
               display: "flex", flexDirection: "column", gap: "20px" }}>
               {messages.filter(m => m.role !== "system").map((m, i) => (
@@ -297,42 +330,42 @@ export default function MockInterview() {
                 }}>
                   {m.role !== "user" && (
                     <div style={{ width: "32px", height: "32px", borderRadius: "10px",
-                      background: "rgba(124,58,237,0.15)", display: "flex", alignItems: "center",
+                      background: "rgba(20, 184, 166, 0.1)", display: "flex", alignItems: "center",
                       justifyContent: "center", fontSize: "16px", flexShrink: 0,
-                      border: "1px solid rgba(124,58,237,0.3)" }}>🤖</div>
+                      border: "1px solid rgba(20, 184, 166, 0.25)" }}>🤖</div>
                   )}
                   <div style={{
                     maxWidth: "75%", padding: "14px 18px", borderRadius: "16px",
-                    background: m.role === "user" ? "linear-gradient(135deg, #7c3aed, #ff3f81)" : "rgba(255,255,255,0.03)",
+                    background: m.role === "user" ? "linear-gradient(135deg, #0d9488, #14b8a6)" : "rgba(0, 0, 0, 0.4)",
                     color: m.role === "user" ? "white" : "#e2e8f0", fontSize: "14px", lineHeight: "1.7",
                     whiteSpace: "pre-wrap",
-                    border: m.role === "user" ? "none" : "1px solid rgba(255,255,255,0.1)",
+                    border: m.role === "user" ? "none" : "1px solid rgba(255,255,255,0.08)",
                     borderBottomRightRadius: m.role === "user" ? "4px" : "16px",
                     borderBottomLeftRadius: m.role !== "user" ? "4px" : "16px",
-                    boxShadow: m.role === "user" ? "0 4px 15px rgba(255,63,129,0.2)" : "0 4px 15px rgba(0,0,0,0.2)",
+                    boxShadow: m.role === "user" ? "0 4px 15px rgba(20,184,166,0.3)" : "0 4px 15px rgba(0,0,0,0.2)",
                     fontWeight: "500"
                   }}>
                     {m.content}
                   </div>
                   {m.role === "user" && (
                     <div style={{ width: "32px", height: "32px", borderRadius: "10px",
-                      background: "rgba(255,63,129,0.15)", display: "flex", alignItems: "center",
+                      background: "rgba(13, 148, 136, 0.15)", display: "flex", alignItems: "center",
                       justifyContent: "center", fontSize: "16px", flexShrink: 0,
-                      border: "1px solid rgba(255,63,129,0.3)" }}>👤</div>
+                      border: "1px solid rgba(13, 148, 136, 0.3)" }}>👤</div>
                   )}
                 </div>
               ))}
               {loading && (
                 <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                   <div style={{ width: "32px", height: "32px", borderRadius: "10px",
-                    background: "rgba(124,58,237,0.15)", display: "flex", alignItems: "center",
-                    justifyContent: "center", fontSize: "16px", border: "1px solid rgba(124,58,237,0.3)" }}>🤖</div>
-                  <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(20, 184, 166, 0.1)", display: "flex", alignItems: "center",
+                    justifyContent: "center", fontSize: "16px", border: "1px solid rgba(20, 184, 166, 0.25)" }}>🤖</div>
+                  <div style={{ background: "rgba(0, 0, 0, 0.4)", border: "1px solid rgba(255,255,255,0.08)",
                     padding: "16px", borderRadius: "16px", borderBottomLeftRadius: "4px" }}>
                     <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                       {[0, 1, 2].map(i => (
                         <div key={i} style={{
-                          width: "8px", height: "8px", borderRadius: "50%", background: "#a78bfa",
+                          width: "8px", height: "8px", borderRadius: "50%", background: "#14b8a6",
                           animation: `bounce 1s ease-in-out ${i * 0.2}s infinite`
                         }} />
                       ))}
@@ -343,7 +376,6 @@ export default function MockInterview() {
               <div ref={bottomRef} />
             </div>
 
-            {/* Input */}
             <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
               <div style={{ display: "flex", gap: "12px" }}>
                 <textarea value={input} onChange={e => setInput(e.target.value)}
@@ -351,26 +383,26 @@ export default function MockInterview() {
                   placeholder="Type your answer... (Enter to send, Shift+Enter for new line)"
                   rows={2} style={{
                     flex: 1, padding: "14px 18px", borderRadius: "12px",
-                    border: "1px solid rgba(255,255,255,0.15)", fontSize: "14px", resize: "none",
-                    background: "rgba(0,0,0,0.3)", color: "white", lineHeight: "1.6",
+                    border: "1px solid rgba(255,255,255,0.08)", fontSize: "14px", resize: "none",
+                    background: "rgba(0, 0, 0, 0.4)", color: "white", lineHeight: "1.6",
                     outline: "none", transition: "border 0.2s", fontWeight: "500"
                   }} 
-                  onFocus={e => e.target.style.borderColor = "rgba(255,63,129,0.5)"}
-                  onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
+                  onFocus={e => e.target.style.borderColor = "rgba(20,184,166,0.5)"}
+                  onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
                 />
                 <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
-                  background: loading || !input.trim() ? "rgba(255,255,255,0.05)" : "linear-gradient(90deg, #7c3aed, #ff3f81)",
-                  color: loading || !input.trim() ? "#6b6b78" : "white",
+                  background: loading || !input.trim() ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #0d9488, #14b8a6)",
+                  color: loading || !input.trim() ? "#64748b" : "white",
                   padding: "0 24px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.05)",
                   cursor: loading || !input.trim() ? "not-allowed" : "pointer",
                   fontSize: "20px", transition: "all 0.2s", alignSelf: "stretch",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: !loading && input.trim() ? "0 4px 15px rgba(255,63,129,0.3)" : "none"
+                  boxShadow: !loading && input.trim() ? "0 4px 15px rgba(20,184,166,0.3)" : "none"
                 }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
               </div>
-              <p style={{ fontSize: "11px", color: "#6b6b78", marginTop: "10px", fontWeight: "600" }}>
+              <p style={{ fontSize: "11px", color: "#64748b", marginTop: "10px", fontWeight: "600" }}>
                 Enter to send · Shift+Enter for new line
               </p>
             </div>

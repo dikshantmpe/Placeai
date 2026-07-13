@@ -79,7 +79,6 @@ export default function DSATracker() {
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
         
-        // Ensure the ref exists before attaching Vanta
         if (cancelled || !vantaRef.current || vantaEffect.current) return;
 
         if (window.VANTA && window.VANTA.NET) {
@@ -92,11 +91,11 @@ export default function DSATracker() {
             minWidth: 200.0,
             scale: 1.0,
             scaleMobile: 1.0,
-            color: 0xff3f81, 
-            backgroundColor: 0x0a0812, 
-            points: 11.0,
-            maxDistance: 22.0,
-            spacing: 17.0,
+            color: 0x14b8a6, 
+            backgroundColor: 0x000000, 
+            points: 10.0,
+            maxDistance: 25.0,
+            spacing: 18.0,
             showDots: true,
           });
         }
@@ -120,9 +119,6 @@ export default function DSATracker() {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        // IMPORTANT: this backend only understands its own custom JWT
-        // (issued by /api/auth/login, /api/auth/register, /api/auth/google),
-        // NOT a raw Firebase ID token. Always use the JWT saved in localStorage.
         const token = localStorage.getItem("token");
 
         const res = await axios.get("https://placeai-sqjj.onrender.com/api/problems", {
@@ -169,12 +165,12 @@ export default function DSATracker() {
       position: "relative",
       padding: "2.5rem 3rem",
       color: "#ffffff",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       overflowY: "auto",
-      overflowX: "hidden"
+      overflowX: "hidden",
+      background: "#000000"
     }}>
       
-      {/* 1. BACKGROUND ALWAYS RENDERS FIRST */}
       <div 
         ref={vantaRef} 
         style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
@@ -182,19 +178,48 @@ export default function DSATracker() {
       
       <div style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-        background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(10,8,18,0.75) 80%)"
+        background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
       }} />
 
       <style>{`
+        /* --- SCROLLBAR STYLES (Grey) --- */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        ::-webkit-scrollbar-corner {
+          background: #0a0a0a;
+        }
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #4b5563 #0a0a0a;
+        }
+
         .glass-panel {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(24px) saturate(140%);
+          -webkit-backdrop-filter: blur(24px) saturate(140%);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 24px;
-          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.05);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
           position: relative;
           z-index: 10;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-panel:hover {
+          background: rgba(0, 0, 0, 0.8);
+          border-color: rgba(255, 255, 255, 0.12);
+          transform: translateY(-4px);
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
         }
 
         .dsa-stats-grid {
@@ -207,8 +232,8 @@ export default function DSATracker() {
         }
 
         .topic-btn {
-          background: rgba(255, 255, 255, 0.03);
-          color: #9b9ba8;
+          background: rgba(0, 0, 0, 0.5);
+          color: #94a3b8;
           padding: 10px 18px;
           border-radius: 12px;
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -221,17 +246,17 @@ export default function DSATracker() {
         }
         
         .topic-btn:hover {
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(0, 0, 0, 0.7);
           border-color: rgba(255, 255, 255, 0.15);
-          color: white;
+          color: #e2e8f0;
           transform: translateY(-2px);
         }
         
         .topic-btn.active {
-          background: linear-gradient(90deg, #7c3aed, #ff3f81);
+          background: linear-gradient(135deg, #0d9488, #14b8a6);
           color: white;
           border-color: transparent;
-          box-shadow: 0 8px 20px -5px rgba(255,63,129,0.5);
+          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
           transform: translateY(-2px);
         }
 
@@ -273,18 +298,16 @@ export default function DSATracker() {
         }
       `}</style>
 
-      {/* 2. SHOW LOADING SCREEN OR DASHBOARD OVER THE BACKGROUND */}
       {loading ? (
         <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-          <div style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#fff", fontWeight: "700", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>
-            <div style={{ width: "24px", height: "24px", border: "3px solid rgba(255,63,129,0.3)", borderTop: "3px solid #ff3f81", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+          <div style={{ background: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "24px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#fff", fontWeight: "700", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}>
+            <div style={{ width: "24px", height: "24px", border: "3px solid rgba(20,184,166,0.3)", borderTop: "3px solid #14b8a6", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
             Decrypting DSA Sheet...
           </div>
         </div>
       ) : (
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           
-          {/* WARNING BANNER FOR DEMO MODE */}
           {isDemoMode && (
             <div className="glass-panel" style={{
               background: "rgba(245, 158, 11, 0.05)",
@@ -297,46 +320,61 @@ export default function DSATracker() {
               <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "8px", borderRadius: "8px" }}>⚠️</div> 
               <div>
                 <h4 style={{ margin: "0 0 4px 0", color: "#fcd34d", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
-                <p style={{ margin: 0, color: "#9b9ba8", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
+                <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
               </div>
             </div>
           )}
 
-          {/* Unified Header with Profile Pill */}
-          <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
-            <div>
-              <h2 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "14px", letterSpacing: "-0.5px" }}>
-                <span style={{ width: "28px", height: "4px", background: "linear-gradient(90deg, #ff3f81, #7c3aed)", borderRadius: "2px" }}></span>
-                DSA <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Tracker</span>
-              </h2>
-              <p style={{ color: "#9b9ba8", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
+          <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{
+                width: "40px", height: "40px", borderRadius: "10px",
+                background: "linear-gradient(135deg, #115e59, #14b8a6)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: "800", fontSize: "1.1rem", color: "white"
+              }}>
+                C
+              </div>
+              <div>
+                <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
+                <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
+              </div>
             </div>
             
             <div style={{
-              display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.05)",
-              backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", 
+              display: "flex", alignItems: "center", gap: "12px",
+              background: "rgba(0, 0, 0, 0.7)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 255, 255, 0.08)", 
               padding: "8px 16px", borderRadius: "100px"
             }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981" }} />
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px #22c55e" }} />
               <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
                 {displayName} • Ready to work
               </span>
             </div>
           </header>
 
+          <div style={{ marginBottom: "0.5rem" }}>
+            <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+              DSA <span style={{ color: "#14b8a6" }}>Tracker</span>
+            </h2>
+            <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
+          </div>
+
           {/* Stats Row */}
           <div className="dsa-stats-grid">
             {[
-              { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#ff3f81", icon: "⟨/⟩" },
-              { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#a78bfa", icon: "🎯" },
-              { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#10b981", icon: "📊" },
+              { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#14b8a6", icon: "⟨/⟩" },
+              { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#8b5cf6", icon: "🎯" },
+              { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#22c55e", icon: "📊" },
             ].map((s, i) => (
               <div key={i} className="glass-panel" style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "20px" }}>
                 <div>
-                  <p style={{ color: "#9b9ba8", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
+                  <p style={{ color: "#64748b", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
                     <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "white", lineHeight: "1" }}>{s.value}</span>
-                    <span style={{ fontSize: "0.9rem", color: "#6b6b78", fontWeight: "600" }}>{s.total}</span>
+                    <span style={{ fontSize: "0.9rem", color: "#475569", fontWeight: "600" }}>{s.total}</span>
                   </div>
                 </div>
                 <div style={{
@@ -353,13 +391,13 @@ export default function DSATracker() {
           <div className="glass-panel" style={{ padding: "1.5rem 2rem", borderRadius: "20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
               <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: "700" }}>Overall Sheet Progress</span>
-              <span style={{ fontSize: "0.9rem", color: "#ff3f81", fontWeight: "800" }}>{percent}%</span>
+              <span style={{ fontSize: "0.9rem", color: "#14b8a6", fontWeight: "800" }}>{percent}%</span>
             </div>
             <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "10px", height: "10px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)" }}>
               <div style={{
-                width: `${percent}%`, background: "linear-gradient(90deg, #7c3aed, #ff3f81)",
+                width: `${percent}%`, background: "linear-gradient(90deg, #0d9488, #14b8a6)",
                 height: "100%", borderRadius: "10px", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                boxShadow: "0 0 20px rgba(255,63,129,0.6)"
+                boxShadow: "0 0 20px rgba(20,184,166,0.6)"
               }} />
             </div>
           </div>
@@ -384,7 +422,7 @@ export default function DSATracker() {
               display: "grid", gridTemplateColumns: "44px 1fr 120px 100px 80px",
               padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)",
               background: "rgba(0,0,0,0.3)",
-              fontSize: "0.75rem", color: "#6b6b78", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
+              fontSize: "0.75rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
             }}>
               <span></span>
               <span>Problem Title</span>
@@ -394,7 +432,7 @@ export default function DSATracker() {
             </div>
 
             {filtered.length === 0 ? (
-              <div style={{ padding: "5rem", textAlign: "center", color: "#6b6b78", fontWeight: "600", fontSize: "1rem" }}>
+              <div style={{ padding: "5rem", textAlign: "center", color: "#64748b", fontWeight: "600", fontSize: "1rem" }}>
                 <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: 0.5 }}>📭</div>
                 No problems found for this topic.
               </div>
@@ -415,18 +453,18 @@ export default function DSATracker() {
                     </div>
 
                     <button onClick={() => navigate(`/problem/${p._id}`)} style={{
-                      color: p.status ? "#6b6b78" : "#ffffff", fontSize: "0.95rem", fontWeight: "600",
+                      color: p.status ? "#64748b" : "#ffffff", fontSize: "0.95rem", fontWeight: "600",
                       textDecoration: p.status ? "line-through" : "none",
                       background: "transparent", border: "none", cursor: "pointer",
                       textAlign: "left", padding: 0, transition: "color 0.2s"
                     }}>
-                      <span style={{ color: "#6b6b78", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
+                      <span style={{ color: "#64748b", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
                         {String(i + 1).padStart(2, "0")}.
                       </span>
                       {p.title}
                     </button>
 
-                    <span style={{ fontSize: "0.8rem", color: "#9b9ba8", fontWeight: "600" }}>{p.topic}</span>
+                    <span style={{ fontSize: "0.8rem", color: "#94a3b8", fontWeight: "600" }}>{p.topic}</span>
 
                     <span style={{
                       fontSize: "0.7rem", fontWeight: "800", padding: "6px 12px",
@@ -438,7 +476,7 @@ export default function DSATracker() {
                     </span>
 
                     <span style={{
-                      fontSize: "0.85rem", color: p.status ? "#10b981" : "#6b6b78",
+                      fontSize: "0.85rem", color: p.status ? "#10b981" : "#64748b",
                       fontWeight: "800", display: "flex", alignItems: "center", gap: "6px"
                     }}>
                       {p.status ? (
