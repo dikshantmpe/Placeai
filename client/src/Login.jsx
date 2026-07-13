@@ -139,7 +139,7 @@ export default function Login({ setUser }) {
             minWidth: 200.0,
             scale: 1.0,
             scaleMobile: 1.0,
-            color: 0x3b82f6,
+            color: 0x14b8a6,
             backgroundColor: 0x000000,
             points: 10.0,
             maxDistance: 25.0,
