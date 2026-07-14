@@ -5,21 +5,6 @@ import axios from "axios";
 import { auth } from "./firebase.js"; 
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
-
 // Custom hook for typing animation
 function useTypingEffect(texts, speed = 80, pause = 2000) {
   const [displayedText, setDisplayedText] = useState("");
@@ -72,8 +57,6 @@ export default function Login({ setUser }) {
   const loginPanelRef = useRef(null);
   
   const navigate = useNavigate();
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
 
   const taglines = [
     "Prepare Smarter. Get Placed Faster.",
@@ -106,65 +89,6 @@ export default function Login({ setUser }) {
     });
     return () => unsubscribe();
   }, [navigate, setUser]);
-
-  useEffect(() => {
-    let cancelled = false;
-    let originalWarn;
-    let originalError;
-    
-    async function initVanta() {
-      try {
-        originalWarn = console.warn;
-        originalError = console.error;
-        console.warn = function(...args) {
-          const msg = (args[0]?.toString?.() || args.join(" "));
-          if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
-          originalWarn.apply(console, args);
-        };
-        console.error = function(...args) {
-          const msg = (args[0]?.toString?.() || args.join(" "));
-          if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
-          originalError.apply(console, args);
-        };
-
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
-
-        if (cancelled || !vantaRef.current || vantaEffect.current) return;
-
-        if (window.VANTA && window.VANTA.NET) {
-          vantaEffect.current = window.VANTA.NET({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.0,
-            minWidth: 200.0,
-            scale: 1.0,
-            scaleMobile: 1.0,
-            color: 0x14b8a6,
-            backgroundColor: 0x000000,
-            points: 10.0,
-            maxDistance: 25.0,
-            spacing: 18.0,
-            showDots: true,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to load Vanta background:", err);
-      }
-    }
-    initVanta();
-    return () => {
-      cancelled = true;
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
-      }
-      if (originalWarn) console.warn = originalWarn;
-      if (originalError) console.error = originalError;
-    };
-  }, []);
 
   const handleMouseEnter = useCallback(() => {
     setIsPanelHovered(true);
@@ -248,6 +172,57 @@ export default function Login({ setUser }) {
     setError("GitHub login not configured yet.");
   };
 
+  // Simple animated background component
+  const AnimatedBackground = () => (
+    <div style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden", background: "#000000" }}>
+      {/* Floating gradient orbs */}
+      <div className="orb orb-1" style={{
+        position: "absolute",
+        width: "600px",
+        height: "600px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(20,184,166,0.15) 0%, transparent 70%)",
+        top: "-10%",
+        left: "-10%",
+        filter: "blur(80px)",
+        animation: "floatOrb1 20s ease-in-out infinite"
+      }} />
+      <div className="orb orb-2" style={{
+        position: "absolute",
+        width: "500px",
+        height: "500px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 70%)",
+        bottom: "-10%",
+        right: "-5%",
+        filter: "blur(80px)",
+        animation: "floatOrb2 25s ease-in-out infinite"
+      }} />
+      <div className="orb orb-3" style={{
+        position: "absolute",
+        width: "400px",
+        height: "400px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(45,212,191,0.08) 0%, transparent 70%)",
+        top: "40%",
+        left: "60%",
+        filter: "blur(60px)",
+        animation: "floatOrb3 18s ease-in-out infinite"
+      }} />
+      {/* Subtle grid overlay */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        backgroundImage: `
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: "60px 60px",
+        opacity: 0.5
+      }} />
+    </div>
+  );
+
   if (isCheckingAuth) {
     return (
       <div style={{
@@ -256,7 +231,7 @@ export default function Login({ setUser }) {
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         color: "#ffffff", background: "#000000",
       }}>
-        <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
+        <AnimatedBackground />
         <div style={{ position: "relative", zIndex: 10, textAlign: "center" }}>
           <div style={{
             width: "48px", height: "48px", borderRadius: "50%",
@@ -266,7 +241,23 @@ export default function Login({ setUser }) {
           }} />
           <p style={{ color: "#64748b", fontSize: "0.95rem" }}>Signing you in...</p>
         </div>
-        <style dangerouslySetInnerHTML={{ __html: "@keyframes spin { to { transform: rotate(360deg); } }" }} />
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @keyframes floatOrb1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, 40px) scale(1.1); }
+            66% { transform: translate(-30px, 80px) scale(0.9); }
+          }
+          @keyframes floatOrb2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-50px, -30px) scale(1.05); }
+            66% { transform: translate(40px, -60px) scale(0.95); }
+          }
+          @keyframes floatOrb3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-80px, 20px) scale(1.15); }
+          }
+        `}} />
       </div>
     );
   }
@@ -471,6 +462,22 @@ export default function Login({ setUser }) {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+
+        /* Animated background orbs */
+        @keyframes floatOrb1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(60px, 40px) scale(1.1); }
+          66% { transform: translate(-30px, 80px) scale(0.9); }
+        }
+        @keyframes floatOrb2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(-50px, -30px) scale(1.05); }
+          66% { transform: translate(40px, -60px) scale(0.95); }
+        }
+        @keyframes floatOrb3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-80px, 20px) scale(1.15); }
+        }
         
         @media (max-width: 1024px) {
           .login-layout { flex-direction: column !important; padding: 1rem !important; }
@@ -483,7 +490,8 @@ export default function Login({ setUser }) {
         }
       `}</style>
 
-      <div ref={vantaRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
+      <AnimatedBackground />
+
       <div style={{
         position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
         background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
