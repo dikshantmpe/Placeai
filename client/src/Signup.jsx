@@ -94,15 +94,17 @@ export default function Signup() {
     }
 
     try {
-      // Call backend API
+      // Pointing to live Render backend
       const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/register", {
         name: name.trim(),
         email: email.toLowerCase(),
         password: password
       });
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      // Alert the user to check email, then redirect to login page
+      alert("Account created! Please check your email for the verification link before logging in.");
+      navigate("/"); 
+      
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message) {
@@ -126,6 +128,7 @@ export default function Signup() {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
+      // Pointing to live Render backend
       const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
         name: firebaseUser.displayName || firebaseUser.email.split("@")[0],
         email: firebaseUser.email,
