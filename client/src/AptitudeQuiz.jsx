@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+]import { useState, useEffect } from "react";
 import axios from "axios";
 import { auth } from "./firebase.js";
 
@@ -105,7 +105,7 @@ export default function AptitudeQuiz() {
 
   const styles = `
     .quiz-container {
-      padding: 2rem;
+      padding: 1.5rem;
       width: 100%;
       min-width: 0;
       box-sizing: border-box;
@@ -113,19 +113,48 @@ export default function AptitudeQuiz() {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
-      max-width: 900px;
+      max-width: 800px;
       background: #f8fafc;
       min-height: 100vh;
-      margin: 0 auto;
     }
 
-    .dashboard-card {
+    /* --- SCROLLBAR STYLES (Light Grey) --- */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    ::-webkit-scrollbar-corner {
+      background: #f1f5f9;
+    }
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+
+    .glass-card {
       background: #ffffff;
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
       border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border-radius: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
       position: relative;
       overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .glass-card:hover {
+      background: #ffffff;
+      border-color: #14b8a6;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
     }
 
     .quiz-cats-grid {
@@ -152,16 +181,16 @@ export default function AptitudeQuiz() {
     }
 
     .brand-btn {
-      background: #14b8a6;
+      background: linear-gradient(135deg, #0d9488, #14b8a6);
       color: white;
       border: none;
-      padding: 14px 28px;
-      border-radius: 10px;
+      padding: 16px 32px;
+      border-radius: 12px;
       cursor: pointer;
       font-size: 15px;
-      font-weight: 600;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      transition: background 0.2s ease;
+      font-weight: 700;
+      box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.3);
+      transition: all 0.3s ease;
       width: 100%;
       display: flex;
       align-items: center;
@@ -170,42 +199,14 @@ export default function AptitudeQuiz() {
     }
 
     .brand-btn:hover:not(:disabled) {
-      background: #0d9488;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -6px rgba(13, 148, 136, 0.4);
     }
     .brand-btn:disabled {
-      background: #cbd5e1;
-      color: #64748b;
+      background: #e2e8f0;
+      color: #94a3b8;
       box-shadow: none;
       cursor: not-allowed;
-    }
-
-    .option-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      transition: border-color 0.15s ease, background 0.15s ease;
-    }
-    .option-card:hover {
-      border-color: #14b8a6;
-    }
-
-    .option-letter {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      background: #f1f5f9;
-      color: #64748b;
       border: 1px solid #e2e8f0;
     }
 
@@ -226,65 +227,42 @@ export default function AptitudeQuiz() {
     <div className="quiz-container">
       <style>{styles}</style>
 
-      <header style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
+      <header style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
         <div style={{
           width: "40px", height: "40px", borderRadius: "10px",
-          background: "#14b8a6",
+          background: "linear-gradient(135deg, #115e59, #14b8a6)",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontWeight: "800", fontSize: "1.1rem", color: "white"
         }}>
           C
         </div>
         <div>
-          <div style={{ fontWeight: "700", fontSize: "1.1rem", color: "#1f2937", letterSpacing: "-0.02em" }}>Crackin AI</div>
-          <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "2px" }}>An AI Powered Placement Preparation Platform</div>
+          <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#1f2937" }}>Crackin AI</div>
+          <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
         </div>
       </header>
 
-      <div className="dashboard-card" style={{ padding: "2.5rem", marginBottom: "2rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "1rem" }}>
-          <span style={{ color: "#14b8a6", fontSize: "14px" }}>⚡</span>
-          <span style={{ fontSize: "12px", fontWeight: "700", color: "#14b8a6", letterSpacing: "0.5px", textTransform: "uppercase" }}>AI Placement Strategy</span>
-        </div>
-        <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 12px 0", letterSpacing: "-0.02em", color: "#1f2937", lineHeight: 1.2 }}>
-          Accelerate Your <span style={{ color: "#14b8a6" }}>Placement Journey</span>
+      <div style={{ marginBottom: "2rem" }}>
+        <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em", color: "#1f2937" }}>
+          Aptitude <span style={{ color: "#14b8a6" }}>Quiz</span>
         </h2>
-        <p style={{ color: "#64748b", margin: "0 0 2rem 0", fontSize: "1rem", lineHeight: 1.6, maxWidth: "500px" }}>
-          Your personalized AI command center. Leverage smart tools, track real-time progress, and master technical skills to crack your dream company.
-        </p>
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-          <button onClick={startQuiz} disabled={loading} className="brand-btn" style={{ width: "auto", padding: "14px 28px" }}>
-            {loading ? (
-              <>
-                <span style={{ animation: "pulse-glow 1.5s infinite" }}>⏳</span> Fetching database...
-              </>
-            ) : (
-              <>🚀 Start Practicing →</>
-            )}
-          </button>
-          <button disabled className="brand-btn" style={{ width: "auto", background: "#ffffff", color: "#374151", border: "1px solid #e2e8f0", boxShadow: "none" }}>
-            📊 View Analytics
-          </button>
-        </div>
+        <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>20 random questions — Quant, Logical & Verbal. 10 minutes timer.</p>
       </div>
 
       {/* Category Cards */}
       <div className="quiz-cats-grid">
         {[
-          { cat: "Quant", desc: "Numbers, percentages, ratios", color: "#14b8a6", iconBg: "#f0fdfa" },
-          { cat: "Logical", desc: "Patterns, sequences, puzzles", color: "#8b5cf6", iconBg: "#f5f3ff" },
-          { cat: "Verbal", desc: "Grammar, comprehension", color: "#3b82f6", iconBg: "#eff6ff" },
-        ].map(({ cat, desc, color, iconBg }) => (
-          <div key={cat} className="dashboard-card" style={{ padding: "1.5rem", textAlign: "left" }}>
-            <div style={{ 
-              width: "44px", height: "44px", borderRadius: "10px", 
-              background: iconBg, display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "20px", marginBottom: "12px"
-            }}>
-              {categoryIcon[cat]}
-            </div>
-            <p style={{ fontWeight: "700", color: "#1f2937", margin: "0 0 6px", fontSize: "15px" }}>{cat}</p>
-            <p style={{ color: "#64748b", fontSize: "13px", margin: 0, lineHeight: "1.5" }}>{desc}</p>
+          { cat: "Quant", desc: "Numbers, percentages, ratios", color: "#14b8a6" },
+          { cat: "Logical", desc: "Patterns, sequences, puzzles", color: "#8b5cf6" },
+          { cat: "Verbal", desc: "Grammar, comprehension", color: "#60a5fa" },
+        ].map(({ cat, desc, color }) => (
+          <div key={cat} className="glass-card" style={{
+            padding: "1.5rem", textAlign: "center", transition: "transform 0.2s"
+          }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
+             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+            <div style={{ fontSize: "36px", marginBottom: "12px", filter: `drop-shadow(0 0 10px ${color}40)` }}>{categoryIcon[cat]}</div>
+            <p style={{ fontWeight: "800", color, margin: "0 0 6px", fontSize: "15px", letterSpacing: "0.5px" }}>{cat}</p>
+            <p style={{ color: "#64748b", fontSize: "12px", margin: 0, lineHeight: "1.5", fontWeight: "500" }}>{desc}</p>
           </div>
         ))}
       </div>
@@ -292,19 +270,28 @@ export default function AptitudeQuiz() {
       {/* Info Row */}
       <div className="quiz-info-row">
         {[
-          { icon: "❓", label: "20 Questions", sub: "Mixed difficulty" },
-          { icon: "⏱", label: "10 Minutes", sub: "Timed assessment" },
-          { icon: "🎯", label: "Instant Results", sub: "Detailed review" },
+          { icon: "❓", label: "20 Questions" },
+          { icon: "⏱", label: "10 Minutes" },
+          { icon: "🎯", label: "Instant Results" },
         ].map((item, i) => (
-          <div key={i} className="dashboard-card" style={{
-            flex: 1, padding: "1.25rem", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "8px"
+          <div key={i} style={{
+            flex: 1, background: "#ffffff", border: "1px solid #e2e8f0",
+            borderRadius: "12px", padding: "16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
           }}>
-            <span style={{ fontSize: "24px" }}>{item.icon}</span>
-            <p style={{ margin: 0, fontSize: "14px", color: "#1f2937", fontWeight: "700" }}>{item.label}</p>
-            <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>{item.sub}</p>
+            <span style={{ fontSize: "24px", marginBottom: "8px" }}>{item.icon}</span>
+            <p style={{ margin: 0, fontSize: "13px", color: "#1f2937", fontWeight: "600" }}>{item.label}</p>
           </div>
         ))}
       </div>
+
+      <button onClick={startQuiz} disabled={loading} className="brand-btn">
+        {loading ? (
+          <>
+            <span style={{ animation: "pulse-glow 1.5s infinite" }}>⏳</span> Fetching database...
+          </>
+        ) : "🚀 Start Quiz"}
+      </button>
     </div>
   );
 
@@ -312,27 +299,28 @@ export default function AptitudeQuiz() {
   if (quizDone) {
     const score = getScore();
     const percent = Math.round((score / answers.length) * 100);
-    const grade = percent >= 80 ? { label: "Excellent! 🎉", color: "#10b981", bg: "#f0fdf4" }
-      : percent >= 60 ? { label: "Good Job! 👍", color: "#f59e0b", bg: "#fffbeb" }
-      : { label: "Keep Practicing! 💪", color: "#f43f5e", bg: "#fff1f2" };
+    const grade = percent >= 80 ? { label: "Excellent! 🎉", color: "#10b981", gradient: "linear-gradient(90deg, #10b981, #059669)" }
+      : percent >= 60 ? { label: "Good Job! 👍", color: "#f59e0b", gradient: "linear-gradient(90deg, #f59e0b, #d97706)" }
+      : { label: "Keep Practicing! 💪", color: "#f43f5e", gradient: "linear-gradient(90deg, #f43f5e, #e11d48)" };
 
     return (
       <div className="quiz-container">
         <style>{styles}</style>
-        <h2 style={{ fontSize: "1.5rem", fontWeight: "800", margin: "0 0 1.5rem", color: "#1f2937" }}>Quiz Results</h2>
+        <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 1.5rem", color: "#1f2937" }}>Quiz Results</h2>
 
         {/* Score Card */}
-        <div className="dashboard-card" style={{
-          border: `1px solid ${grade.color}30`, padding: "2.5rem 1.5rem", textAlign: "center", marginBottom: "2rem", background: grade.bg
+        <div className="glass-card" style={{
+          border: `1px solid ${grade.color}50`, padding: "2.5rem 1.5rem", textAlign: "center", marginBottom: "2rem",
+          boxShadow: `0 0 30px ${grade.color}15`
         }}>
-          <div style={{ fontSize: "56px", fontWeight: "800", color: grade.color, marginBottom: "8px", lineHeight: 1 }}>
-            {score}<span style={{ fontSize: "24px", color: "#64748b" }}>/{answers.length}</span>
+          <div style={{ fontSize: "64px", fontWeight: "800", color: grade.color, marginBottom: "12px", lineHeight: 1 }}>
+            {score}<span style={{ fontSize: "28px", color: "#64748b" }}>/{answers.length}</span>
           </div>
-          <p style={{ color: grade.color, fontWeight: "700", fontSize: "16px", margin: "0 0 20px" }}>
+          <p style={{ color: grade.color, fontWeight: "700", fontSize: "18px", margin: "0 0 20px" }}>
             {grade.label}
           </p>
           <div style={{ background: "#e2e8f0", borderRadius: "8px", height: "10px", maxWidth: "400px", margin: "0 auto", overflow: "hidden" }}>
-            <div style={{ width: `${percent}%`, background: grade.color, height: "100%", borderRadius: "8px", transition: "width 1s cubic-bezier(0.2, 0.8, 0.2, 1)" }} />
+            <div style={{ width: `${percent}%`, background: grade.gradient, height: "100%", borderRadius: "8px", transition: "width 1s cubic-bezier(0.2, 0.8, 0.2, 1)" }} />
           </div>
           <p style={{ color: "#64748b", fontSize: "14px", marginTop: "12px", fontWeight: "600" }}>{percent}% Accuracy</p>
         </div>
@@ -347,9 +335,9 @@ export default function AptitudeQuiz() {
           {answers.map((a, i) => {
             const correct = a.selected === a.question.answer;
             return (
-              <div key={i} className="dashboard-card" style={{
-                border: `1px solid ${correct ? "#10b98130" : "#f43f5e30"}`,
-                background: correct ? "#f0fdf4" : "#fff1f2",
+              <div key={i} className="glass-card" style={{
+                border: `1px solid ${correct ? "rgba(16,185,129,0.3)" : "rgba(244,63,94,0.3)"}`,
+                background: correct ? "rgba(16, 185, 129, 0.05)" : "rgba(244, 63, 94, 0.05)",
                 padding: "1.25rem"
               }}>
                 <p style={{ fontWeight: "600", margin: "0 0 12px", fontSize: "15px", color: "#1f2937", lineHeight: "1.6" }}>
@@ -358,12 +346,12 @@ export default function AptitudeQuiz() {
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <p style={{ margin: 0, color: "#059669", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ background: "#10b98120", padding: "2px 6px", borderRadius: "4px", color: "#059669" }}>✓</span> 
+                    <span style={{ background: "rgba(16,185,129,0.15)", padding: "2px 6px", borderRadius: "4px" }}>✓</span> 
                     {a.question.options[a.question.answer]}
                   </p>
                   {!correct && (
                     <p style={{ margin: 0, color: "#e11d48", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ background: "#f43f5e20", padding: "2px 6px", borderRadius: "4px", color: "#e11d48" }}>✗</span> 
+                      <span style={{ background: "rgba(244,63,94,0.15)", padding: "2px 6px", borderRadius: "4px" }}>✗</span> 
                       Your answer: {a.selected !== null ? a.question.options[a.selected] : "Not answered"}
                     </p>
                   )}
@@ -389,8 +377,8 @@ export default function AptitudeQuiz() {
       <style>{styles}</style>
 
       {isDemoMode && (
-        <div className="dashboard-card" style={{
-          background: "#fffbeb", border: "1px solid #fcd34d",
+        <div style={{
+          background: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.2)",
           color: "#92400e", padding: "12px 16px", borderRadius: "12px",
           display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "600",
           marginBottom: "1.5rem"
@@ -400,39 +388,38 @@ export default function AptitudeQuiz() {
         </div>
       )}
 
-      <div className="dashboard-card" style={{ padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
-        <div className="quiz-header" style={{ marginBottom: 0 }}>
-          <span style={{ fontSize: "14px", color: "#64748b", fontWeight: "500" }}>
-            Question <span style={{ color: "#1f2937", fontWeight: "700", fontSize: "16px" }}>{current + 1}</span> of {questions.length}
-          </span>
+      <div className="quiz-header">
+        <span style={{ fontSize: "14px", color: "#64748b", fontWeight: "500" }}>
+          Question <span style={{ color: "#1f2937", fontWeight: "700", fontSize: "16px" }}>{current + 1}</span> of {questions.length}
+        </span>
 
-          <span style={{
-            background: timeLeft < 60 ? "#fef2f2" : "#f8fafc",
-            color: timeLeft < 60 ? "#dc2626" : "#1f2937",
-            padding: "6px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "14px",
-            border: `1px solid ${timeLeft < 60 ? "#fecaca" : "#e2e8f0"}`,
-            display: "flex", alignItems: "center", gap: "6px", letterSpacing: "1px"
-          }}>
-            ⏱ {formatTime()}
-          </span>
+        <span style={{
+          background: timeLeft < 60 ? "rgba(244,63,94,0.08)" : "#ffffff",
+          color: timeLeft < 60 ? "#dc2626" : "#1f2937",
+          padding: "6px 14px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
+          border: `1px solid ${timeLeft < 60 ? "rgba(244,63,94,0.2)" : "#e2e8f0"}`,
+          boxShadow: timeLeft < 60 ? "0 0 15px rgba(244,63,94,0.1)" : "none",
+          display: "flex", alignItems: "center", gap: "6px", letterSpacing: "1px"
+        }}>
+          ⏱ {formatTime()}
+        </span>
 
-          <span style={{
-            fontSize: "12px", background: "#f8fafc", padding: "6px 12px",
-            borderRadius: "8px", color: "#64748b", border: "1px solid #e2e8f0",
-            fontWeight: "600", display: "flex", alignItems: "center", gap: "6px"
-          }}>
-            {categoryIcon[q.category]} {q.category} <span style={{ margin: "0 4px", color: "#cbd5e1" }}>|</span> <span style={{ color: diffColor[q.difficulty] }}>{q.difficulty}</span>
-          </span>
-        </div>
+        <span style={{
+          fontSize: "12px", background: "#ffffff", padding: "6px 12px",
+          borderRadius: "8px", color: "#64748b", border: "1px solid #e2e8f0",
+          fontWeight: "600", display: "flex", alignItems: "center", gap: "6px"
+        }}>
+          {categoryIcon[q.category]} {q.category} <span style={{ margin: "0 4px", color: "#cbd5e1" }}>|</span> <span style={{ color: diffColor[q.difficulty] }}>{q.difficulty}</span>
+        </span>
+      </div>
 
-        {/* Progress Bar */}
-        <div style={{ background: "#e2e8f0", borderRadius: "6px", height: "6px", marginTop: "1.25rem", overflow: "hidden" }}>
-          <div style={{ width: `${progress}%`, background: "#14b8a6", height: "100%", borderRadius: "6px", transition: "width 0.4s ease-out" }} />
-        </div>
+      {/* Progress Bar */}
+      <div style={{ background: "#e2e8f0", borderRadius: "8px", height: "6px", marginBottom: "2rem", overflow: "hidden" }}>
+        <div style={{ width: `${progress}%`, background: "linear-gradient(90deg, #0d9488, #14b8a6)", height: "100%", borderRadius: "8px", transition: "width 0.4s ease-out", boxShadow: "0 0 10px rgba(20,184,166,0.3)" }} />
       </div>
 
       {/* Question Card */}
-      <div className="dashboard-card" style={{ padding: "2rem", marginBottom: "1.5rem" }}>
+      <div className="glass-card" style={{ padding: "2rem", marginBottom: "1.5rem" }}>
         <p style={{ fontSize: "18px", fontWeight: "600", margin: 0, lineHeight: "1.6", color: "#1f2937" }}>{q.question}</p>
       </div>
 
@@ -443,12 +430,17 @@ export default function AptitudeQuiz() {
           const isWrong = selected === i && i !== q.answer;
 
           return (
-            <div key={i} onClick={() => handleSelect(i)} className="option-card" style={{
-              cursor: selected !== null ? "default" : "pointer",
+            <div key={i} onClick={() => handleSelect(i)} className="glass-card" style={{
+              padding: "16px 20px", borderRadius: "14px", cursor: selected !== null ? "default" : "pointer",
               border: `1px solid ${isCorrect ? "#10b981" : isWrong ? "#f43f5e" : "#e2e8f0"}`,
-              background: isCorrect ? "#f0fdf4" : isWrong ? "#fff1f2" : "#ffffff",
+              background: isCorrect ? "rgba(16,185,129,0.06)" : isWrong ? "rgba(244,63,94,0.06)" : "#ffffff",
+              display: "flex", alignItems: "center", gap: "16px",
+              boxShadow: isCorrect ? "0 0 15px rgba(16,185,129,0.1)" : isWrong ? "0 0 15px rgba(244,63,94,0.1)" : "none"
             }}>
-              <span className="option-letter" style={{
+              <span style={{
+                width: "32px", height: "32px", borderRadius: "10px", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "13px", fontWeight: "800",
                 background: isCorrect ? "#10b981" : isWrong ? "#f43f5e" : "#f1f5f9",
                 color: isCorrect || isWrong ? "white" : "#64748b",
                 border: `1px solid ${isCorrect ? "#10b981" : isWrong ? "#f43f5e" : "#e2e8f0"}`
@@ -464,7 +456,7 @@ export default function AptitudeQuiz() {
       </div>
 
       {selected !== null && (
-        <button onClick={handleNext} className="brand-btn" style={{ padding: "16px" }}>
+        <button onClick={handleNext} className="brand-btn" style={{ padding: "18px" }}>
           {current + 1 === questions.length ? "🏁 Submit Final Answer" : "Next Question →"}
         </button>
       )}
