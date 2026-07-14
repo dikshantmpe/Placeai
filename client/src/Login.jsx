@@ -20,9 +20,53 @@ function loadScript(src) {
   });
 }
 
+// ===== TYPING ANIMATION HOOK =====
+function useTypingAnimation(phrases, typingSpeed = 80, deletingSpeed = 40, pauseDuration = 2000) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const currentPhrase = phrases[currentPhraseIndex];
+    let timer;
+
+    if (isPaused) {
+      timer = setTimeout(() => {
+        setIsPaused(false);
+        setIsDeleting(true);
+      }, pauseDuration);
+      return () => clearTimeout(timer);
+    }
+
+    if (isDeleting) {
+      if (displayedText === "") {
+        setIsDeleting(false);
+        setCurrentPhraseIndex((prev) => (prev + 1) % phrases.length);
+        return;
+      }
+      timer = setTimeout(() => {
+        setDisplayedText((prev) => prev.slice(0, -1));
+      }, deletingSpeed);
+    } else {
+      if (displayedText === currentPhrase) {
+        setIsPaused(true);
+        return;
+      }
+      timer = setTimeout(() => {
+        setDisplayedText((prev) => currentPhrase.slice(0, prev.length + 1));
+      }, typingSpeed);
+    }
+
+    return () => clearTimeout(timer);
+  }, [displayedText, isDeleting, isPaused, currentPhraseIndex, phrases, typingSpeed, deletingSpeed, pauseDuration]);
+
+  return displayedText;
+}
+
 export default function Login({ setUser }) {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isBtnHovered, setIsBtnHovered] = useState(false);
   const [isFormHovered, setIsFormHovered] = useState(false);
@@ -31,16 +75,26 @@ export default function Login({ setUser }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  
+
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
 
+  // Typing animation taglines
+  const taglines = [
+    "Crack Interviews. Land Offers.",
+    "Prepare Smarter. Not Harder.",
+    "Master DSA. Ace Aptitude.",
+    "AI-Powered. Future-Ready.",
+    "Your Placement. Our Mission.",
+  ];
+  const typedText = useTypingAnimation(taglines, 70, 35, 1800);
+
   // Clear autofill on mount
   useEffect(() => {
     setMounted(true);
-    
+
     const timer = setTimeout(() => {
       setEmail("");
       setPassword("");
@@ -56,7 +110,7 @@ export default function Login({ setUser }) {
   // Simplified Auth Listener (Routes to Home now)
   useEffect(() => {
     console.log("🔍 Auth listener mounted...");
-    
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("✅ Persistent user session detected:", user.email);
@@ -79,13 +133,13 @@ export default function Login({ setUser }) {
       try {
         const originalWarn = console.warn;
         const originalError = console.error;
-        
+
         console.warn = function(...args) {
           const msg = (args[0]?.toString?.() || args.join(" "));
           if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
           originalWarn.apply(console, args);
         };
-        
+
         console.error = function(...args) {
           const msg = (args[0]?.toString?.() || args.join(" "));
           if (msg.includes("Cross-Origin") || msg.includes("window") || msg.includes("blocked")) return;
@@ -153,7 +207,7 @@ export default function Login({ setUser }) {
     } catch (err) {
       console.log(err.code);
       console.log(err.message);
-      
+
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
         setError("Invalid email or password.");
       } else if (err.code === "auth/invalid-email") {
@@ -170,17 +224,17 @@ export default function Login({ setUser }) {
     setError("");
     setIsLoading(true);
     console.log("🔴 Launching Google Auth Popup...");
-    
+
     try {
       if (!auth) {
         setError("Authentication service not initialized. Please refresh the page.");
         setIsLoading(false);
         return;
       }
-      
+
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      
+
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
@@ -191,11 +245,11 @@ export default function Login({ setUser }) {
       });
 
       localStorage.setItem("token", res.data.token);
-      
+
       console.log("✅ Google Auth Successful:", firebaseUser.email);
       setUser(firebaseUser);
       navigate("/", { replace: true });
-      
+
     } catch (err) {
       console.error("❌ Google Popup Error:", err);
       setError(`Sign-in failed: ${err.message}`);
@@ -246,7 +300,7 @@ export default function Login({ setUser }) {
   const features = [
     {
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="16 18 22 12 16 6" />
           <polyline points="8 6 2 12 8 18" />
         </svg>
@@ -259,7 +313,7 @@ export default function Login({ setUser }) {
     },
     {
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -274,7 +328,7 @@ export default function Login({ setUser }) {
     },
     {
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
           <line x1="8" y1="21" x2="16" y2="21" />
           <line x1="12" y1="17" x2="12" y2="21" />
@@ -288,7 +342,7 @@ export default function Login({ setUser }) {
     },
     {
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
           <line x1="16" y1="13" x2="8" y2="13" />
@@ -301,19 +355,6 @@ export default function Login({ setUser }) {
       accent: "#fb923c",
       bgIcon: "rgba(251,146,60,0.12)",
       borderIcon: "rgba(251,146,60,0.3)",
-    },
-    {
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 11l3 3L22 4" />
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-        </svg>
-      ),
-      title: "Aptitude Quiz",
-      desc: "Practice aptitude, logical reasoning and verbal ability with AI quizzes.",
-      accent: "#f472b6",
-      bgIcon: "rgba(244,114,182,0.12)",
-      borderIcon: "rgba(244,114,182,0.3)",
     },
   ];
 
@@ -346,10 +387,23 @@ export default function Login({ setUser }) {
           border-color: rgba(255,63,129,0.4);
         }
         input::placeholder { color: #6b6b78; }
-        
+
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+          50% { transform: translateY(-8px); }
+        }
+
+        @keyframes blink-cursor {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+
+        .typing-cursor::after {
+          content: '|';
+          animation: blink-cursor 0.8s infinite;
+          color: #ff3f81;
+          font-weight: 300;
+          margin-left: 2px;
         }
 
         .glass-cube-shine {
@@ -399,22 +453,22 @@ export default function Login({ setUser }) {
       }}>
 
         {/* ========================================= */}
-        {/* LEFT COLUMN: Text & Feature Cards           */}
+        {/* LEFT COLUMN: Text & Feature Cards         */}
         {/* ========================================= */}
         <div style={{
-          flex: "0 1 520px", 
+          flex: "0 1 480px", 
           display: "flex",
           flexDirection: "column",
-          gap: "2rem",
+          gap: "1.5rem",
           zIndex: 10, 
           transform: "rotateY(12deg) rotateX(4deg) translateZ(10px)",
           transformStyle: "preserve-3d"
         }}>
-          
+
           <div style={{ transform: "translateZ(30px)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "1.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "1.25rem" }}>
               <div style={{
-                width: "48px", height: "48px", borderRadius: "12px",
+                width: "44px", height: "44px", borderRadius: "10px",
                 overflow: "hidden",
                 boxShadow: "0 0 20px rgba(255,63,129,0.4)",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -427,10 +481,10 @@ export default function Login({ setUser }) {
                 />
               </div>
               <div>
-                <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "800", letterSpacing: "0.5px" }}>
+                <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "800", letterSpacing: "0.5px" }}>
                   Crackin <span style={{ color: "#ff7aab" }}>AI</span>
                 </h2>
-                <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#9b9ba8" }}>
+                <p style={{ margin: "1px 0 0 0", fontSize: "0.7rem", color: "#9b9ba8" }}>
                   An AI Powered Placement Preparation Platform
                 </p>
               </div>
@@ -438,47 +492,53 @@ export default function Login({ setUser }) {
 
             <div style={{ 
               display: "inline-block", 
-              padding: "6px 14px", 
+              padding: "5px 12px", 
               borderRadius: "20px",
               background: "rgba(255, 255, 255, 0.05)", 
               border: "1px solid rgba(255, 255, 255, 0.12)",
               color: "#ff7aab", 
-              fontSize: "0.75rem", 
+              fontSize: "0.7rem", 
               fontWeight: "600",
               letterSpacing: "0.5px",
               textTransform: "uppercase",
-              marginBottom: "1.25rem"
+              marginBottom: "1rem"
             }}>
               AI POWERED PLACEMENT PREPARATION ✨
             </div>
 
-            <h1 style={{ 
-              fontSize: "3.2rem", 
-              fontWeight: "800", 
-              lineHeight: "1.1", 
-              margin: "0 0 1rem 0",
-              letterSpacing: "-0.5px"
-            }}>
-              Crack Interviews.<br />
-              <span style={{ color: "#ffffff" }}>Land Offers.</span>
+            {/* ===== TYPING ANIMATION HEADLINE ===== */}
+            <h1 
+              className="typing-cursor"
+              style={{ 
+                fontSize: "2.6rem", 
+                fontWeight: "800", 
+                lineHeight: "1.15", 
+                margin: "0 0 0.75rem 0",
+                letterSpacing: "-0.5px",
+                minHeight: "3.2rem",
+                color: "#ffffff"
+              }}
+            >
+              {typedText}
             </h1>
-            
+
             <p style={{ 
               color: "#9b9ba8", 
-              fontSize: "0.95rem", 
+              fontSize: "0.85rem", 
               lineHeight: "1.6",
-              maxWidth: "440px",
-              margin: "0 0 1.5rem 0"
+              maxWidth: "400px",
+              margin: "0 0 1rem 0"
             }}>
               Crackin AI is your all-in-one platform to master DSA, Aptitude, System Design, and Interviews with the power of AI.
             </p>
           </div>
 
+          {/* ===== COMPACT 2x2 FEATURE GRID ===== */}
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
-            gap: "1rem", 
-            maxWidth: "520px",
+            gap: "0.75rem", 
+            maxWidth: "480px",
             alignItems: "start",
             transformStyle: "preserve-3d"
           }}>
@@ -490,11 +550,8 @@ export default function Login({ setUser }) {
                 style={{
                   cursor: "pointer",
                   animation: `float 4s ease-in-out infinite`,
-                  animationDelay: `${i * 0.2}s`,
+                  animationDelay: `${i * 0.3}s`,
                   perspective: "1000px",
-                  gridColumn: i === 4 ? "span 2" : "span 1",
-                  maxWidth: i === 4 ? "50%" : "100%",
-                  marginTop: i === 1 || i === 3 ? "1.5rem" : "0"
               }}>
                 <div 
                   className="glass-cube-shine"
@@ -502,63 +559,63 @@ export default function Login({ setUser }) {
                     background: "linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02))",
                     backdropFilter: "blur(12px)",
                     border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "16px",
-                    padding: "1.25rem",
+                    borderRadius: "14px",
+                    padding: "1rem",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "0.75rem",
+                    gap: "0.5rem",
                     boxShadow: hoveredCard === i 
-                      ? "0 20px 40px -10px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.3)"
-                      : "0 10px 30px -10px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.15)",
+                      ? "0 16px 32px -8px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.3)"
+                      : "0 8px 24px -8px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.15)",
                     transformStyle: "preserve-3d",
                     transform: hoveredCard === i 
-                      ? "rotateY(-8deg) rotateX(-2deg) translateZ(30px) scale(1.03)" 
+                      ? "rotateY(-6deg) rotateX(-2deg) translateZ(20px) scale(1.03)" 
                       : "rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)",
                     transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)"
                   }}
                 >
                   <div style={{
-                    width: "40px", 
-                    height: "40px", 
-                    borderRadius: "10px",
+                    width: "34px", 
+                    height: "34px", 
+                    borderRadius: "8px",
                     background: f.bgIcon, 
                     border: `1px solid ${f.borderIcon}`,
                     color: f.accent, 
                     display: "flex", 
                     alignItems: "center", 
                     justifyContent: "center",
-                    boxShadow: hoveredCard === i ? `0 0 16px ${f.borderIcon}` : "none",
+                    boxShadow: hoveredCard === i ? `0 0 12px ${f.borderIcon}` : "none",
                     transition: "box-shadow 0.3s ease"
                   }}>
                     {f.icon}
                   </div>
-                  
+
                   <div>
                     <div style={{ 
                       fontWeight: 700, 
-                      fontSize: "0.95rem", 
-                      marginBottom: "4px",
+                      fontSize: "0.85rem", 
+                      marginBottom: "3px",
                       color: "#ffffff"
                     }}>
                       {f.title}
                     </div>
                     <div style={{ 
                       color: "#9b9ba8", 
-                      fontSize: "0.8rem", 
-                      lineHeight: "1.5",
-                      marginBottom: "8px"
+                      fontSize: "0.72rem", 
+                      lineHeight: "1.45",
+                      marginBottom: "6px"
                     }}>
                       {f.desc}
                     </div>
                     <div style={{
                       color: f.accent,
-                      fontSize: "0.8rem",
+                      fontSize: "0.72rem",
                       fontWeight: 600,
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px"
+                      gap: "3px"
                     }}>
-                      Learn more <span style={{ fontSize: "1rem" }}>→</span>
+                      Learn more <span style={{ fontSize: "0.9rem" }}>→</span>
                     </div>
                   </div>
                 </div>
@@ -625,7 +682,7 @@ export default function Login({ setUser }) {
             </p>
 
             <form onSubmit={handleLogin} autoComplete="off">
-              
+
               {/* ERROR MESSAGE DISPLAY */}
               {error && (
                 <div style={{
