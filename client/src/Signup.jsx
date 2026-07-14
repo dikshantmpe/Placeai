@@ -371,6 +371,7 @@ export default function Signup() {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Email address"
+                  autoComplete="off"
                   style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "14px 0" }}
                   required
                 />
@@ -396,6 +397,7 @@ export default function Signup() {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Create a Password"
+                  autoComplete="new-password"
                   style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "14px 0" }}
                   required
                 />
