@@ -43,89 +43,69 @@ export default function CompanyQuestions() {
       padding: "2.5rem 3rem", 
       maxWidth: "1000px",
       minHeight: "100vh",
-      color: "#ffffff",
+      color: "#1f2937",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      background: "#000000"
+      background: "#f8fafc"
     }}>
 
       <style>{`
-        /* --- SCROLLBAR STYLES (Grey) --- */
+        /* --- SCROLLBAR STYLES (Light Grey) --- */
         ::-webkit-scrollbar {
           width: 8px;
         }
         ::-webkit-scrollbar-track {
-          background: #0a0a0a;
+          background: #f1f5f9;
         }
         ::-webkit-scrollbar-thumb {
-          background: #4b5563;
+          background: #cbd5e1;
           border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: #6b7280;
+          background: #94a3b8;
         }
         ::-webkit-scrollbar-corner {
-          background: #0a0a0a;
+          background: #f1f5f9;
         }
         * {
           scrollbar-width: thin;
-          scrollbar-color: #4b5563 #0a0a0a;
+          scrollbar-color: #cbd5e1 #f1f5f9;
         }
 
         .glass-panel {
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(24px) saturate(140%);
-          -webkit-backdrop-filter: blur(24px) saturate(140%);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 24px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .glass-panel:hover {
-          background: rgba(0, 0, 0, 0.8);
-          border-color: rgba(255, 255, 255, 0.12);
-          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+          position: relative;
+          overflow: hidden;
         }
 
         .question-card {
-          background: rgba(0, 0, 0, 0.6);
-          backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 16px;
           padding: 16px 20px;
-          transition: all 0.2s ease;
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           gap: 16px;
         }
-        .question-card:hover {
-          background: rgba(0, 0, 0, 0.8);
-          border-color: rgba(255, 255, 255, 0.1);
-          transform: translateY(-2px);
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 30px rgba(20, 184, 166, 0.05);
-        }
 
         .filter-btn {
           padding: 7px 16px;
           border-radius: 10px;
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          border: 1px solid #e2e8f0;
           cursor: pointer;
-          background: rgba(0, 0, 0, 0.5);
+          background: #ffffff;
           color: #64748b;
           font-size: 13px;
           font-weight: 500;
-          transition: all 0.2s ease;
-        }
-        .filter-btn:hover {
-          background: rgba(0, 0, 0, 0.7);
-          border-color: rgba(255, 255, 255, 0.1);
-          color: #e2e8f0;
         }
         .filter-btn.active {
           background: linear-gradient(135deg, #0d9488, #14b8a6);
           color: white;
           border-color: transparent;
-          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
+          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.3);
           font-weight: 600;
         }
 
@@ -133,17 +113,11 @@ export default function CompanyQuestions() {
           padding: 5px 14px;
           border-radius: 8px;
           cursor: pointer;
-          background: transparent;
+          background: #ffffff;
           color: #64748b;
           font-size: 12px;
           font-weight: 500;
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          transition: all 0.2s ease;
-        }
-        .round-btn:hover {
-          background: rgba(0, 0, 0, 0.5);
-          border-color: rgba(255, 255, 255, 0.1);
-          color: #e2e8f0;
+          border: 1px solid #e2e8f0;
         }
         .round-btn.active {
           background: rgba(20, 184, 166, 0.1);
@@ -161,22 +135,21 @@ export default function CompanyQuestions() {
           cursor: pointer;
           font-size: 13px;
           font-weight: 600;
-          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
+          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.3);
           transition: all 0.3s ease;
         }
         .add-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 30px -6px rgba(13, 148, 136, 0.6);
+          box-shadow: 0 12px 30px -6px rgba(13, 148, 136, 0.4);
         }
         .add-btn.cancel {
-          background: rgba(0, 0, 0, 0.7);
-          color: #94a3b8;
+          background: #f1f5f9;
+          color: #64748b;
           box-shadow: none;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid #e2e8f0;
         }
         .add-btn.cancel:hover {
-          background: rgba(0, 0, 0, 0.9);
-          border-color: rgba(255, 255, 255, 0.15);
+          background: #e2e8f0;
         }
 
         .submit-btn {
@@ -197,11 +170,11 @@ export default function CompanyQuestions() {
         }
 
         input, select, textarea {
-          background: rgba(0, 0, 0, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 10px;
           padding: 10px 14px;
-          color: #e2e8f0;
+          color: #1f2937;
           font-size: 14px;
           outline: none;
           transition: all 0.2s ease;
@@ -212,11 +185,11 @@ export default function CompanyQuestions() {
           box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
         }
         input::placeholder, textarea::placeholder {
-          color: #475569;
+          color: #94a3b8;
         }
         select option {
-          background: #0a0a0a;
-          color: #e2e8f0;
+          background: #ffffff;
+          color: #1f2937;
         }
       `}</style>
 
@@ -232,7 +205,7 @@ export default function CompanyQuestions() {
             C
           </div>
           <div>
-            <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
+            <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#1f2937" }}>Crackin AI</div>
             <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
           </div>
         </div>
@@ -242,7 +215,7 @@ export default function CompanyQuestions() {
       </header>
 
       <div style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+        <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em", color: "#1f2937" }}>
           Company <span style={{ color: "#14b8a6" }}>Questions</span>
         </h2>
         <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Real interview questions from top companies.</p>
@@ -251,7 +224,7 @@ export default function CompanyQuestions() {
       {/* Add Question Form */}
       {showForm && (
         <div className="glass-panel" style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
-          <h3 style={{ margin: "0 0 1.25rem", fontSize: "15px", fontWeight: "700", color: "#e2e8f0" }}>
+          <h3 style={{ margin: "0 0 1.25rem", fontSize: "15px", fontWeight: "700", color: "#1f2937" }}>
             📝 Submit a Question You Faced
           </h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
@@ -280,10 +253,10 @@ export default function CompanyQuestions() {
             {["Easy", "Medium", "Hard"].map(d => (
               <button key={d} onClick={() => setForm({ ...form, difficulty: d })} style={{
                 padding: "6px 16px", borderRadius: "8px", border: "none", cursor: "pointer",
-                background: form.difficulty === d ? `${diffColor[d]}18` : "rgba(0, 0, 0, 0.5)",
+                background: form.difficulty === d ? `${diffColor[d]}18` : "#f1f5f9",
                 color: form.difficulty === d ? diffColor[d] : "#64748b",
                 fontWeight: form.difficulty === d ? "700" : "500", fontSize: "13px",
-                border: `1px solid ${form.difficulty === d ? diffColor[d] + "55" : "rgba(255,255,255,0.06)"}`,
+                border: `1px solid ${form.difficulty === d ? diffColor[d] + "55" : "#e2e8f0"}`,
                 transition: "all 0.2s ease"
               }}>{d}</button>
             ))}
@@ -326,7 +299,7 @@ export default function CompanyQuestions() {
 
       {/* Count */}
       <p style={{ color: "#64748b", fontSize: "13px", marginBottom: "1rem", fontWeight: "500" }}>
-        Showing <span style={{ color: "white", fontWeight: "700" }}>{filtered.length}</span> questions
+        Showing <span style={{ color: "#1f2937", fontWeight: "700" }}>{filtered.length}</span> questions
         {company !== "All" && <span style={{ color: companyColors[company] }}> · {company}</span>}
         {round !== "All" && <span style={{ color: roundColor[round] }}> · {round}</span>}
       </p>
@@ -346,10 +319,10 @@ export default function CompanyQuestions() {
         ) : filtered.map((q, i) => (
           <div key={q._id} className="question-card">
             <div style={{ display: "flex", gap: "14px", flex: 1, alignItems: "flex-start" }}>
-              <span style={{ color: "#475569", fontSize: "13px", minWidth: "24px", paddingTop: "2px", fontWeight: "700" }}>
+              <span style={{ color: "#94a3b8", fontSize: "13px", minWidth: "24px", paddingTop: "2px", fontWeight: "700" }}>
                 {String(i + 1).padStart(2, "0")}.
               </span>
-              <p style={{ margin: 0, fontSize: "14px", color: "#e2e8f0", lineHeight: "1.6", flex: 1, fontWeight: "500" }}>
+              <p style={{ margin: 0, fontSize: "14px", color: "#374151", lineHeight: "1.6", flex: 1, fontWeight: "500" }}>
                 {q.question}
               </p>
             </div>
