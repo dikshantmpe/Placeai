@@ -172,53 +172,73 @@ export default function Login({ setUser }) {
     setError("GitHub login not configured yet.");
   };
 
-  // Simple animated background component
+  // Attractive animated background with 4 floating gradient orbs
   const AnimatedBackground = () => (
     <div style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden", background: "#000000" }}>
-      {/* Floating gradient orbs */}
-      <div className="orb orb-1" style={{
+      {/* Orb 1 - Teal (top-left) */}
+      <div style={{
         position: "absolute",
         width: "600px",
         height: "600px",
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(20,184,166,0.15) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(20,184,166,0.2) 0%, transparent 70%)",
         top: "-10%",
         left: "-10%",
         filter: "blur(80px)",
-        animation: "floatOrb1 20s ease-in-out infinite"
+        animation: "floatOrb1 15s ease-in-out infinite"
       }} />
-      <div className="orb orb-2" style={{
+      {/* Orb 2 - Purple (bottom-right) */}
+      <div style={{
         position: "absolute",
         width: "500px",
         height: "500px",
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
         bottom: "-10%",
         right: "-5%",
         filter: "blur(80px)",
-        animation: "floatOrb2 25s ease-in-out infinite"
+        animation: "floatOrb2 18s ease-in-out infinite"
       }} />
-      <div className="orb orb-3" style={{
+      {/* Orb 3 - Pink (mid-right) */}
+      <div style={{
         position: "absolute",
-        width: "400px",
-        height: "400px",
+        width: "350px",
+        height: "350px",
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(45,212,191,0.08) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(236,72,153,0.12) 0%, transparent 70%)",
         top: "40%",
         left: "60%",
         filter: "blur(60px)",
-        animation: "floatOrb3 18s ease-in-out infinite"
+        animation: "floatOrb3 12s ease-in-out infinite"
       }} />
-      {/* Subtle grid overlay */}
+      {/* Orb 4 - Amber (bottom-left) */}
+      <div style={{
+        position: "absolute",
+        width: "450px",
+        height: "450px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)",
+        top: "60%",
+        left: "20%",
+        filter: "blur(70px)",
+        animation: "floatOrb4 20s ease-in-out infinite"
+      }} />
+      {/* Subtle dot grid */}
       <div style={{
         position: "absolute",
         inset: 0,
         backgroundImage: `
-          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+          linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
         `,
-        backgroundSize: "60px 60px",
-        opacity: 0.5
+        backgroundSize: "50px 50px",
+        opacity: 0.6
+      }} />
+      {/* Top radial glow */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        background: "radial-gradient(ellipse at 50% 0%, rgba(20,184,166,0.06) 0%, transparent 50%)"
       }} />
     </div>
   );
@@ -245,17 +265,22 @@ export default function Login({ setUser }) {
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes floatOrb1 {
             0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(60px, 40px) scale(1.1); }
-            66% { transform: translate(-30px, 80px) scale(0.9); }
+            33% { transform: translate(80px, 60px) scale(1.15); }
+            66% { transform: translate(-40px, 100px) scale(0.9); }
           }
           @keyframes floatOrb2 {
             0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-50px, -30px) scale(1.05); }
-            66% { transform: translate(40px, -60px) scale(0.95); }
+            33% { transform: translate(-70px, -50px) scale(1.1); }
+            66% { transform: translate(50px, -80px) scale(0.95); }
           }
           @keyframes floatOrb3 {
             0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-80px, 20px) scale(1.15); }
+            50% { transform: translate(-100px, 40px) scale(1.2); }
+          }
+          @keyframes floatOrb4 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(60px, -40px) scale(1.1); }
+            75% { transform: translate(-30px, 60px) scale(0.95); }
           }
         `}} />
       </div>
@@ -466,17 +491,22 @@ export default function Login({ setUser }) {
         /* Animated background orbs */
         @keyframes floatOrb1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(60px, 40px) scale(1.1); }
-          66% { transform: translate(-30px, 80px) scale(0.9); }
+          33% { transform: translate(80px, 60px) scale(1.15); }
+          66% { transform: translate(-40px, 100px) scale(0.9); }
         }
         @keyframes floatOrb2 {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-50px, -30px) scale(1.05); }
-          66% { transform: translate(40px, -60px) scale(0.95); }
+          33% { transform: translate(-70px, -50px) scale(1.1); }
+          66% { transform: translate(50px, -80px) scale(0.95); }
         }
         @keyframes floatOrb3 {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-80px, 20px) scale(1.15); }
+          50% { transform: translate(-100px, 40px) scale(1.2); }
+        }
+        @keyframes floatOrb4 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(60px, -40px) scale(1.1); }
+          75% { transform: translate(-30px, 60px) scale(0.95); }
         }
         
         @media (max-width: 1024px) {
