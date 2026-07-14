@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 // --- FIREBASE IMPORTS ---
@@ -50,11 +50,6 @@ export default function Login({ setUser }) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
-  const [hoveredCube, setHoveredCube] = useState(null);
-  
-  const [tilt, setTilt] = useState({ rotateX: 2, rotateY: -8 });
-  const [isPanelHovered, setIsPanelHovered] = useState(false);
-  const loginPanelRef = useRef(null);
   
   const navigate = useNavigate();
 
@@ -89,28 +84,6 @@ export default function Login({ setUser }) {
     });
     return () => unsubscribe();
   }, [navigate, setUser]);
-
-  const handleMouseEnter = useCallback(() => {
-    setIsPanelHovered(true);
-    setTilt({ rotateX: 0, rotateY: 0 });
-  }, []);
-
-  const handleMouseMove = useCallback((e) => {
-    if (!loginPanelRef.current || !isPanelHovered) return;
-    const rect = loginPanelRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -2.5;
-    const rotateY = ((x - centerX) / centerX) * 2.5;
-    setTilt({ rotateX, rotateY });
-  }, [isPanelHovered]);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsPanelHovered(false);
-    setTilt({ rotateX: 2, rotateY: -8 });
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -172,117 +145,24 @@ export default function Login({ setUser }) {
     setError("GitHub login not configured yet.");
   };
 
-  // Attractive animated background with 4 floating gradient orbs
-  const AnimatedBackground = () => (
-    <div style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden", background: "#000000" }}>
-      {/* Orb 1 - Teal (top-left) */}
-      <div style={{
-        position: "absolute",
-        width: "600px",
-        height: "600px",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(20,184,166,0.2) 0%, transparent 70%)",
-        top: "-10%",
-        left: "-10%",
-        filter: "blur(80px)",
-        animation: "floatOrb1 15s ease-in-out infinite"
-      }} />
-      {/* Orb 2 - Purple (bottom-right) */}
-      <div style={{
-        position: "absolute",
-        width: "500px",
-        height: "500px",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
-        bottom: "-10%",
-        right: "-5%",
-        filter: "blur(80px)",
-        animation: "floatOrb2 18s ease-in-out infinite"
-      }} />
-      {/* Orb 3 - Pink (mid-right) */}
-      <div style={{
-        position: "absolute",
-        width: "350px",
-        height: "350px",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(236,72,153,0.12) 0%, transparent 70%)",
-        top: "40%",
-        left: "60%",
-        filter: "blur(60px)",
-        animation: "floatOrb3 12s ease-in-out infinite"
-      }} />
-      {/* Orb 4 - Amber (bottom-left) */}
-      <div style={{
-        position: "absolute",
-        width: "450px",
-        height: "450px",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)",
-        top: "60%",
-        left: "20%",
-        filter: "blur(70px)",
-        animation: "floatOrb4 20s ease-in-out infinite"
-      }} />
-      {/* Subtle dot grid */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        backgroundImage: `
-          linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
-        `,
-        backgroundSize: "50px 50px",
-        opacity: 0.6
-      }} />
-      {/* Top radial glow */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        background: "radial-gradient(ellipse at 50% 0%, rgba(20,184,166,0.06) 0%, transparent 50%)"
-      }} />
-    </div>
-  );
-
   if (isCheckingAuth) {
     return (
       <div style={{
-        minHeight: "100vh", width: "100%", position: "relative", overflow: "hidden",
+        minHeight: "100vh", width: "100%",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        color: "#ffffff", background: "#000000",
+        color: "#111827", background: "#ffffff",
       }}>
-        <AnimatedBackground />
-        <div style={{ position: "relative", zIndex: 10, textAlign: "center" }}>
+        <div style={{ textAlign: "center" }}>
           <div style={{
             width: "48px", height: "48px", borderRadius: "50%",
             border: "3px solid rgba(20,184,166,0.3)",
             borderTop: "3px solid #14b8a6",
             animation: "spin 1s linear infinite", margin: "0 auto 16px"
           }} />
-          <p style={{ color: "#64748b", fontSize: "0.95rem" }}>Signing you in...</p>
+          <p style={{ color: "#6b7280", fontSize: "0.95rem" }}>Signing you in...</p>
         </div>
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes spin { to { transform: rotate(360deg); } }
-          @keyframes floatOrb1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(80px, 60px) scale(1.15); }
-            66% { transform: translate(-40px, 100px) scale(0.9); }
-          }
-          @keyframes floatOrb2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-70px, -50px) scale(1.1); }
-            66% { transform: translate(50px, -80px) scale(0.95); }
-          }
-          @keyframes floatOrb3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-100px, 40px) scale(1.2); }
-          }
-          @keyframes floatOrb4 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(60px, -40px) scale(1.1); }
-            75% { transform: translate(-30px, 60px) scale(0.95); }
-          }
-        `}} />
+        <style dangerouslySetInnerHTML={{ __html: "@keyframes spin { to { transform: rotate(360deg); } }" }} />
       </div>
     );
   }
@@ -297,8 +177,6 @@ export default function Login({ setUser }) {
       title: "DSA Tracker",
       desc: "Track your DSA progress, solve curated problems and master algorithms.",
       color: "#14b8a6",
-      bg: "rgba(59,130,246,0.12)",
-      border: "rgba(59,130,246,0.25)",
       arrowColor: "#14b8a6"
     },
     {
@@ -310,8 +188,6 @@ export default function Login({ setUser }) {
       title: "Mock Interview",
       desc: "AI-powered mock interviews with real-time feedback to improve performance.",
       color: "#8b5cf6",
-      bg: "rgba(139,92,246,0.12)",
-      border: "rgba(139,92,246,0.25)",
       arrowColor: "#8b5cf6"
     },
     {
@@ -323,8 +199,6 @@ export default function Login({ setUser }) {
       title: "Company Questions",
       desc: "Access real interview questions asked by top companies.",
       color: "#22c55e",
-      bg: "rgba(34,197,94,0.12)",
-      border: "rgba(34,197,94,0.25)",
       arrowColor: "#22c55e"
     },
     {
@@ -336,8 +210,6 @@ export default function Login({ setUser }) {
       title: "Resume Analyser",
       desc: "AI reviews your resume and gives actionable suggestions.",
       color: "#f59e0b",
-      bg: "rgba(245,158,11,0.12)",
-      border: "rgba(245,158,11,0.25)",
       arrowColor: "#f59e0b"
     },
     {
@@ -349,8 +221,6 @@ export default function Login({ setUser }) {
       title: "Aptitude Quiz",
       desc: "Practice aptitude, logical reasoning and verbal ability with AI quizzes.",
       color: "#ec4899",
-      bg: "rgba(236,72,153,0.12)",
-      border: "rgba(236,72,153,0.25)",
       arrowColor: "#ec4899"
     },
   ];
@@ -359,106 +229,13 @@ export default function Login({ setUser }) {
 
   return (
     <div style={{
-      minHeight: "100vh", width: "100%", position: "relative", overflow: "hidden",
+      minHeight: "100vh", width: "100%",
       display: "flex", flexDirection: "column",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      color: "#ffffff", background: "#000000",
+      color: "#111827", background: "#ffffff",
     }}>
       <style>{`
-        .glass-input-blue {
-          background: rgba(0, 0, 0, 0.7);
-          border: 1px solid rgba(20, 184, 166, 0.15);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          transition: all 0.25s ease;
-        }
-        .glass-input-blue:focus-within {
-          background: rgba(0, 0, 0, 0.85);
-          border-color: rgba(20, 184, 166, 0.5);
-          box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15), 0 0 20px rgba(20, 184, 166, 0.1);
-        }
-        input::placeholder { color: #475569; }
-        
-        .feature-card {
-          background: rgba(0, 0, 0, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          backdrop-filter: blur(12px);
-          transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-          transform-style: preserve-3d;
-          perspective: 1000px;
-          position: relative;
-          overflow: hidden;
-        }
-        .feature-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: -100%;
-          width: 50%; height: 100%;
-          background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
-          transform: skewX(-25deg);
-          transition: left 0.6s ease;
-          pointer-events: none;
-        }
-        .feature-card:hover::before {
-          left: 150%;
-          transition: left 0.8s ease;
-        }
-        .feature-card:hover {
-          background: rgba(0, 0, 0, 0.8);
-          border-color: rgba(255, 255, 255, 0.12);
-          transform: translateY(-8px) rotateX(-4deg) rotateY(4deg) scale(1.03);
-          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(20, 184, 166, 0.1);
-        }
-        .feature-card:hover .cube-icon {
-          transform: translateZ(30px) scale(1.1);
-        }
-        .feature-card:hover .cube-arrow {
-          transform: translateX(6px);
-        }
-        .cube-icon {
-          transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .cube-arrow {
-          transition: transform 0.3s ease;
-        }
-        
-        .nav-link {
-          color: #94a3b8;
-          transition: color 0.2s ease;
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-        .nav-link:hover { color: #e2e8f0; }
-        
-        .social-btn {
-          background: rgba(0, 0, 0, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        .social-btn:hover {
-          background: rgba(0, 0, 0, 0.85);
-          border-color: rgba(255, 255, 255, 0.15);
-        }
-        
-        .signin-btn {
-          background: linear-gradient(135deg, #0d9488, #14b8a6);
-          transition: all 0.3s ease;
-          border: none;
-          cursor: pointer;
-        }
-        .signin-btn:hover {
-          background: linear-gradient(135deg, #0f766e, #0d9488);
-          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
-          transform: translateY(-1px);
-        }
-        .signin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        
-        .login-panel-tilt {
-          transform-style: preserve-3d;
-          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
+        input::placeholder { color: #9ca3af; }
         
         .typing-cursor {
           display: inline-block;
@@ -474,41 +251,6 @@ export default function Login({ setUser }) {
           50% { opacity: 0; }
         }
         
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
-        .float-anim { animation: float 4s ease-in-out infinite; }
-        .float-anim-d1 { animation: float 4s ease-in-out infinite; animation-delay: 0.5s; }
-        .float-anim-d2 { animation: float 4s ease-in-out infinite; animation-delay: 1s; }
-        .float-anim-d3 { animation: float 4s ease-in-out infinite; animation-delay: 1.5s; }
-        .float-anim-d4 { animation: float 4s ease-in-out infinite; animation-delay: 2s; }
-        
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        /* Animated background orbs */
-        @keyframes floatOrb1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(80px, 60px) scale(1.15); }
-          66% { transform: translate(-40px, 100px) scale(0.9); }
-        }
-        @keyframes floatOrb2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-70px, -50px) scale(1.1); }
-          66% { transform: translate(50px, -80px) scale(0.95); }
-        }
-        @keyframes floatOrb3 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-100px, 40px) scale(1.2); }
-        }
-        @keyframes floatOrb4 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(60px, -40px) scale(1.1); }
-          75% { transform: translate(-30px, 60px) scale(0.95); }
-        }
-        
         @media (max-width: 1024px) {
           .login-layout { flex-direction: column !important; padding: 1rem !important; }
           .left-section { max-width: 100% !important; }
@@ -520,15 +262,7 @@ export default function Login({ setUser }) {
         }
       `}</style>
 
-      <AnimatedBackground />
-
-      <div style={{
-        position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
-      }} />
-
       <nav style={{
-        position: "relative", zIndex: 20,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "1.25rem 2.5rem", maxWidth: "1400px", width: "100%", margin: "0 auto",
         boxSizing: "border-box"
@@ -536,40 +270,30 @@ export default function Login({ setUser }) {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{
             width: "40px", height: "40px", borderRadius: "10px",
-            background: "linear-gradient(135deg, #115e59, #14b8a6)",
+            background: "linear-gradient(135deg, #0d9488, #14b8a6)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: "800", fontSize: "1.1rem", color: "white"
           }}>
             C
           </div>
           <div>
-            <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
-            <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
+            <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#111827" }}>Crackin AI</div>
+            <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
           </div>
         </div>
 
         <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
           {navLinks.map((link) => (
-            <a key={link} href="#" className="nav-link">{link}</a>
+            <a key={link} href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: "0.9rem", fontWeight: 500 }}>{link}</a>
           ))}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <button style={{
-            width: "36px", height: "36px", borderRadius: "50%",
-            background: "rgba(0, 0, 0, 0.7)", border: "1px solid rgba(255,255,255,0.08)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#94a3b8", cursor: "pointer", backdropFilter: "blur(8px)"
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          </button>
+        <div>
           <button style={{
             padding: "8px 20px", borderRadius: "8px",
             background: "linear-gradient(135deg, #0d9488, #14b8a6)",
             border: "none", color: "white", fontWeight: "600", fontSize: "0.85rem",
-            cursor: "pointer", transition: "all 0.2s ease"
+            cursor: "pointer"
           }}>
             Get Started
           </button>
@@ -577,7 +301,6 @@ export default function Login({ setUser }) {
       </nav>
 
       <div className="login-layout" style={{
-        position: "relative", zIndex: 10,
         flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
         gap: "4rem", padding: "2rem 3rem", maxWidth: "1400px", margin: "0 auto",
         width: "100%", boxSizing: "border-box",
@@ -591,8 +314,8 @@ export default function Login({ setUser }) {
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "6px 16px", borderRadius: "20px",
-              background: "rgba(20, 184, 166, 0.1)", border: "1px solid rgba(20, 184, 166, 0.2)",
-              color: "#2dd4bf", fontSize: "0.75rem", fontWeight: "600",
+              background: "rgba(20, 184, 166, 0.08)", border: "1px solid rgba(20, 184, 166, 0.15)",
+              color: "#0d9488", fontSize: "0.75rem", fontWeight: "600",
               letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "1.5rem"
             }}>
               AI POWERED PLACEMENT PREPARATION ✨
@@ -600,14 +323,15 @@ export default function Login({ setUser }) {
             
             <h1 style={{
               fontSize: "clamp(2.5rem, 5vw, 3.5rem)", fontWeight: "800",
-              lineHeight: "1.15", margin: "0 0 1rem 0", letterSpacing: "-0.02em", minHeight: "1.2em"
+              lineHeight: "1.15", margin: "0 0 1rem 0", letterSpacing: "-0.02em", minHeight: "1.2em",
+              color: "#111827"
             }}>
-              <span style={{ color: "#e2e8f0" }}>{displayedText}</span>
+              <span>{displayedText}</span>
               <span className="typing-cursor" />
             </h1>
             
             <p style={{
-              color: "#94a3b8", fontSize: "1.05rem", lineHeight: "1.7", maxWidth: "480px", margin: 0
+              color: "#6b7280", fontSize: "1.05rem", lineHeight: "1.7", maxWidth: "480px", margin: 0
             }}>
               Crackin AI is your all-in-one platform to master DSA, Aptitude, System Design, and Interviews with the power of AI.
             </p>
@@ -616,63 +340,48 @@ export default function Login({ setUser }) {
           <div className="feature-grid" style={{
             display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem"
           }}>
-            {features.map((f, i) => {
-              const floatClass = i === 0 ? "float-anim" : i === 1 ? "float-anim-d1" : i === 2 ? "float-anim-d2" : i === 3 ? "float-anim-d3" : "float-anim-d4";
-              return (
-                <div 
-                  key={i} 
-                  className={`feature-card ${floatClass}`}
-                  onMouseEnter={() => setHoveredCube(i)}
-                  onMouseLeave={() => setHoveredCube(null)}
-                  style={{
-                    borderRadius: "16px", padding: "1.25rem", cursor: "pointer",
-                    transform: hoveredCube === i ? "translateY(-8px) rotateX(-4deg) rotateY(4deg) scale(1.03)" : undefined,
-                  }}
-                >
-                  <div className="cube-icon" style={{
-                    width: "40px", height: "40px", borderRadius: "10px",
-                    background: f.bg, border: `1px solid ${f.border}`,
-                    color: f.color, display: "flex", alignItems: "center", justifyContent: "center",
-                    marginBottom: "12px",
-                    boxShadow: hoveredCube === i ? `0 0 20px ${f.bg}` : "none"
-                  }}>
-                    {f.icon}
-                  </div>
-                  <div style={{ fontWeight: "700", fontSize: "0.9rem", marginBottom: "6px" }}>{f.title}</div>
-                  <div style={{ color: "#64748b", fontSize: "0.78rem", lineHeight: "1.5" }}>{f.desc}</div>
-                  <div className="cube-arrow" style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "4px", color: f.arrowColor, fontSize: "0.8rem", fontWeight: "600" }}>
-                    Learn more <span style={{ fontSize: "1rem" }}>→</span>
-                  </div>
+            {features.map((f, i) => (
+              <div 
+                key={i}
+                style={{
+                  background: "#f9fafb",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                  padding: "1.25rem",
+                  cursor: "pointer"
+                }}
+              >
+                <div style={{
+                  width: "40px", height: "40px", borderRadius: "10px",
+                  background: `${f.color}14`, border: `1px solid ${f.color}26`,
+                  color: f.color, display: "flex", alignItems: "center", justifyContent: "center",
+                  marginBottom: "12px"
+                }}>
+                  {f.icon}
                 </div>
-              );
-            })}
+                <div style={{ fontWeight: "700", fontSize: "0.9rem", marginBottom: "6px", color: "#111827" }}>{f.title}</div>
+                <div style={{ color: "#6b7280", fontSize: "0.78rem", lineHeight: "1.5" }}>{f.desc}</div>
+                <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "4px", color: f.arrowColor, fontSize: "0.8rem", fontWeight: "600" }}>
+                  Learn more <span style={{ fontSize: "1rem" }}>→</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="right-section" style={{ width: "420px", flexShrink: 0, perspective: "1200px" }}>
-          <div 
-            ref={loginPanelRef}
-            onMouseEnter={handleMouseEnter}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            className="login-panel-tilt"
-            style={{
-              background: "rgba(0, 0, 0, 0.7)",
-              backdropFilter: "blur(24px) saturate(140%)",
-              WebkitBackdropFilter: "blur(24px) saturate(140%)",
-              borderRadius: "24px",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
-              padding: "2.5rem",
-              transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateZ(0)`,
-              willChange: "transform"
-            }}
-          >
+        <div className="right-section" style={{ width: "420px", flexShrink: 0 }}>
+          <div style={{
+            background: "#ffffff",
+            borderRadius: "24px",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
+            padding: "2.5rem"
+          }}>
             <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
-              <h2 style={{ fontSize: "1.5rem", fontWeight: "700", margin: "0 0 0.5rem 0" }}>
+              <h2 style={{ fontSize: "1.5rem", fontWeight: "700", margin: "0 0 0.5rem 0", color: "#111827" }}>
                 Welcome Back! 👋
               </h2>
-              <p style={{ color: "#64748b", fontSize: "0.9rem", margin: 0 }}>
+              <p style={{ color: "#6b7280", fontSize: "0.9rem", margin: 0 }}>
                 Sign in to continue your learning journey
               </p>
             </div>
@@ -681,11 +390,11 @@ export default function Login({ setUser }) {
               <button 
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="social-btn"
                 style={{
                   flex: 1, padding: "10px", borderRadius: "10px",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  color: "#e2e8f0", fontSize: "0.85rem", fontWeight: "500"
+                  color: "#374151", fontSize: "0.85rem", fontWeight: "500",
+                  background: "#ffffff", border: "1px solid #d1d5db", cursor: "pointer"
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -699,11 +408,11 @@ export default function Login({ setUser }) {
               <button 
                 onClick={handleGitHubLogin}
                 disabled={isLoading}
-                className="social-btn"
                 style={{
                   flex: 1, padding: "10px", borderRadius: "10px",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  color: "#e2e8f0", fontSize: "0.85rem", fontWeight: "500"
+                  color: "#374151", fontSize: "0.85rem", fontWeight: "500",
+                  background: "#ffffff", border: "1px solid #d1d5db", cursor: "pointer"
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -714,24 +423,26 @@ export default function Login({ setUser }) {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
-              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
-              <span style={{ color: "#475569", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>or continue with email</span>
-              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
+              <span style={{ color: "#9ca3af", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>or continue with email</span>
+              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
             </div>
 
             <form onSubmit={handleLogin} autoComplete="off">
               {error && (
                 <div style={{
-                  background: "rgba(239, 68, 68, 0.08)",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  color: "#f87171", padding: "10px 14px", borderRadius: "10px",
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  color: "#ef4444", padding: "10px 14px", borderRadius: "10px",
                   fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center"
                 }}>
                   {error}
                 </div>
               )}
 
-              <div className="glass-input-blue" style={{
+              <div style={{
+                background: "#f9fafb",
+                border: "1px solid #d1d5db",
                 borderRadius: "12px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 14px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
@@ -747,13 +458,15 @@ export default function Login({ setUser }) {
                   spellCheck="false"
                   style={{
                     flex: 1, background: "transparent", border: "none", outline: "none",
-                    color: "white", fontSize: "0.95rem", padding: "14px 0"
+                    color: "#111827", fontSize: "0.95rem", padding: "14px 0"
                   }}
                   required
                 />
               </div>
 
-              <div className="glass-input-blue" style={{
+              <div style={{
+                background: "#f9fafb",
+                border: "1px solid #d1d5db",
                 borderRadius: "12px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 14px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "10px" }}>
@@ -769,12 +482,12 @@ export default function Login({ setUser }) {
                   spellCheck="false"
                   style={{
                     flex: 1, background: "transparent", border: "none", outline: "none",
-                    color: "white", fontSize: "0.95rem", padding: "14px 0"
+                    color: "#111827", fontSize: "0.95rem", padding: "14px 0"
                   }}
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
-                  background: "none", border: "none", cursor: "pointer", color: "#475569", padding: "4px"
+                  background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: "4px"
                 }}>
                   {showPassword ? (
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
@@ -785,7 +498,7 @@ export default function Login({ setUser }) {
               </div>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#6b7280", fontSize: "0.85rem" }}>
                   <input 
                     type="checkbox" 
                     checked={rememberMe}
@@ -797,30 +510,32 @@ export default function Login({ setUser }) {
                   />
                   Remember me
                 </label>
-                <a href="#" style={{ color: "#14b8a6", fontSize: "0.85rem", textDecoration: "none", fontWeight: "500" }}>
+                <a href="#" style={{ color: "#0d9488", fontSize: "0.85rem", textDecoration: "none", fontWeight: "500" }}>
                   Forgot Password?
                 </a>
               </div>
 
-              <button type="submit" disabled={isLoading} className="signin-btn" style={{
+              <button type="submit" disabled={isLoading} style={{
                 width: "100%", padding: "14px", borderRadius: "12px",
-                color: "white", fontSize: "1rem", fontWeight: "600"
+                color: "white", fontSize: "1rem", fontWeight: "600",
+                background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+                border: "none", cursor: "pointer"
               }}>
                 {isLoading ? "Signing in..." : "Sign In"}
               </button>
             </form>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "1.5rem 0" }}>
-              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
-              <span style={{ color: "#475569", fontSize: "0.8rem" }}>Don't have an account?</span>
-              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
+              <span style={{ color: "#9ca3af", fontSize: "0.8rem" }}>Don't have an account?</span>
+              <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
             </div>
 
             <Link to="/signup" style={{
               display: "block", width: "100%", padding: "12px", borderRadius: "12px",
-              background: "transparent", border: "1px solid rgba(20, 184, 166, 0.3)",
+              background: "transparent", border: "1px solid #14b8a6",
               color: "#14b8a6", fontSize: "0.95rem", fontWeight: "600",
-              textAlign: "center", textDecoration: "none", transition: "all 0.2s ease"
+              textAlign: "center", textDecoration: "none"
             }}>
               Sign Up for Free
             </Link>
