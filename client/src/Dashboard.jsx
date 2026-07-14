@@ -1,25 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { auth } from "./firebase.js"; 
 import { onAuthStateChanged } from "firebase/auth";
 
 const COLORS = ["#14b8a6", "#8b5cf6", "#22c55e", "#f59e0b", "#ec4899", "#06b6d4", "#f43f5e"];
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
 
 const formatName = (name) => {
   if (!name) return "Guest";
@@ -36,14 +21,6 @@ export default function Dashboard() {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const streak = parseInt(localStorage.getItem("streak") || "0");
 
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
-
-  // Tilt state for hero panel
-  const [heroTilt, setHeroTilt] = useState({ rotateX: 0, rotateY: -6 });
-  const [isHeroHovered, setIsHeroHovered] = useState(false);
-  const heroPanelRef = useRef(null);
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) setFirebaseUser(currentUser);
@@ -58,73 +35,6 @@ export default function Dashboard() {
     rawName = firebaseUser.email.split("@")[0];
   }
   const displayName = formatName(rawName);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function initVanta() {
-      try {
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
-
-        if (cancelled || !vantaRef.current || vantaEffect.current) return;
-
-        if (window.VANTA && window.VANTA.NET) {
-          vantaEffect.current = window.VANTA.NET({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.0,
-            minWidth: 200.0,
-            scale: 1.0,
-            scaleMobile: 1.0,
-            color: 0x14b8a6,
-            backgroundColor: 0x000000,
-            points: 10.0,
-            maxDistance: 25.0,
-            spacing: 18.0,
-            showDots: true,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to load Vanta background:", err);
-      }
-    }
-
-    initVanta();
-
-    return () => {
-      cancelled = true;
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
-      }
-    };
-  }, []);
-
-  // Hero tilt handlers
-  const handleHeroEnter = useCallback(() => {
-    setIsHeroHovered(true);
-    setHeroTilt({ rotateX: 0, rotateY: 0 });
-  }, []);
-
-  const handleHeroMove = useCallback((e) => {
-    if (!heroPanelRef.current || !isHeroHovered) return;
-    const rect = heroPanelRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -2.5;
-    const rotateY = ((x - centerX) / centerX) * 2.5;
-    setHeroTilt({ rotateX, rotateY });
-  }, [isHeroHovered]);
-
-  const handleHeroLeave = useCallback(() => {
-    setIsHeroHovered(false);
-    setHeroTilt({ rotateX: 0, rotateY: -6 });
-  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -178,102 +88,39 @@ export default function Dashboard() {
       minHeight: "100vh",
       position: "relative",
       padding: "2.5rem 3rem",
-      color: "#ffffff",
+      color: "#111827",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       overflowY: "auto",
       overflowX: "hidden",
-      background: "#000000"
+      background: "#ffffff"
     }}>
 
-      <div 
-        ref={vantaRef} 
-        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
-      />
-
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
-      }} />
-
       <style>{`
-        /* --- SCROLLBAR STYLES (Grey) --- */
         ::-webkit-scrollbar {
           width: 8px;
         }
         ::-webkit-scrollbar-track {
-          background: #0a0a0a;
+          background: #f3f4f6;
         }
         ::-webkit-scrollbar-thumb {
-          background: #4b5563;
+          background: #d1d5db;
           border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: #6b7280;
+          background: #9ca3af;
         }
         ::-webkit-scrollbar-corner {
-          background: #0a0a0a;
+          background: #f3f4f6;
         }
         * {
           scrollbar-width: thin;
-          scrollbar-color: #4b5563 #0a0a0a;
+          scrollbar-color: #d1d5db #f3f4f6;
         }
 
-        .glass-panel {
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(24px) saturate(140%);
-          -webkit-backdrop-filter: blur(24px) saturate(140%);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 24px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-          position: relative;
-          z-index: 10;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .glass-panel:hover {
-          background: rgba(0, 0, 0, 0.8);
-          border-color: rgba(255, 255, 255, 0.12);
-          transform: translateY(-4px);
-          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
-        }
-        .stat-card {
-          background: rgba(0, 0, 0, 0.6);
-          backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 16px;
-          padding: 1.5rem;
-          transition: all 0.3s ease;
-          transform-style: preserve-3d;
-        }
-        .stat-card:hover {
-          background: rgba(0, 0, 0, 0.8);
-          border-color: rgba(255, 255, 255, 0.1);
-          transform: translateY(-6px) rotateX(-3deg) rotateY(3deg) scale(1.02);
-          box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(20, 184, 166, 0.08);
-        }
-        .stat-card:hover .stat-icon {
-          transform: translateZ(20px) scale(1.1);
-        }
-        .stat-icon {
-          transition: transform 0.3s ease;
-        }
-        .hero-tilt {
-          transform-style: preserve-3d;
-          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
         @keyframes spin { 
           to { transform: rotate(360deg); } 
         }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
-        .float-anim { animation: float 4s ease-in-out infinite; }
-        .float-anim-d1 { animation: float 4s ease-in-out infinite; animation-delay: 0.5s; }
-        .float-anim-d2 { animation: float 4s ease-in-out infinite; animation-delay: 1s; }
-        .float-anim-d3 { animation: float 4s ease-in-out infinite; animation-delay: 1.5s; }
-        .recharts-tooltip-wrapper {
-          outline: none !important;
-        }
+
         @media (max-width: 1200px) {
           .bento-hero { grid-column: span 12 !important; }
           .bento-progress { grid-column: span 12 !important; }
@@ -287,7 +134,7 @@ export default function Dashboard() {
 
       {loading ? (
         <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-          <div style={{ background: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "24px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#fff", fontWeight: "700", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#111827", fontWeight: "700", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
             <div style={{ width: "24px", height: "24px", border: "3px solid rgba(20,184,166,0.3)", borderTop: "3px solid #14b8a6", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
             Crunching Analytics...
           </div>
@@ -296,18 +143,19 @@ export default function Dashboard() {
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
 
           {isDemoMode && (
-            <div className="glass-panel" style={{
-              background: "rgba(245, 158, 11, 0.05)",
-              borderColor: "rgba(245, 158, 11, 0.2)",
+            <div style={{
+              background: "#fffbeb",
+              border: "1px solid #fcd34d",
+              borderRadius: "16px",
               padding: "16px 24px",
               display: "flex",
               alignItems: "center",
               gap: "12px",
             }}>
-              <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "8px", borderRadius: "8px" }}>⚠️</div> 
+              <div style={{ background: "rgba(245, 158, 11, 0.1)", padding: "8px", borderRadius: "8px", color: "#f59e0b" }}>⚠️</div> 
               <div>
-                <h4 style={{ margin: "0 0 4px 0", color: "#fcd34d", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
-                <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
+                <h4 style={{ margin: "0 0 4px 0", color: "#92400e", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
+                <p style={{ margin: 0, color: "#a16207", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
               </div>
             </div>
           )}
@@ -323,30 +171,29 @@ export default function Dashboard() {
                 C
               </div>
               <div>
-                <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
-                <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
+                <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#111827" }}>Crackin AI</div>
+                <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
               </div>
             </div>
 
             <div style={{
               display: "flex", alignItems: "center", gap: "12px",
-              background: "rgba(0, 0, 0, 0.7)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.08)", 
+              background: "#f9fafb",
+              border: "1px solid #e5e7eb",
               padding: "8px 16px", borderRadius: "100px"
             }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px #22c55e" }} />
-              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }} />
+              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#374151" }}>
                 {displayName} • Ready to work
               </span>
             </div>
           </header>
 
           <div style={{ marginBottom: "0.5rem" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em", color: "#111827" }}>
               Progress <span style={{ color: "#14b8a6" }}>Dashboard</span>
             </h2>
-            <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Your overall placement preparation at a glance.</p>
+            <p style={{ color: "#6b7280", margin: 0, fontSize: "1rem" }}>Your overall placement preparation at a glance.</p>
           </div>
 
           {/* Bento Grid */}
@@ -356,29 +203,23 @@ export default function Dashboard() {
             gap: "1.5rem"
           }}>
 
-            {/* Hero Panel with Tilt */}
-            <div style={{ gridColumn: "span 8", perspective: "1200px" }}>
-              <div
-                ref={heroPanelRef}
-                onMouseEnter={handleHeroEnter}
-                onMouseMove={handleHeroMove}
-                onMouseLeave={handleHeroLeave}
-                className="hero-tilt glass-panel"
-                style={{
-                  overflow: "hidden",
-                  transform: `rotateX(${heroTilt.rotateX}deg) rotateY(${heroTilt.rotateY}deg) translateZ(0)`,
-                  willChange: "transform"
-                }}
-              >
-                <div style={{ position: "absolute", top: 0, right: 0, width: "300px", height: "100%", background: "radial-gradient(ellipse at right, rgba(20,184,166,0.1), transparent 70%)", pointerEvents: "none" }} />
-
+            {/* Hero Panel */}
+            <div className="bento-hero" style={{ gridColumn: "span 8" }}>
+              <div style={{
+                background: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "24px",
+                padding: "2rem",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
+                overflow: "hidden"
+              }}>
                 <div style={{ position: "relative", zIndex: 1 }}>
                   <div style={{ 
                     display: "inline-flex", alignItems: "center", gap: "8px",
-                    background: "rgba(20, 184, 166, 0.1)", 
-                    border: "1px solid rgba(20, 184, 166, 0.2)",
+                    background: "rgba(20, 184, 166, 0.08)", 
+                    border: "1px solid rgba(20, 184, 166, 0.15)",
                     padding: "6px 14px", borderRadius: "8px", 
-                    color: "#2dd4bf", fontSize: "0.75rem", fontWeight: "700",
+                    color: "#0d9488", fontSize: "0.75rem", fontWeight: "700",
                     textTransform: "uppercase", letterSpacing: "0.05em",
                     marginBottom: "1.5rem" 
                   }}>
@@ -386,11 +227,11 @@ export default function Dashboard() {
                     Analytics Overview
                   </div>
 
-                  <h2 style={{ fontSize: "2rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0" }}>
+                  <h2 style={{ fontSize: "2rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 1rem 0", color: "#111827" }}>
                     Track Your <span style={{ color: "#14b8a6" }}>Progress</span>
                   </h2>
 
-                  <p style={{ color: "#94a3b8", fontSize: "0.9rem", maxWidth: "400px", lineHeight: "1.5", margin: "0 0 1.5rem 0" }}>
+                  <p style={{ color: "#6b7280", fontSize: "0.9rem", maxWidth: "400px", lineHeight: "1.5", margin: "0 0 1.5rem 0" }}>
                     Monitor your DSA mastery, quiz performance, and company-wise preparation stats in real-time.
                   </p>
 
@@ -404,42 +245,42 @@ export default function Dashboard() {
                     <div style={{ 
                       textAlign: "center", 
                       padding: "0.75rem",
-                      background: "rgba(0, 0, 0, 0.4)",
+                      background: "#f9fafb",
                       borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.06)"
+                      border: "1px solid #e5e7eb"
                     }}>
                       <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#14b8a6", lineHeight: "1.2" }}>{data.dsa.done}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>DSA Solved</div>
+                      <div style={{ color: "#6b7280", fontSize: "0.75rem", marginTop: "4px" }}>DSA Solved</div>
                     </div>
                     <div style={{ 
                       textAlign: "center", 
                       padding: "0.75rem",
-                      background: "rgba(0, 0, 0, 0.4)",
+                      background: "#f9fafb",
                       borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.06)"
+                      border: "1px solid #e5e7eb"
                     }}>
                       <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#8b5cf6", lineHeight: "1.2" }}>{data.quiz.total}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>Quizzes Done</div>
+                      <div style={{ color: "#6b7280", fontSize: "0.75rem", marginTop: "4px" }}>Quizzes Done</div>
                     </div>
                     <div style={{ 
                       textAlign: "center", 
                       padding: "0.75rem",
-                      background: "rgba(0, 0, 0, 0.4)",
+                      background: "#f9fafb",
                       borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.06)"
+                      border: "1px solid #e5e7eb"
                     }}>
                       <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#22c55e", lineHeight: "1.2" }}>{totalCompany}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>Company Qs</div>
+                      <div style={{ color: "#6b7280", fontSize: "0.75rem", marginTop: "4px" }}>Company Qs</div>
                     </div>
                     <div style={{ 
                       textAlign: "center", 
                       padding: "0.75rem",
-                      background: "rgba(0, 0, 0, 0.4)",
+                      background: "#f9fafb",
                       borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.06)"
+                      border: "1px solid #e5e7eb"
                     }}>
                       <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#f59e0b", lineHeight: "1.2" }}>{streak || 3}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>Day Streak</div>
+                      <div style={{ color: "#6b7280", fontSize: "0.75rem", marginTop: "4px" }}>Day Streak</div>
                     </div>
                   </div>
                 </div>
@@ -447,20 +288,19 @@ export default function Dashboard() {
             </div>
 
             {/* Readiness Score */}
-            <div className="glass-panel bento-progress" style={{ gridColumn: "span 4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 2rem 0", color: "#e2e8f0" }}>Readiness Score</h3>
+            <div className="bento-progress" style={{ gridColumn: "span 4", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "2rem", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 2rem 0", color: "#111827" }}>Readiness Score</h3>
 
               <div style={{ position: "relative", width: "160px", height: "160px" }}>
                 <svg viewBox="0 0 36 36" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
                   <path 
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                    fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" 
+                    fill="none" stroke="#e5e7eb" strokeWidth="3" 
                   />
                   <path 
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
                     fill="none" stroke="url(#progressGradient)" strokeWidth="3" 
                     strokeDasharray="35, 100" 
-                    style={{ animation: "progress 2s ease-out forwards" }} 
                   />
                   <defs>
                     <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -471,66 +311,64 @@ export default function Dashboard() {
                 </svg>
 
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "white", lineHeight: "1" }}>
-                    35<span style={{ fontSize: "1.2rem", color: "#64748b" }}>%</span>
+                  <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "#111827", lineHeight: "1" }}>
+                    35<span style={{ fontSize: "1.2rem", color: "#6b7280" }}>%</span>
                   </span>
                 </div>
               </div>
 
-              <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: "1.5rem 0 0 0", lineHeight: "1.5" }}>
+              <p style={{ color: "#6b7280", fontSize: "0.85rem", margin: "1.5rem 0 0 0", lineHeight: "1.5" }}>
                 You are <strong style={{ color: "#14b8a6" }}>15% closer</strong> to your goal this week. Keep going!
               </p>
             </div>
 
             {/* Stat Cards */}
             {[
-              { label: "DSA Progress", value: `${data.dsa.done}`, sub: `/ ${data.dsa.total} problems`, pct: data.dsa.percent, color: "#14b8a6", icon: "💻", floatClass: "float-anim" },
-              { label: "Quiz Questions", value: data.quiz.total, sub: "completed", pct: 100, color: "#8b5cf6", icon: "🧠", floatClass: "float-anim-d1" },
-              { label: "Company Q's", value: totalCompany, sub: "across companies", pct: 80, color: "#22c55e", icon: "🏢", floatClass: "float-anim-d2" },
-              { label: "Daily Streak", value: streak || 3, sub: "days", pct: Math.min((streak || 3) * 10, 100), color: "#f59e0b", icon: "🔥", floatClass: "float-anim-d3" },
+              { label: "DSA Progress", value: `${data.dsa.done}`, sub: `/ ${data.dsa.total} problems`, pct: data.dsa.percent, color: "#14b8a6", bg: "rgba(20,184,166,0.08)", border: "rgba(20,184,166,0.15)", icon: "💻" },
+              { label: "Quiz Questions", value: data.quiz.total, sub: "completed", pct: 100, color: "#8b5cf6", bg: "rgba(139,92,246,0.08)", border: "rgba(139,92,246,0.15)", icon: "🧠" },
+              { label: "Company Q's", value: totalCompany, sub: "across companies", pct: 80, color: "#22c55e", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.15)", icon: "🏢" },
+              { label: "Daily Streak", value: streak || 3, sub: "days", pct: Math.min((streak || 3) * 10, 100), color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.15)", icon: "🔥" },
             ].map((s, i) => (
-              <div key={i} className={`stat-card ${s.floatClass}`} style={{ gridColumn: "span 3" }}>
+              <div key={i} className="bento-stat" style={{ gridColumn: "span 3", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                  <p style={{ color: "#64748b", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: 0 }}>
+                  <p style={{ color: "#6b7280", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: 0 }}>
                     {s.label}
                   </p>
-                  <div className="stat-icon" style={{
+                  <div style={{
                     width: "36px", height: "36px", borderRadius: "10px",
-                    background: `linear-gradient(135deg, ${s.color}20, transparent)`, 
+                    background: s.bg, 
                     display: "flex", alignItems: "center", justifyContent: "center", 
-                    fontSize: "1.1rem", border: `1px solid ${s.color}40`, color: s.color,
-                    boxShadow: `0 0 15px ${s.color}15`
+                    fontSize: "1.1rem", border: `1px solid ${s.border}`, color: s.color
                   }}>{s.icon}</div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "12px" }}>
-                  <span style={{ fontSize: "2rem", fontWeight: "800", color: "white", lineHeight: 1 }}>{s.value}</span>
-                  <span style={{ fontSize: "0.85rem", color: "#475569", fontWeight: "600" }}>{s.sub}</span>
+                  <span style={{ fontSize: "2rem", fontWeight: "800", color: "#111827", lineHeight: 1 }}>{s.value}</span>
+                  <span style={{ fontSize: "0.85rem", color: "#6b7280", fontWeight: "600" }}>{s.sub}</span>
                 </div>
 
-                <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "6px", height: "6px", overflow: "hidden" }}>
-                  <div style={{ width: `${s.pct}%`, background: `linear-gradient(90deg, ${s.color}, ${s.color}dd)`, height: "100%", borderRadius: "6px", boxShadow: `0 0 10px ${s.color}80`, transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
+                <div style={{ background: "#e5e7eb", borderRadius: "6px", height: "6px", overflow: "hidden" }}>
+                  <div style={{ width: `${s.pct}%`, background: s.color, height: "100%", borderRadius: "6px" }} />
                 </div>
                 <p style={{ color: s.color, fontSize: "0.75rem", fontWeight: "700", margin: "10px 0 0" }}>{s.pct}% complete</p>
               </div>
             ))}
 
             {/* DSA Progress by Topic */}
-            <div className="glass-panel" style={{ gridColumn: "span 6", padding: "1.5rem" }}>
-              <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.1rem", fontWeight: "700", color: "#e2e8f0" }}>DSA Progress by Topic</h3>
+            <div style={{ gridColumn: "span 6", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "1.5rem", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
+              <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.1rem", fontWeight: "700", color: "#111827" }}>DSA Progress by Topic</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {data.dsaByTopic.map((t, i) => (
                   <div key={t.topic}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "8px", fontWeight: "600" }}>
-                      <span style={{ color: "#d1d5db" }}>{t.topic}</span>
-                      <span style={{ color: "#9ca3af" }}>{t.done}/{t.total} ({t.percent}%)</span>
+                      <span style={{ color: "#374151" }}>{t.topic}</span>
+                      <span style={{ color: "#6b7280" }}>{t.done}/{t.total} ({t.percent}%)</span>
                     </div>
-                    <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "6px", height: "6px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.03)" }}>
+                    <div style={{ background: "#e5e7eb", borderRadius: "6px", height: "6px", overflow: "hidden" }}>
                       <div style={{
                         width: `${t.percent}%`,
                         background: COLORS[i % COLORS.length],
-                        height: "100%", borderRadius: "6px", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                        boxShadow: `0 0 12px ${COLORS[i % COLORS.length]}80`
+                        height: "100%", borderRadius: "6px"
                       }} />
                     </div>
                   </div>
@@ -539,15 +377,15 @@ export default function Dashboard() {
             </div>
 
             {/* Pie Chart */}
-            <div className="glass-panel" style={{ gridColumn: "span 6", padding: "1.5rem", display: "flex", flexDirection: "column" }}>
-              <h3 style={{ margin: "0 0 1rem", fontSize: "1.1rem", fontWeight: "700", color: "#e2e8f0" }}>Company-wise Distribution</h3>
+            <div style={{ gridColumn: "span 6", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "1.5rem", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)", display: "flex", flexDirection: "column" }}>
+              <h3 style={{ margin: "0 0 1rem", fontSize: "1.1rem", fontWeight: "700", color: "#111827" }}>Company-wise Distribution</h3>
               <div style={{ flex: 1, minHeight: "220px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie 
                       data={data.companyStats} dataKey="count" nameKey="company"
                       cx="50%" cy="50%" outerRadius={90} innerRadius={50}
-                      stroke="rgba(255,255,255,0.05)" strokeWidth={2}
+                      stroke="#ffffff" strokeWidth={2}
                     >
                       {data.companyStats.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -555,11 +393,11 @@ export default function Dashboard() {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ 
-                        background: "rgba(0, 0, 0, 0.9)", border: "1px solid rgba(255,255,255,0.1)", 
-                        borderRadius: "12px", backdropFilter: "blur(16px)", color: "white", fontSize: "0.85rem",
-                        boxShadow: "0 10px 25px rgba(0,0,0,0.5)" 
+                        background: "#ffffff", border: "1px solid #e5e7eb", 
+                        borderRadius: "12px", color: "#111827", fontSize: "0.85rem",
+                        boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" 
                       }} 
-                      itemStyle={{ color: "#e2e8f0", fontWeight: "600" }}
+                      itemStyle={{ color: "#111827", fontWeight: "600" }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -567,32 +405,32 @@ export default function Dashboard() {
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "1rem", justifyContent: "center" }}>
                 {data.companyStats.map((c, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.03)", padding: "4px 10px", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0, boxShadow: `0 0 10px ${COLORS[i % COLORS.length]}` }} />
-                    <span style={{ fontSize: "0.8rem", color: "#e2e8f0", fontWeight: "600" }}>{c.company}</span>
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f9fafb", padding: "4px 10px", borderRadius: "20px", border: "1px solid #e5e7eb" }}>
+                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.8rem", color: "#374151", fontWeight: "600" }}>{c.company}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Bar Chart */}
-            <div className="glass-panel" style={{ gridColumn: "span 12", padding: "1.5rem", marginBottom: "2rem" }}>
-              <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.1rem", fontWeight: "700", color: "#e2e8f0" }}>DSA Solved by Topic</h3>
+            <div style={{ gridColumn: "span 12", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
+              <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.1rem", fontWeight: "700", color: "#111827" }}>DSA Solved by Topic</h3>
               <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.dsaByTopic} barGap={8} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <XAxis dataKey="topic" tick={{ fontSize: 11, fill: "#64748b", fontWeight: "600" }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} tickLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: "#64748b", fontWeight: "600" }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="topic" tick={{ fontSize: 11, fill: "#6b7280", fontWeight: "600" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#6b7280", fontWeight: "600" }} axisLine={false} tickLine={false} />
                     <Tooltip 
-                      cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                      cursor={{ fill: "rgba(0,0,0,0.03)" }}
                       contentStyle={{ 
-                        background: "rgba(0, 0, 0, 0.9)", border: "1px solid rgba(255,255,255,0.1)", 
-                        borderRadius: "12px", backdropFilter: "blur(16px)", color: "white", fontSize: "0.85rem",
-                        boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+                        background: "#ffffff", border: "1px solid #e5e7eb", 
+                        borderRadius: "12px", color: "#111827", fontSize: "0.85rem",
+                        boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)"
                       }} 
                     />
                     <Bar dataKey="done" fill="#14b8a6" radius={[6, 6, 0, 0]} name="Solved" />
-                    <Bar dataKey="total" fill="rgba(255,255,255,0.06)" radius={[6, 6, 0, 0]} name="Total" />
+                    <Bar dataKey="total" fill="#e5e7eb" radius={[6, 6, 0, 0]} name="Total" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
