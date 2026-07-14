@@ -1,26 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from "./firebase.js"; 
 import { onAuthStateChanged } from "firebase/auth";
 
-// Helper function to load Vanta scripts safely
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
-
-// Title Case Formatter
 const formatName = (name) => {
   if (!name) return "Guest";
   return name
@@ -31,7 +14,8 @@ const formatName = (name) => {
 
 const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
 const diffColor = { Easy: "#10b981", Medium: "#f59e0b", Hard: "#ef4444" };
-const diffBg = { Easy: "rgba(16, 185, 129, 0.15)", Medium: "rgba(245, 158, 11, 0.15)", Hard: "rgba(239, 68, 68, 0.15)" };
+const diffBg = { Easy: "rgba(16, 185, 129, 0.08)", Medium: "rgba(245, 158, 11, 0.08)", Hard: "rgba(239, 68, 68, 0.08)" };
+const diffBorder = { Easy: "rgba(16, 185, 129, 0.2)", Medium: "rgba(245, 158, 11, 0.2)", Hard: "rgba(239, 68, 68, 0.2)" };
 
 const generateDummyData = () => {
   return Array.from({ length: 45 }).map((_, i) => ({
@@ -50,11 +34,7 @@ export default function DSATracker() {
   const [loading, setLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [firebaseUser, setFirebaseUser] = useState(null);
-  
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
 
-  // Authenticate User for Profile Pill
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) setFirebaseUser(currentUser);
@@ -70,57 +50,10 @@ export default function DSATracker() {
   }
   const displayName = formatName(rawName);
 
-  // Initialize Vanta.js Background
-  useEffect(() => {
-    let cancelled = false;
-
-    async function initVanta() {
-      try {
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js");
-        
-        if (cancelled || !vantaRef.current || vantaEffect.current) return;
-
-        if (window.VANTA && window.VANTA.NET) {
-          vantaEffect.current = window.VANTA.NET({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.0,
-            minWidth: 200.0,
-            scale: 1.0,
-            scaleMobile: 1.0,
-            color: 0x14b8a6, 
-            backgroundColor: 0x000000, 
-            points: 10.0,
-            maxDistance: 25.0,
-            spacing: 18.0,
-            showDots: true,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to load Vanta background:", err);
-      }
-    }
-
-    initVanta();
-
-    return () => {
-      cancelled = true;
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
-      }
-    };
-  }, []);
-
-  // Fetch Problems
   useEffect(() => {
     const fetchProblems = async () => {
       try {
         const token = localStorage.getItem("token");
-
         const res = await axios.get("https://placeai-sqjj.onrender.com/api/problems", {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -139,12 +72,9 @@ export default function DSATracker() {
 
   const toggleStatus = async (id) => {
     setProblems(problems.map(p => p._id === id ? { ...p, status: !p.status } : p));
-    
     if (isDemoMode) return; 
-
     try {
       const token = localStorage.getItem("token");
-      
       await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -164,129 +94,33 @@ export default function DSATracker() {
       minHeight: "100vh",
       position: "relative",
       padding: "2.5rem 3rem",
-      color: "#ffffff",
+      color: "#111827",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       overflowY: "auto",
       overflowX: "hidden",
-      background: "#000000"
+      background: "#ffffff"
     }}>
-      
-      <div 
-        ref={vantaRef} 
-        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }} 
-      />
-      
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 0%, rgba(13, 148, 136, 0.08) 0%, transparent 60%)"
-      }} />
-
       <style>{`
-        /* --- SCROLLBAR STYLES (Grey) --- */
         ::-webkit-scrollbar {
           width: 8px;
         }
         ::-webkit-scrollbar-track {
-          background: #0a0a0a;
+          background: #f3f4f6;
         }
         ::-webkit-scrollbar-thumb {
-          background: #4b5563;
+          background: #d1d5db;
           border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: #6b7280;
+          background: #9ca3af;
         }
         ::-webkit-scrollbar-corner {
-          background: #0a0a0a;
+          background: #f3f4f6;
         }
         * {
           scrollbar-width: thin;
-          scrollbar-color: #4b5563 #0a0a0a;
+          scrollbar-color: #d1d5db #f3f4f6;
         }
-
-        .glass-panel {
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(24px) saturate(140%);
-          -webkit-backdrop-filter: blur(24px) saturate(140%);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 24px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-          position: relative;
-          z-index: 10;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .glass-panel:hover {
-          background: rgba(0, 0, 0, 0.8);
-          border-color: rgba(255, 255, 255, 0.12);
-          transform: translateY(-4px);
-          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
-        }
-
-        .dsa-stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 1.5rem;
-          margin-bottom: 1.5rem;
-          position: relative;
-          z-index: 10;
-        }
-
-        .topic-btn {
-          background: rgba(0, 0, 0, 0.5);
-          color: #94a3b8;
-          padding: 10px 18px;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          cursor: pointer;
-          font-size: 0.85rem;
-          font-weight: 600;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          white-space: nowrap;
-          backdrop-filter: blur(10px);
-        }
-        
-        .topic-btn:hover {
-          background: rgba(0, 0, 0, 0.7);
-          border-color: rgba(255, 255, 255, 0.15);
-          color: #e2e8f0;
-          transform: translateY(-2px);
-        }
-        
-        .topic-btn.active {
-          background: linear-gradient(135deg, #0d9488, #14b8a6);
-          color: white;
-          border-color: transparent;
-          box-shadow: 0 8px 30px -6px rgba(13, 148, 136, 0.5);
-          transform: translateY(-2px);
-        }
-
-        .table-row {
-          display: grid;
-          grid-template-columns: 44px 1fr 120px 100px 80px;
-          padding: 16px 24px;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-          align-items: center;
-          transition: all 0.2s ease;
-        }
-        
-        .table-row:last-child {
-          border-bottom: none;
-        }
-        
-        .table-row:hover {
-          background: rgba(255,255,255,0.03);
-        }
-        
-        .table-row.completed {
-          background: rgba(16, 185, 129, 0.04);
-        }
-        
-        .table-row.completed:hover {
-          background: rgba(16, 185, 129, 0.07);
-        }
-
-        .problems-mobile { display: none; }
-        .problems-desktop { display: block; }
 
         @keyframes spin { 
           to { transform: rotate(360deg); } 
@@ -300,7 +134,7 @@ export default function DSATracker() {
 
       {loading ? (
         <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-          <div style={{ background: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "24px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#fff", fontWeight: "700", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#111827", fontWeight: "700", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
             <div style={{ width: "24px", height: "24px", border: "3px solid rgba(20,184,166,0.3)", borderTop: "3px solid #14b8a6", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
             Decrypting DSA Sheet...
           </div>
@@ -309,18 +143,19 @@ export default function DSATracker() {
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           
           {isDemoMode && (
-            <div className="glass-panel" style={{
-              background: "rgba(245, 158, 11, 0.05)",
-              borderColor: "rgba(245, 158, 11, 0.2)",
+            <div style={{
+              background: "#fffbeb",
+              border: "1px solid #fcd34d",
+              borderRadius: "16px",
               padding: "16px 24px",
               display: "flex",
               alignItems: "center",
               gap: "12px",
             }}>
-              <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "8px", borderRadius: "8px" }}>⚠️</div> 
+              <div style={{ background: "rgba(245, 158, 11, 0.1)", padding: "8px", borderRadius: "8px", color: "#f59e0b" }}>⚠️</div> 
               <div>
-                <h4 style={{ margin: "0 0 4px 0", color: "#fcd34d", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
-                <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
+                <h4 style={{ margin: "0 0 4px 0", color: "#92400e", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
+                <p style={{ margin: 0, color: "#a16207", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
               </div>
             </div>
           )}
@@ -336,68 +171,66 @@ export default function DSATracker() {
                 C
               </div>
               <div>
-                <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em" }}>Crackin AI</div>
-                <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
+                <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#111827" }}>Crackin AI</div>
+                <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
               </div>
             </div>
             
             <div style={{
               display: "flex", alignItems: "center", gap: "12px",
-              background: "rgba(0, 0, 0, 0.7)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.08)", 
+              background: "#f9fafb",
+              border: "1px solid #e5e7eb",
               padding: "8px 16px", borderRadius: "100px"
             }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px #22c55e" }} />
-              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#e2e8f0" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }} />
+              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#374151" }}>
                 {displayName} • Ready to work
               </span>
             </div>
           </header>
 
           <div style={{ marginBottom: "0.5rem" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em", color: "#111827" }}>
               DSA <span style={{ color: "#14b8a6" }}>Tracker</span>
             </h2>
-            <p style={{ color: "#64748b", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
+            <p style={{ color: "#6b7280", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
           </div>
 
           {/* Stats Row */}
-          <div className="dsa-stats-grid">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "1.5rem" }}>
             {[
-              { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#14b8a6", icon: "⟨/⟩" },
-              { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#8b5cf6", icon: "🎯" },
-              { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#22c55e", icon: "📊" },
+              { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#14b8a6", bg: "rgba(20,184,166,0.08)", border: "rgba(20,184,166,0.15)", icon: "⟨/⟩" },
+              { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#8b5cf6", bg: "rgba(139,92,246,0.08)", border: "rgba(139,92,246,0.15)", icon: "🎯" },
+              { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#22c55e", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.15)", icon: "📊" },
             ].map((s, i) => (
-              <div key={i} className="glass-panel" style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "20px" }}>
+              <div key={i} style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "20px", padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
                 <div>
-                  <p style={{ color: "#64748b", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
+                  <p style={{ color: "#6b7280", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-                    <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "white", lineHeight: "1" }}>{s.value}</span>
-                    <span style={{ fontSize: "0.9rem", color: "#475569", fontWeight: "600" }}>{s.total}</span>
+                    <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "#111827", lineHeight: "1" }}>{s.value}</span>
+                    <span style={{ fontSize: "0.9rem", color: "#6b7280", fontWeight: "600" }}>{s.total}</span>
                   </div>
                 </div>
                 <div style={{
                   width: "48px", height: "48px", borderRadius: "12px",
-                  background: `linear-gradient(135deg, ${s.color}20, transparent)`, 
+                  background: s.bg, 
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", 
-                  border: `1px solid ${s.color}40`, color: s.color, boxShadow: `0 0 20px ${s.color}20`
+                  border: `1px solid ${s.border}`, color: s.color
                 }}>{s.icon}</div>
               </div>
             ))}
           </div>
 
           {/* Global Progress Bar */}
-          <div className="glass-panel" style={{ padding: "1.5rem 2rem", borderRadius: "20px" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "20px", padding: "1.5rem 2rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-              <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: "700" }}>Overall Sheet Progress</span>
+              <span style={{ fontSize: "0.9rem", color: "#374151", fontWeight: "700" }}>Overall Sheet Progress</span>
               <span style={{ fontSize: "0.9rem", color: "#14b8a6", fontWeight: "800" }}>{percent}%</span>
             </div>
-            <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "10px", height: "10px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)" }}>
+            <div style={{ background: "#e5e7eb", borderRadius: "10px", height: "10px", overflow: "hidden" }}>
               <div style={{
                 width: `${percent}%`, background: "linear-gradient(90deg, #0d9488, #14b8a6)",
-                height: "100%", borderRadius: "10px", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                boxShadow: "0 0 20px rgba(20,184,166,0.6)"
+                height: "100%", borderRadius: "10px"
               }} />
             </div>
           </div>
@@ -408,21 +241,35 @@ export default function DSATracker() {
               const topicDone = t === "All" ? problems.filter(p => p.status).length : problems.filter(p => p.topic === t && p.status).length;
               const topicTotal = t === "All" ? problems.length : problems.filter(p => p.topic === t).length;
               return (
-                <button key={t} onClick={() => setFilter(t)} className={`topic-btn ${filter === t ? "active" : ""}`}>
-                  {t} <span style={{ opacity: filter === t ? 1 : 0.5, fontSize: "0.75rem", marginLeft: "6px", fontWeight: filter === t ? "700" : "500" }}>{topicDone}/{topicTotal}</span>
+                <button 
+                  key={t} 
+                  onClick={() => setFilter(t)} 
+                  style={{
+                    background: filter === t ? "linear-gradient(135deg, #0d9488, #14b8a6)" : "#f9fafb",
+                    color: filter === t ? "white" : "#6b7280",
+                    padding: "10px 18px",
+                    borderRadius: "12px",
+                    border: filter === t ? "none" : "1px solid #e5e7eb",
+                    cursor: "pointer",
+                    fontSize: "0.85rem",
+                    fontWeight: "600",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  {t} <span style={{ opacity: filter === t ? 0.8 : 0.5, fontSize: "0.75rem", marginLeft: "6px", fontWeight: filter === t ? "700" : "500" }}>{topicDone}/{topicTotal}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Problem List (Desktop) */}
-          <div className="problems-desktop glass-panel" style={{ padding: "0", overflow: "hidden" }}>
+          <div className="problems-desktop" style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "0", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
             
             <div style={{
               display: "grid", gridTemplateColumns: "44px 1fr 120px 100px 80px",
-              padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(0,0,0,0.3)",
-              fontSize: "0.75rem", color: "#64748b", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
+              padding: "16px 24px", borderBottom: "1px solid #e5e7eb",
+              background: "#f9fafb",
+              fontSize: "0.75rem", color: "#6b7280", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
             }}>
               <span></span>
               <span>Problem Title</span>
@@ -432,51 +279,60 @@ export default function DSATracker() {
             </div>
 
             {filtered.length === 0 ? (
-              <div style={{ padding: "5rem", textAlign: "center", color: "#64748b", fontWeight: "600", fontSize: "1rem" }}>
+              <div style={{ padding: "5rem", textAlign: "center", color: "#6b7280", fontWeight: "600", fontSize: "1rem" }}>
                 <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: 0.5 }}>📭</div>
                 No problems found for this topic.
               </div>
             ) : (
               <div>
                 {filtered.map((p, i) => (
-                  <div key={p._id} className={`table-row ${p.status ? "completed" : ""}`}>
+                  <div 
+                    key={p._id} 
+                    style={{
+                      display: "grid", 
+                      gridTemplateColumns: "44px 1fr 120px 100px 80px",
+                      padding: "16px 24px", 
+                      borderBottom: i < filtered.length - 1 ? "1px solid #f3f4f6" : "none",
+                      alignItems: "center",
+                      background: p.status ? "rgba(16, 185, 129, 0.04)" : "transparent"
+                    }}
+                  >
                     
                     <div onClick={() => toggleStatus(p._id)} style={{
                       width: "24px", height: "24px", borderRadius: "8px", cursor: "pointer",
-                      background: p.status ? "linear-gradient(135deg, #10b981, #059669)" : "rgba(255,255,255,0.03)",
-                      border: `1px solid ${p.status ? "#10b981" : "rgba(255,255,255,0.15)"}`,
+                      background: p.status ? "linear-gradient(135deg, #10b981, #059669)" : "#ffffff",
+                      border: `1px solid ${p.status ? "#10b981" : "#d1d5db"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)", color: "white", 
-                      boxShadow: p.status ? "0 0 15px rgba(16,185,129,0.5)" : "inset 0 2px 4px rgba(0,0,0,0.2)"
+                      color: "white"
                     }}>
                       {p.status && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                     </div>
 
                     <button onClick={() => navigate(`/problem/${p._id}`)} style={{
-                      color: p.status ? "#64748b" : "#ffffff", fontSize: "0.95rem", fontWeight: "600",
+                      color: p.status ? "#6b7280" : "#111827", fontSize: "0.95rem", fontWeight: "600",
                       textDecoration: p.status ? "line-through" : "none",
                       background: "transparent", border: "none", cursor: "pointer",
-                      textAlign: "left", padding: 0, transition: "color 0.2s"
+                      textAlign: "left", padding: 0
                     }}>
-                      <span style={{ color: "#64748b", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
+                      <span style={{ color: p.status ? "#9ca3af" : "#6b7280", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
                         {String(i + 1).padStart(2, "0")}.
                       </span>
                       {p.title}
                     </button>
 
-                    <span style={{ fontSize: "0.8rem", color: "#94a3b8", fontWeight: "600" }}>{p.topic}</span>
+                    <span style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: "600" }}>{p.topic}</span>
 
                     <span style={{
                       fontSize: "0.7rem", fontWeight: "800", padding: "6px 12px",
                       borderRadius: "6px", display: "inline-flex", alignItems: "center", justifyContent: "center",
                       color: diffColor[p.difficulty], background: diffBg[p.difficulty],
-                      border: `1px solid ${diffColor[p.difficulty]}40`, letterSpacing: "0.5px", textTransform: "uppercase"
+                      border: `1px solid ${diffBorder[p.difficulty]}`, letterSpacing: "0.5px", textTransform: "uppercase"
                     }}>
                       {p.difficulty}
                     </span>
 
                     <span style={{
-                      fontSize: "0.85rem", color: p.status ? "#10b981" : "#64748b",
+                      fontSize: "0.85rem", color: p.status ? "#10b981" : "#9ca3af",
                       fontWeight: "800", display: "flex", alignItems: "center", gap: "6px"
                     }}>
                       {p.status ? (
