@@ -169,11 +169,7 @@ export default function Signup() {
           border-radius: 28px;
           border: 1px solid #e2e8f0;
           box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-          padding: 3.5rem;
-        }
-
-        @media (max-width: 1100px) {
-          .middle-image-layer { display: none !important; }
+          padding: 2.5rem 3rem;
         }
       `}</style>
 
@@ -181,18 +177,19 @@ export default function Signup() {
         position: "relative",
         zIndex: 10,
         width: "100%",
-        maxWidth: "1350px",
+        maxWidth: "1100px",
         display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
         justifyContent: "space-between",
+        gap: "4rem",
         opacity: mounted ? 1 : 0,
         transition: "opacity 0.8s ease-in"
       }}>
 
         {/* LEFT COLUMN: Text & Feature Cards */}
         <div style={{
-          flex: "0 1 420px", 
+          flex: "1 1 380px", 
           display: "flex",
           flexDirection: "column",
           gap: "2.5rem",
@@ -200,21 +197,6 @@ export default function Signup() {
         }}>
 
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "1.5rem" }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "#ffffff"
-              }}>
-                <img src="/logo.png" alt="Crackin Ai Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-              <h2 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "800", letterSpacing: "0.5px", color: "#1f2937" }}>
-                Crackin <span style={{ color: "#14b8a6" }}>Ai</span>
-              </h2>
-            </div>
-
             <h1 style={{ fontSize: "3rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 0.5rem 0", color: "#1f2937" }}>
               Start Your <span style={{ color: "#14b8a6" }}>Journey.</span>
             </h1>
@@ -249,23 +231,31 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* MIDDLE COLUMN: Image */}
-        <div className="middle-image-layer" style={{
-          position: "absolute", left: "54%", top: "50%", transform: "translate(-50%, -50%)", width: "440px", height: "640px",
-          zIndex: 5, borderRadius: "28px", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
-        }}>
-          <img src="/purple.jpeg" alt="AI Robot Concept" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(248,250,252,0.3), rgba(248,250,252,0.7))" }} />
-        </div>
-
-        {/* RIGHT COLUMN: Signup Panel */}
+        {/* RIGHT COLUMN: Signup Panel with Logo on top */}
         <div style={{ flex: "0 1 420px", zIndex: 10 }}>
           <div className="signup-panel">
 
-            <h1 style={{ fontSize: "2.2rem", fontWeight: "800", margin: "0 0 0.5rem 0", lineHeight: 1.15, color: "#1f2937" }}>
+            {/* Logo centered at top of signup panel */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "1.5rem" }}>
+              <div style={{
+                width: "56px", height: "56px", borderRadius: "14px",
+                background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: "800", fontSize: "1.4rem", color: "white",
+                marginBottom: "12px",
+                boxShadow: "0 4px 12px rgba(13, 148, 136, 0.25)"
+              }}>
+                C
+              </div>
+              <h2 style={{ margin: 0, fontSize: "1.3rem", fontWeight: "800", color: "#1f2937" }}>
+                Crackin <span style={{ color: "#14b8a6" }}>Ai</span>
+              </h2>
+            </div>
+
+            <h1 style={{ fontSize: "1.6rem", fontWeight: "800", margin: "0 0 0.5rem 0", lineHeight: 1.15, color: "#1f2937", textAlign: "center" }}>
               Create Account
             </h1>
-            <p style={{ color: "#64748b", fontSize: "0.95rem", margin: "0 0 2.5rem 0" }}>
+            <p style={{ color: "#64748b", fontSize: "0.9rem", margin: "0 0 2rem 0", textAlign: "center" }}>
               Join Crackin Ai to accelerate your placement journey.
             </p>
 
@@ -282,7 +272,7 @@ export default function Signup() {
 
               {/* Full Name Input */}
               <div className={`glass-input ${focusedField === "name" ? "focused" : ""}`} style={{
-                borderRadius: "14px", marginBottom: "1.25rem", display: "flex", alignItems: "center", padding: "0 16px"
+                borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -295,14 +285,14 @@ export default function Signup() {
                   onFocus={() => setFocusedField("name")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Full Name"
-                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "16px 0" }}
+                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "14px 0" }}
                   required
                 />
               </div>
 
               {/* Email Input */}
               <div className={`glass-input ${focusedField === "email" ? "focused" : ""}`} style={{
-                borderRadius: "14px", marginBottom: "1.25rem", display: "flex", alignItems: "center", padding: "0 16px"
+                borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                   <path d="M3 7l9 6 9-6" />
@@ -315,14 +305,14 @@ export default function Signup() {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Email address"
-                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "16px 0" }}
+                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "14px 0" }}
                   required
                 />
               </div>
 
               {/* Password Input */}
               <div className={`glass-input ${focusedField === "password" ? "focused" : ""}`} style={{
-                borderRadius: "14px", marginBottom: "2rem", display: "flex", alignItems: "center", padding: "0 16px"
+                borderRadius: "14px", marginBottom: "1.5rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                   <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -335,7 +325,7 @@ export default function Signup() {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Create a Password"
-                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "16px 0" }}
+                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "#1f2937", fontSize: "1rem", padding: "14px 0" }}
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8" }}>
@@ -351,10 +341,10 @@ export default function Signup() {
                 type="submit"
                 disabled={isLoading}
                 style={{
-                  width: "100%", padding: "16px", borderRadius: "14px", border: "none", 
+                  width: "100%", padding: "14px", borderRadius: "14px", border: "none", 
                   cursor: isLoading ? "not-allowed" : "pointer",
                   background: "linear-gradient(90deg, #0d9488, #14b8a6)",
-                  color: "white", fontSize: "1.05rem", fontWeight: "700",
+                  color: "white", fontSize: "1rem", fontWeight: "700",
                   boxShadow: "0 4px 15px rgba(13, 148, 136, 0.3)",
                   transition: "all 0.3s ease",
                   opacity: isLoading ? 0.7 : 1
@@ -364,7 +354,7 @@ export default function Signup() {
               </button>
             </form>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", margin: "2rem 0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", margin: "1.5rem 0" }}>
               <div style={{ flex: 1, height: "1px", background: "#e2e8f0" }} />
               <span style={{ color: "#94a3b8", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "600" }}>or continue with</span>
               <div style={{ flex: 1, height: "1px", background: "#e2e8f0" }} />
@@ -376,7 +366,7 @@ export default function Signup() {
               disabled={isLoading}
               className="glass-input"
               style={{
-                width: "100%", padding: "14px", borderRadius: "14px", display: "flex", alignItems: "center",
+                width: "100%", padding: "12px", borderRadius: "14px", display: "flex", alignItems: "center",
                 justifyContent: "center", gap: "12px", cursor: isLoading ? "not-allowed" : "pointer", 
                 fontSize: "0.95rem", fontWeight: "600", color: "#374151", opacity: isLoading ? 0.7 : 1
               }}
@@ -390,7 +380,7 @@ export default function Signup() {
               Sign up with Google
             </button>
 
-            <p style={{ textAlign: "center", marginTop: "2rem", color: "#64748b", fontSize: "0.9rem" }}>
+            <p style={{ textAlign: "center", marginTop: "1.5rem", color: "#64748b", fontSize: "0.9rem" }}>
               Already have an account?{" "}
               <Link to="/" style={{ color: "#14b8a6", textDecoration: "none", fontWeight: "700" }}>Login</Link>
             </p>
