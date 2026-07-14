@@ -1,4 +1,4 @@
-]import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { auth } from "./firebase.js";
 
@@ -142,19 +142,11 @@ export default function AptitudeQuiz() {
 
     .glass-card {
       background: #ffffff;
-      backdrop-filter: blur(24px) saturate(140%);
-      -webkit-backdrop-filter: blur(24px) saturate(140%);
       border: 1px solid #e2e8f0;
       border-radius: 24px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
       position: relative;
       overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .glass-card:hover {
-      background: #ffffff;
-      border-color: #14b8a6;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
     }
 
     .quiz-cats-grid {
@@ -256,11 +248,8 @@ export default function AptitudeQuiz() {
           { cat: "Logical", desc: "Patterns, sequences, puzzles", color: "#8b5cf6" },
           { cat: "Verbal", desc: "Grammar, comprehension", color: "#60a5fa" },
         ].map(({ cat, desc, color }) => (
-          <div key={cat} className="glass-card" style={{
-            padding: "1.5rem", textAlign: "center", transition: "transform 0.2s"
-          }} onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
-             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-            <div style={{ fontSize: "36px", marginBottom: "12px", filter: `drop-shadow(0 0 10px ${color}40)` }}>{categoryIcon[cat]}</div>
+          <div key={cat} className="glass-card" style={{ padding: "1.5rem", textAlign: "center" }}>
+            <div style={{ fontSize: "36px", marginBottom: "12px" }}>{categoryIcon[cat]}</div>
             <p style={{ fontWeight: "800", color, margin: "0 0 6px", fontSize: "15px", letterSpacing: "0.5px" }}>{cat}</p>
             <p style={{ color: "#64748b", fontSize: "12px", margin: 0, lineHeight: "1.5", fontWeight: "500" }}>{desc}</p>
           </div>
