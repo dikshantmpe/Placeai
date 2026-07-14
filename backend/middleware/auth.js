@@ -13,10 +13,12 @@ module.exports = function requireAuth(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    // decoded = { userId, name, email, iat, exp }
     req.user = decoded;
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Token expired" });
+    }
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 };

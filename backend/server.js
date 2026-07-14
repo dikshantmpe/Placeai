@@ -10,6 +10,11 @@ app.use(express.json());
 
 // Routes
 app.get('/api/ping', (req, res) => res.status(200).send('awake'));
+
+// Auth routes (no middleware needed)
+app.use("/api/auth", require("./routes/auth"));
+
+// Protected routes (with middleware if needed)
 app.use("/api/problems", require("./routes/problems"));
 app.use("/api/resume", require("./routes/resume"));
 app.use("/api/interview", require("./routes/interview"));
@@ -18,7 +23,6 @@ app.use("/api/company", require("./routes/company"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/daily", require("./routes/daily"));
 app.use("/api/chatbot", require("./routes/chatbot"));
-app.use("/api/auth", require("./routes/auth"));
 
 // MongoDB connect
 mongoose.connect(process.env.MONGO_URI)

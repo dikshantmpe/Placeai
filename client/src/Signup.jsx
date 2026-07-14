@@ -13,6 +13,8 @@ export default function Signup() {
 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState("");
 
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
@@ -21,32 +23,92 @@ export default function Signup() {
     setMounted(true);
   }, []);
 
+  // Email validation
+  const isValidEmail = (emailValue) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+  };
+
+  // Password validation
+  const isValidPassword = (passwordValue) => {
+    if (passwordValue.length < 8) return false;
+    if (!/[A-Z]/.test(passwordValue)) return false;
+    if (!/[a-z]/.test(passwordValue)) return false;
+    if (!/[0-9]/.test(passwordValue)) return false;
+    if (!/[^a-zA-Z0-9]/.test(passwordValue)) return false;
+    return true;
+  };
+
+  // Get password strength
+  const getPasswordStrength = (passwordValue) => {
+    let score = 0;
+    if (passwordValue.length >= 8) score++;
+    if (passwordValue.length >= 12) score++;
+    if (/[a-z]/.test(passwordValue)) score++;
+    if (/[A-Z]/.test(passwordValue)) score++;
+    if (/[0-9]/.test(passwordValue)) score++;
+    if (/[^a-zA-Z0-9]/.test(passwordValue)) score++;
+
+    const strengths = ["Weak", "Fair", "Good", "Strong", "Very Strong"];
+    return strengths[Math.min(score - 1, 4)] || "Weak";
+  };
+
+  const handleEmailChange = (e) => {
+    const emailValue = e.target.value;
+    setEmail(emailValue);
+
+    if (emailValue && !isValidEmail(emailValue)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const passwordValue = e.target.value;
+    setPassword(passwordValue);
+    setPasswordStrength(getPasswordStrength(passwordValue));
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
+    // Validate all fields
+    if (!name.trim()) {
+      setError("Full name is required");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      setError("Password must be 8+ chars with uppercase, lowercase, number, and special character");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-      await updateProfile(userCredential.user, {
-        displayName: name
-      });
-
-      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
-        name: name,
-        email: email,
-        avatar: userCredential.user.photoURL || "",
+      // Call backend API
+      const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/register", {
+        name: name.trim(),
+        email: email.toLowerCase(),
+        password: password
       });
 
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      if (err.code === "auth/email-already-in-use") {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === "auth/email-already-in-use") {
         setError("An account with this email already exists.");
-      } else if (err.code === "auth/weak-password") {
-        setError("Password should be at least 6 characters.");
       } else {
         setError("Failed to create account. Please try again.");
       }
@@ -149,6 +211,10 @@ export default function Signup() {
           background: #ffffff;
           box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
           border-color: #14b8a6;
+        }
+        .glass-input.error {
+          border-color: #ef4444;
+          background: #fef2f2;
         }
         input::placeholder { color: #94a3b8; }
 
@@ -271,7 +337,7 @@ export default function Signup() {
               )}
 
               {/* Full Name Input */}
-              <div className={`glass-input ${focusedField === "name" ? "focused" : ""}`} style={{
+              <div className={`glass-input`} style={{
                 borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
@@ -291,8 +357,8 @@ export default function Signup() {
               </div>
 
               {/* Email Input */}
-              <div className={`glass-input ${focusedField === "email" ? "focused" : ""}`} style={{
-                borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
+              <div className={`glass-input ${emailError ? "error" : focusedField === "email" ? "focused" : ""}`} style={{
+                borderRadius: "14px", marginBottom: emailError ? "0.5rem" : "1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                   <path d="M3 7l9 6 9-6" />
@@ -301,7 +367,7 @@ export default function Signup() {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Email address"
@@ -309,10 +375,15 @@ export default function Signup() {
                   required
                 />
               </div>
+              {emailError && (
+                <div style={{ color: "#ef4444", fontSize: "0.8rem", marginBottom: "1rem" }}>
+                  {emailError}
+                </div>
+              )}
 
               {/* Password Input */}
               <div className={`glass-input ${focusedField === "password" ? "focused" : ""}`} style={{
-                borderRadius: "14px", marginBottom: "1.5rem", display: "flex", alignItems: "center", padding: "0 16px"
+                borderRadius: "14px", marginBottom: "1rem", display: "flex", alignItems: "center", padding: "0 16px"
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" style={{ flexShrink: 0, marginRight: "12px" }}>
                   <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -321,7 +392,7 @@ export default function Signup() {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Create a Password"
@@ -337,17 +408,26 @@ export default function Signup() {
                 </button>
               </div>
 
+              {/* Password Strength */}
+              {password && (
+                <div style={{ marginBottom: "1.5rem", fontSize: "0.85rem", color: "#64748b" }}>
+                  Password Strength: <span style={{ fontWeight: "600", color: passwordStrength === "Very Strong" ? "#22c55e" : passwordStrength === "Strong" ? "#3b82f6" : passwordStrength === "Good" ? "#eab308" : "#ef4444" }}>
+                    {passwordStrength}
+                  </span>
+                </div>
+              )}
+
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || emailError || (password && !isValidPassword(password))}
                 style={{
                   width: "100%", padding: "14px", borderRadius: "14px", border: "none", 
-                  cursor: isLoading ? "not-allowed" : "pointer",
+                  cursor: (isLoading || emailError || (password && !isValidPassword(password))) ? "not-allowed" : "pointer",
                   background: "linear-gradient(90deg, #0d9488, #14b8a6)",
                   color: "white", fontSize: "1rem", fontWeight: "700",
                   boxShadow: "0 4px 15px rgba(13, 148, 136, 0.3)",
                   transition: "all 0.3s ease",
-                  opacity: isLoading ? 0.7 : 1
+                  opacity: (isLoading || emailError || (password && !isValidPassword(password))) ? 0.7 : 1
                 }}
               >
                 {isLoading ? "Creating Account..." : "Sign Up →"}
