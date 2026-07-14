@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
   provider:  { type: String, default: "email" },
   loginAttempts: { type: Number, default: 0 },
   lockUntil: Date,
+  isVerified: { type: Boolean, default: false }, // <-- Added for email verification
+  verificationToken: { type: String },           // <-- Added for the verification link
   createdAt: { type: Date, default: Date.now }
 });
 
