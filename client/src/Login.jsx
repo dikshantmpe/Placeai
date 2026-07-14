@@ -26,7 +26,7 @@ export default function Login({ setUser }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isBtnHovered, setIsBtnHovered] = useState(false);
   const [isFormHovered, setIsFormHovered] = useState(false);
-  const [hoveredCube, setHoveredCube] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +61,7 @@ export default function Login({ setUser }) {
       if (user) {
         console.log("✅ Persistent user session detected:", user.email);
         setUser(user);
-        navigate("/", { replace: true }); // <--- CHANGED TO "/"
+        navigate("/", { replace: true });
       } else {
         console.log("📝 No active session found. Ready for login.");
         setIsCheckingAuth(false);
@@ -140,8 +140,6 @@ export default function Login({ setUser }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      // Exchange Firebase identity for your backend's JWT so API calls
-      // (e.g. DSATracker fetching /api/problems) can authenticate.
       const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
         name: firebaseUser.displayName || firebaseUser.email.split("@")[0],
         email: firebaseUser.email,
@@ -151,7 +149,7 @@ export default function Login({ setUser }) {
       localStorage.setItem("token", res.data.token);
 
       setUser(firebaseUser);
-      navigate("/", { replace: true }); // <--- CHANGED TO "/"
+      navigate("/", { replace: true });
     } catch (err) {
       console.log(err.code);
       console.log(err.message);
@@ -186,8 +184,6 @@ export default function Login({ setUser }) {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      // Exchange Firebase identity for your backend's JWT so API calls
-      // (e.g. DSATracker fetching /api/problems) can authenticate.
       const res = await axios.post("https://placeai-sqjj.onrender.com/api/auth/google", {
         name: firebaseUser.displayName || firebaseUser.email.split("@")[0],
         email: firebaseUser.email,
@@ -198,7 +194,7 @@ export default function Login({ setUser }) {
       
       console.log("✅ Google Auth Successful:", firebaseUser.email);
       setUser(firebaseUser);
-      navigate("/", { replace: true }); // <--- CHANGED TO "/"
+      navigate("/", { replace: true });
       
     } catch (err) {
       console.error("❌ Google Popup Error:", err);
@@ -250,45 +246,74 @@ export default function Login({ setUser }) {
   const features = [
     {
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
         </svg>
       ),
-      title: "AI-Powered",
-      desc: "Resume & Interviews",
+      title: "DSA Tracker",
+      desc: "Track your DSA progress, solve curated problems and master algorithms.",
+      accent: "#34d399",
+      bgIcon: "rgba(52,211,153,0.12)",
+      borderIcon: "rgba(52,211,153,0.3)",
     },
     {
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 17l6-6 4 4 8-8" />
-          <path d="M17 7h4v4" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       ),
-      title: "Track Progress",
-      desc: "Smart Analytics",
+      title: "Mock Interview",
+      desc: "AI-powered mock interviews with real-time feedback to improve performance.",
+      accent: "#a78bfa",
+      bgIcon: "rgba(167,139,250,0.12)",
+      borderIcon: "rgba(167,139,250,0.3)",
     },
     {
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" />
-          <path d="M3 10h18" />
-          <path d="M8 2v4M16 2v4" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
         </svg>
       ),
-      title: "Daily Challenges",
-      desc: "DSA & Aptitude",
+      title: "Company Questions",
+      desc: "Access real interview questions asked by top companies.",
+      accent: "#34d399",
+      bgIcon: "rgba(52,211,153,0.12)",
+      borderIcon: "rgba(52,211,153,0.3)",
     },
     {
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
-          <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
-          <path d="M8 7h8M8 11h8M8 15h5" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
         </svg>
       ),
-      title: "Insights",
-      desc: "Company Questions",
+      title: "Resume Analyser",
+      desc: "AI reviews your resume and gives actionable suggestions.",
+      accent: "#fb923c",
+      bgIcon: "rgba(251,146,60,0.12)",
+      borderIcon: "rgba(251,146,60,0.3)",
+    },
+    {
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+      ),
+      title: "Aptitude Quiz",
+      desc: "Practice aptitude, logical reasoning and verbal ability with AI quizzes.",
+      accent: "#f472b6",
+      bgIcon: "rgba(244,114,182,0.12)",
+      borderIcon: "rgba(244,114,182,0.3)",
     },
   ];
 
@@ -374,13 +399,13 @@ export default function Login({ setUser }) {
       }}>
 
         {/* ========================================= */}
-        {/* LEFT COLUMN: Text & Animated Cubes        */}
+        {/* LEFT COLUMN: Text & Feature Cards           */}
         {/* ========================================= */}
         <div style={{
-          flex: "0 1 420px", 
+          flex: "0 1 520px", 
           display: "flex",
           flexDirection: "column",
-          gap: "2.5rem",
+          gap: "2rem",
           zIndex: 10, 
           transform: "rotateY(12deg) rotateX(4deg) translateZ(10px)",
           transformStyle: "preserve-3d"
@@ -401,84 +426,140 @@ export default function Login({ setUser }) {
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
-              <h2 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "800", letterSpacing: "0.5px" }}>
-                Crackin <span style={{ color: "#ff7aab" }}>Ai</span>
-              </h2>
+              <div>
+                <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "800", letterSpacing: "0.5px" }}>
+                  Crackin <span style={{ color: "#ff7aab" }}>AI</span>
+                </h2>
+                <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#9b9ba8" }}>
+                  An AI Powered Placement Preparation Platform
+                </p>
+              </div>
             </div>
 
-            <h1 style={{ fontSize: "3.5rem", fontWeight: "800", lineHeight: "1.1", margin: "0 0 0.5rem 0" }}>
-              Prepare <span style={{ background: "linear-gradient(90deg, #a78bfa, #ff3f81)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Smarter.</span>
-            </h1>
             <div style={{ 
-              display: "inline-block", padding: "6px 14px", borderRadius: "20px",
-              background: "rgba(255, 255, 255, 0.1)", border: "1px solid rgba(255, 255, 255, 0.15)",
-              color: "#e2e8f0", fontSize: "0.9rem", marginTop: "8px"
+              display: "inline-block", 
+              padding: "6px 14px", 
+              borderRadius: "20px",
+              background: "rgba(255, 255, 255, 0.05)", 
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              color: "#ff7aab", 
+              fontSize: "0.75rem", 
+              fontWeight: "600",
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+              marginBottom: "1.25rem"
             }}>
-              ✦ Your AI Placement Partner
+              AI POWERED PLACEMENT PREPARATION ✨
             </div>
+
+            <h1 style={{ 
+              fontSize: "3.2rem", 
+              fontWeight: "800", 
+              lineHeight: "1.1", 
+              margin: "0 0 1rem 0",
+              letterSpacing: "-0.5px"
+            }}>
+              Crack Interviews.<br />
+              <span style={{ color: "#ffffff" }}>Land Offers.</span>
+            </h1>
+            
+            <p style={{ 
+              color: "#9b9ba8", 
+              fontSize: "0.95rem", 
+              lineHeight: "1.6",
+              maxWidth: "440px",
+              margin: "0 0 1.5rem 0"
+            }}>
+              Crackin AI is your all-in-one platform to master DSA, Aptitude, System Design, and Interviews with the power of AI.
+            </p>
           </div>
 
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(2, 1fr)", 
-            gap: "1.25rem", 
-            maxWidth: "420px",
+            gap: "1rem", 
+            maxWidth: "520px",
             alignItems: "start",
             transformStyle: "preserve-3d"
           }}>
             {features.map((f, i) => (
               <div 
                 key={i} 
-                onMouseEnter={() => setHoveredCube(i)}
-                onMouseLeave={() => setHoveredCube(null)}
+                onMouseEnter={() => setHoveredCard(i)}
+                onMouseLeave={() => setHoveredCard(null)}
                 style={{
                   cursor: "pointer",
                   animation: `float 4s ease-in-out infinite`,
-                  animationDelay: `${i * 0.25}s`,
+                  animationDelay: `${i * 0.2}s`,
                   perspective: "1000px",
-                  marginTop: i % 2 !== 0 ? "3.5rem" : "0" 
+                  gridColumn: i === 4 ? "span 2" : "span 1",
+                  maxWidth: i === 4 ? "50%" : "100%",
+                  marginTop: i === 1 || i === 3 ? "1.5rem" : "0"
               }}>
                 <div 
                   className="glass-cube-shine"
                   style={{
-                    background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))",
+                    background: "linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02))",
                     backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    borderRadius: "20px",
-                    padding: "1.5rem 1rem",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "16px",
+                    padding: "1.25rem",
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                    boxShadow: hoveredCube === i 
-                      ? "0 20px 40px -10px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.4)"
-                      : "0 10px 30px -10px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(255,255,255,0.2)",
+                    gap: "0.75rem",
+                    boxShadow: hoveredCard === i 
+                      ? "0 20px 40px -10px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.3)"
+                      : "0 10px 30px -10px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.15)",
                     transformStyle: "preserve-3d",
-                    transform: hoveredCube === i 
-                      ? "rotateY(-12deg) rotateX(-4deg) translateZ(40px) scale(1.05)" 
+                    transform: hoveredCard === i 
+                      ? "rotateY(-8deg) rotateX(-2deg) translateZ(30px) scale(1.03)" 
                       : "rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1)",
                     transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)"
                   }}
                 >
                   <div style={{
-                    transform: hoveredCube === i ? "translateZ(30px)" : "translateZ(0px)",
-                    transition: "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center"
+                    width: "40px", 
+                    height: "40px", 
+                    borderRadius: "10px",
+                    background: f.bgIcon, 
+                    border: `1px solid ${f.borderIcon}`,
+                    color: f.accent, 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center",
+                    boxShadow: hoveredCard === i ? `0 0 16px ${f.borderIcon}` : "none",
+                    transition: "box-shadow 0.3s ease"
                   }}>
-                    <div style={{
-                      width: "44px", height: "44px", borderRadius: "12px",
-                      background: "rgba(255,63,129,0.1)", border: "1px solid rgba(255,63,129,0.25)",
-                      color: "#ff7aab", display: "flex", alignItems: "center", justifyContent: "center",
-                      marginBottom: "12px",
-                      boxShadow: hoveredCube === i ? "0 0 20px rgba(255,63,129,0.5)" : "none",
-                      transition: "box-shadow 0.3s ease"
+                    {f.icon}
+                  </div>
+                  
+                  <div>
+                    <div style={{ 
+                      fontWeight: 700, 
+                      fontSize: "0.95rem", 
+                      marginBottom: "4px",
+                      color: "#ffffff"
                     }}>
-                      {f.icon}
+                      {f.title}
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>{f.title}</div>
-                    <div style={{ color: "#9b9ba8", fontSize: "0.75rem", lineHeight: "1.4" }}>{f.desc}</div>
+                    <div style={{ 
+                      color: "#9b9ba8", 
+                      fontSize: "0.8rem", 
+                      lineHeight: "1.5",
+                      marginBottom: "8px"
+                    }}>
+                      {f.desc}
+                    </div>
+                    <div style={{
+                      color: f.accent,
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px"
+                    }}>
+                      Learn more <span style={{ fontSize: "1rem" }}>→</span>
+                    </div>
                   </div>
                 </div>
               </div>
