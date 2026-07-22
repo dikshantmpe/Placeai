@@ -14,7 +14,7 @@ const server = http.createServer(app);
 // EXPRESS MIDDLEWARE (FIRST - before anything else)
 // ═══════════════════════════════════════════════════════════════
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com"],
+  origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com", "https://placeai-mu.vercel.app"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -39,7 +39,7 @@ let wsHandler = null;
 try {
   const io = socketIo(server, {
     cors: {
-      origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com"],
+      origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com", "https://placeai-mu.vercel.app"],
       credentials: true,
       methods: ["GET", "POST"],
     },
