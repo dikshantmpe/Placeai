@@ -3,11 +3,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { getAuth } = require("firebase-admin/auth");
 const User = require("../models/User");
 
 const router = express.Router();
 
-// Setup Nodemailer (Ensure EMAIL_USER and EMAIL_PASS are in your .env)
+// Setup Nodemailer
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -69,24 +70,22 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
-    // Send verification email
-    const verificationLink = `http://localhost:${process.env.PORT || 5000}/api/auth/verify/${verificationToken}`;
+    const verificationLink = `http://localhost:5001/api/auth/verify/${verificationToken}`;
     
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: 'Verify Your Crackin AI Account',
-      html: `<p>Welcome! Click <a href="${verificationLink}">here</a> to verify your email address.</p>`
+      html: `<p>Welcome to Crackin AI! Click <a href="${verificationLink}">here</a> to verify your email address.</p>`
     });
 
-    // Note: No JWT token returned here anymore. User must verify first.
     res.status(201).json({
       message: "User registered successfully. Please check your email to verify your account."
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Register Error:", error);
+    res.status(500).json({ message: "Server error during registration." });
   }
 });
 
@@ -103,10 +102,9 @@ router.get("/verify/:token", async (req, res) => {
     user.verificationToken = undefined;
     await user.save();
 
-    // Redirect to frontend login page
-    res.redirect('http://localhost:5173/login?verified=true'); 
+    res.redirect('http://localhost:5173/');
   } catch (error) {
-    console.error(error);
+    console.error("Verification Route Error:", error);
     res.status(500).json({ message: "Server error during verification." });
   }
 });
@@ -130,36 +128,31 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Check if account is locked
     if (user.lockUntil && user.lockUntil > new Date()) {
       return res.status(429).json({ message: "Account locked. Try again later" });
     }
 
-    // BLOCK UNVERIFIED USERS
     if (!user.isVerified) {
       return res.status(403).json({ message: "Please verify your email before logging in." });
     }
 
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       user.loginAttempts = (user.loginAttempts || 0) + 1;
       if (user.loginAttempts >= 5) {
-        user.lockUntil = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours
+        user.lockUntil = new Date(Date.now() + 2 * 60 * 60 * 1000);
       }
       await user.save();
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Reset login attempts
     if (user.loginAttempts > 0) {
       user.loginAttempts = 0;
       user.lockUntil = null;
       await user.save();
     }
 
-    // Create JWT
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET || "secret",
@@ -173,7 +166,7 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Login Error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -183,11 +176,7 @@ router.post("/check-email", async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ available: false });
-    }
-
-    if (!isValidEmail(email)) {
+    if (!email || !isValidEmail(email)) {
       return res.status(400).json({ available: false });
     }
 
@@ -196,6 +185,54 @@ router.post("/check-email", async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ available: false });
+  }
+});
+
+// POST: Google Sign-In
+router.post("/google", async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "ID token required" });
+    }
+
+    console.log("Verifying ID token with Firebase...");
+    const decodedToken = await getAuth().verifyIdToken(idToken);
+    const { email, name } = decodedToken;
+
+    console.log("Token verified for:", email);
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      console.log("Creating new user for:", email);
+      user = new User({
+        name: name || "User",
+        email,
+        provider: "google",
+        isVerified: true
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "7d" }
+    );
+
+    console.log("✅ Google Sign-In successful for:", email);
+
+    res.json({
+      message: "Google sign-in successful",
+      token,
+      user: { id: user._id, name: user.name, email: user.email }
+    });
+
+  } catch (error) {
+    console.error("❌ Google Sign-In Error:", error.message);
+    res.status(500).json({ message: "Google sign-in failed: " + error.message });
   }
 });
 

@@ -55,7 +55,7 @@ export default function ResumeAnalyzer() {
     } catch (err) {
       console.error("Backend fetch failed. Loading Demo Feedback instead...", err);
       setIsDemoMode(true);
-      
+
       setTimeout(() => {
         setFeedback(`OVERALL SCORE:
 82/100
@@ -89,9 +89,9 @@ SUGGESTIONS:
 
   const renderFeedback = () => {
     const sectionColors = {
-      "STRENGTHS:": "#10b981",    
-      "WEAKNESSES:": "#f43f5e",   
-      "SUGGESTIONS:": "#f59e0b",  
+      "STRENGTHS:": "#18775e",
+      "WEAKNESSES:": "#b53d45",
+      "SUGGESTIONS:": "#9a6514",
     };
 
     return feedback.split("\n").map((line, i) => {
@@ -99,16 +99,16 @@ SUGGESTIONS:
         return (
           <div key={i} style={{ 
             display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            background: 'rgba(20, 184, 166, 0.08)', 
-            border: '1px solid rgba(20, 184, 166, 0.15)', borderRadius: '20px', 
+            background: '#eaf3ff', 
+            border: '1px solid #d1e0f5', borderRadius: '12px', 
             padding: '2rem', marginBottom: '2rem'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '3.5rem', fontWeight: '800', color: '#111827' }}>
+              <span style={{ fontSize: '3rem', fontWeight: '800', color: '#10264a' }}>
                 {line.split('/')[0]}
               </span>
-              <span style={{ fontSize: '1.5rem', color: '#6b7280', fontWeight: '600' }}>/100</span>
-              <p style={{ margin: '8px 0 0', color: '#14b8a6', fontSize: '0.85rem', fontWeight: '800', letterSpacing: '2px' }}>
+              <span style={{ fontSize: '1.2rem', color: '#657287', fontWeight: '600' }}>/100</span>
+              <p style={{ margin: '8px 0 0', color: '#1769e0', fontSize: '0.8rem', fontWeight: '800', letterSpacing: '2px' }}>
                 ATS MATCH SCORE
               </p>
             </div>
@@ -123,13 +123,13 @@ SUGGESTIONS:
         return (
           <div key={i} style={{
             display: "flex", alignItems: "center", gap: "10px",
-            marginTop: "1.75rem", marginBottom: "12px"
+            marginTop: "1.5rem", marginBottom: "10px"
           }}>
             <div style={{
-              width: "4px", height: "22px", borderRadius: "2px",
+              width: "4px", height: "20px", borderRadius: "2px",
               background: sectionColors[header]
             }} />
-            <h3 style={{ color: sectionColors[header], margin: 0, fontSize: "0.9rem",
+            <h3 style={{ color: sectionColors[header], margin: 0, fontSize: "0.85rem",
               fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {line}
             </h3>
@@ -141,10 +141,10 @@ SUGGESTIONS:
         return (
           <div key={i} style={{
             display: "flex", alignItems: "flex-start", gap: "10px",
-            margin: "10px 0", paddingLeft: "14px"
+            margin: "8px 0", paddingLeft: "14px"
           }}>
-            <span style={{ color: "#14b8a6", marginTop: "2px", fontSize: "0.9rem" }}>▸</span>
-            <p style={{ margin: 0, color: "#374151", fontSize: "0.95rem", lineHeight: "1.6", fontWeight: "500" }}>
+            <span style={{ color: "#1769e0", marginTop: "2px", fontSize: "0.85rem" }}>▸</span>
+            <p style={{ margin: 0, color: "#172033", fontSize: "0.9rem", lineHeight: "1.6", fontWeight: "500" }}>
               {line.slice(2)}
             </p>
           </div>
@@ -152,23 +152,27 @@ SUGGESTIONS:
       }
 
       if (line.trim()) {
-        return <p key={i} style={{ color: "#374151", fontSize: "0.95rem", lineHeight: "1.6", margin: "8px 0" }}>{line}</p>;
+        return <p key={i} style={{ color: "#172033", fontSize: "0.9rem", lineHeight: "1.6", margin: "6px 0" }}>{line}</p>;
       }
       return null;
     });
   };
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   return (
     <div style={{
       flex: 1,
       minHeight: "100vh",
       position: "relative",
-      padding: "2.5rem 3rem",
-      color: "#111827",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      padding: "24px 22px",
+      color: "#172033",
+      fontFamily: "Inter, system-ui, sans-serif",
       overflowY: "auto",
       overflowX: "hidden",
-      background: "#ffffff"
+      background: "#f3f2ef",
+      fontSize: "14px",
+      lineHeight: "1.5"
     }}>
 
       <style>{`
@@ -176,21 +180,21 @@ SUGGESTIONS:
           width: 8px;
         }
         ::-webkit-scrollbar-track {
-          background: #f3f4f6;
+          background: #f3f2ef;
         }
         ::-webkit-scrollbar-thumb {
-          background: #d1d5db;
+          background: #dedbd5;
           border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: #9ca3af;
+          background: #b8b3ab;
         }
         ::-webkit-scrollbar-corner {
-          background: #f3f4f6;
+          background: #f3f2ef;
         }
         * {
           scrollbar-width: thin;
-          scrollbar-color: #d1d5db #f3f4f6;
+          scrollbar-color: #dedbd5 #f3f2ef;
         }
 
         @keyframes spin { 
@@ -198,79 +202,47 @@ SUGGESTIONS:
         }
       `}</style>
 
-      <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        
+      <div style={{ maxWidth: "1440px", margin: "0 auto", position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "18px" }}>
+
         {isDemoMode && (
           <div style={{
-            background: "#fffbeb",
-            border: "1px solid #fcd34d",
-            borderRadius: "16px",
-            padding: "16px 24px",
+            background: "#fff1cf",
+            border: "1px solid #f0d080",
+            borderRadius: "12px",
+            padding: "12px 20px",
             display: "flex",
             alignItems: "center",
             gap: "12px",
           }}>
-            <div style={{ background: "rgba(245, 158, 11, 0.1)", padding: "8px", borderRadius: "8px", color: "#f59e0b" }}>⚠️</div> 
+            <div style={{ background: "rgba(154, 101, 20, 0.1)", padding: "8px", borderRadius: "8px", color: "#9a6514", fontWeight: "800" }}>⚠️</div> 
             <div>
-              <h4 style={{ margin: "0 0 4px 0", color: "#92400e", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
-              <p style={{ margin: 0, color: "#a16207", fontSize: "0.85rem" }}>Backend offline. Generating demo AI feedback instead.</p>
+              <h4 style={{ margin: "0 0 4px 0", color: "#765010", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
+              <p style={{ margin: 0, color: "#9a6514", fontSize: "0.85rem" }}>Backend offline. Generating demo AI feedback instead.</p>
             </div>
           </div>
         )}
 
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{
-              width: "40px", height: "40px", borderRadius: "10px",
-              background: "linear-gradient(135deg, #115e59, #14b8a6)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: "800", fontSize: "1.1rem", color: "white"
-            }}>
-              C
-            </div>
-            <div>
-              <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#111827" }}>Crackin AI</div>
-              <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
-            </div>
-          </div>
-          
-          <div style={{
-            display: "flex", alignItems: "center", gap: "12px",
-            background: "#f9fafb",
-            border: "1px solid #e5e7eb",
-            padding: "8px 16px", borderRadius: "100px"
-          }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }} />
-            <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#374151" }}>
-              {displayName} • Ready to work
-            </span>
-          </div>
-        </header>
+        {/* Hero Section - Upload + Settings */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.2fr 0.8fr", gap: "18px" }}>
 
-        <div style={{ marginBottom: "0.5rem" }}>
-          <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em", color: "#111827" }}>
-            Resume <span style={{ color: "#14b8a6" }}>Analyzer</span>
-          </h2>
-          <p style={{ color: "#6b7280", margin: 0, fontSize: "1rem" }}>Upload your resume and get instant AI-powered feedback.</p>
-        </div>
+          {/* Upload Panel */}
+          <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "27px" }}>
+            <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>AI-POWERED RESUME REVIEW</span>
+            <h1 style={{ fontSize: "34px", lineHeight: "1.13", margin: "8px 0", color: "#10264a", fontWeight: "700" }}>Make your resume easier to notice—and harder to reject.</h1>
+            <p style={{ color: "#657287", margin: "0 0 22px 0" }}>Check ATS compatibility, role-specific keywords, skills coverage, structure, and readability.</p>
 
-        <div style={{ display: "flex", gap: "2rem", flexDirection: window.innerWidth < 1024 ? "column" : "row" }}>
-          
-          <div style={{ flex: "1 1 50%", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "20px", padding: "2.5rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
-            <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.2rem", fontWeight: "700", color: "#111827" }}>Upload Document</h3>
-            
             <div
               style={{ 
-                flex: 1, 
-                display: "flex", 
-                flexDirection: "column", 
-                justifyContent: "center",
-                border: `2px dashed ${dragOver ? "#14b8a6" : file ? "#10b981" : "#d1d5db"}`,
-                borderRadius: "20px",
-                padding: "4rem 2rem",
+                minHeight: "270px",
+                border: `2px dashed ${dragOver ? "#1769e0" : file ? "#18775e" : "#aab7c8"}`,
+                borderRadius: "14px",
+                background: dragOver ? "#f5f9ff" : file ? "rgba(24, 119, 94, 0.04)" : "#fbfcfe",
+                display: "grid",
+                placeItems: "center",
                 textAlign: "center",
-                background: dragOver ? "rgba(20, 184, 166, 0.04)" : file ? "rgba(16, 185, 129, 0.04)" : "#f9fafb",
-                cursor: "pointer"
+                padding: "25px",
+                cursor: "pointer",
+                transition: "all 0.2s"
               }}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
@@ -283,120 +255,248 @@ SUGGESTIONS:
 
               {file ? (
                 <div>
-                  <div style={{ fontSize: "64px", marginBottom: "16px" }}>📄</div>
-                  <p style={{ color: "#10b981", fontWeight: "700", fontSize: "1.1rem", margin: "0 0 8px" }}>{file.name}</p>
-                  <p style={{ color: "#6b7280", fontSize: "0.9rem", margin: 0, fontWeight: "500" }}>
+                  <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", fontWeight: "700" }}>✓</div>
+                  <h2 style={{ color: "#18775e", fontWeight: "700", fontSize: "1.1rem", margin: "0 0 8px" }}>{file.name}</h2>
+                  <p style={{ color: "#657287", fontSize: "0.9rem", margin: 0, fontWeight: "500" }}>
                     {(file.size / 1024).toFixed(1)} KB · Click to swap file
                   </p>
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontSize: "64px", marginBottom: "16px", opacity: 0.6 }}>📁</div>
-                  <p style={{ color: "#374151", fontWeight: "700", fontSize: "1.1rem", margin: "0 0 8px" }}>
-                    Drag & Drop your resume here
+                  <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px" }}>⇧</div>
+                  <h2 style={{ color: "#172033", fontWeight: "700", fontSize: "1.3rem", margin: "0 0 8px" }}>
+                    Drop your resume here
+                  </h2>
+                  <p style={{ color: "#657287", fontSize: "0.95rem", margin: "0 0 24px" }}>
+                    or select a document from your device
                   </p>
-                  <p style={{ color: "#6b7280", fontSize: "0.95rem", margin: "0 0 24px" }}>
-                    or click to browse your files
-                  </p>
-                  <span style={{
-                    background: "#f3f4f6", border: "1px solid #e5e7eb",
-                    color: "#6b7280", padding: "8px 24px", borderRadius: "10px", fontSize: "0.85rem", fontWeight: "600"
-                  }}>
-                    PDF format only
-                  </span>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); document.getElementById("resumeInput").click(); }}
+                    style={{
+                      border: "0",
+                      background: "#1769e0",
+                      color: "#fff",
+                      padding: "11px 17px",
+                      borderRadius: "99px",
+                      fontWeight: "750",
+                      cursor: "pointer",
+                      fontSize: "14px"
+                    }}
+                  >
+                    Browse files
+                  </button>
+                  <div style={{ display: "flex", gap: "7px", flexWrap: "wrap", justifyContent: "center", marginTop: "14px" }}>
+                    {["PDF", "DOCX", "TXT", "Maximum 10 MB"].map((tag, i) => (
+                      <span key={i} style={{ fontSize: "11px", padding: "5px 8px", borderRadius: "99px", border: "1px solid #dedbd5", color: "#657287" }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            <div style={{ marginTop: "2rem" }}>
+            {/* Upload progress (shown when file selected) */}
+            {file && (
+              <div style={{ marginTop: "13px", padding: "12px", border: "1px solid #dedbd5", borderRadius: "9px" }}>
+                <b>{file.name}</b>
+                <span style={{ color: "#657287" }}> · {(file.size / 1024).toFixed(1)} KB · Ready to analyze</span>
+                <div style={{ height: "7px", background: "#e8edf3", borderRadius: "99px", overflow: "hidden", marginTop: "7px" }}>
+                  <span style={{ display: "block", height: "100%", width: "100%", background: "#1769e0", borderRadius: "99px" }}></span>
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginTop: "9px", padding: "10px", background: "#fff1cf", color: "#765010", borderRadius: "8px", fontSize: "12px" }}>
+              Unsupported formats and documents larger than 10 MB will be rejected before analysis.
+            </div>
+          </div>
+
+          {/* Analysis Settings Panel */}
+          <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "27px" }}>
+            <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>ANALYSIS SETTINGS</span>
+            <h2 style={{ color: "#10264a", fontSize: "1.5rem", fontWeight: "700", margin: "8px 0" }}>Choose what to inspect</h2>
+            <p style={{ color: "#657287", margin: "0 0 18px 0" }}>Adjust the scan before starting your analysis.</p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: "#f6f7f9", padding: "4px", border: "1px solid #dedbd5", borderRadius: "10px", margin: "18px 0" }}>
+              <label style={{ textAlign: "center", padding: "10px", borderRadius: "7px", fontWeight: "700", cursor: "pointer", background: "transparent", color: "#657287" }}>
+                <input type="radio" name="depth" style={{ position: "absolute", opacity: 0 }} />
+                Quick Scan
+              </label>
+              <label style={{ textAlign: "center", padding: "10px", borderRadius: "7px", fontWeight: "700", cursor: "pointer", background: "#fff", color: "#1769e0", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                <input type="radio" name="depth" defaultChecked style={{ position: "absolute", opacity: 0 }} />
+                Deep Analysis
+              </label>
+            </div>
+
+            <div style={{ display: "grid", gap: "7px" }}>
+              {[
+                { title: "Keyword optimization", desc: "Compare terminology and role relevance." },
+                { title: "Skills gap identification", desc: "Find missing technical and soft skills." },
+                { title: "Formatting assessment", desc: "Review hierarchy and consistency." },
+                { title: "ATS compatibility score", desc: "Flag parsing and screening risks." },
+                { title: "Readability metrics", desc: "Measure clarity and information density." },
+              ].map((item, i) => (
+                <label key={i} style={{ display: "flex", gap: "9px", padding: "9px", border: "1px solid #dedbd5", borderRadius: "8px", cursor: "pointer", alignItems: "flex-start" }}>
+                  <input type="checkbox" defaultChecked style={{ accentColor: "#1769e0", marginTop: "2px" }} />
+                  <span>
+                    <b style={{ color: "#172033", fontSize: "14px" }}>{item.title}</b>
+                    <small style={{ display: "block", color: "#657287", fontSize: "12px" }}>{item.desc}</small>
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <p style={{ margin: "16px 0 8px 0" }}><b>Target job description</b> <span style={{ color: "#657287" }}>(optional)</span></p>
+            <textarea 
+              placeholder="Paste a job description here for role-specific comparison…"
+              style={{ width: "100%", minHeight: "120px", border: "1px solid #dedbd5", borderRadius: "9px", padding: "11px", resize: "vertical", fontFamily: "inherit", fontSize: "14px" }}
+            />
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "13px" }}>
+              <small style={{ color: "#657287" }}>Deep analysis: ~30 sec</small>
               <button 
                 onClick={handleUpload} 
                 disabled={loading || !file} 
                 style={{
-                  background: loading || !file ? "#f3f4f6" : "linear-gradient(135deg, #0d9488, #14b8a6)",
-                  color: loading || !file ? "#9ca3af" : "white",
-                  border: loading || !file ? "1px solid #e5e7eb" : "none",
-                  padding: "16px 32px",
-                  borderRadius: "14px",
+                  border: loading || !file ? "1px solid #dedbd5" : "0",
+                  background: loading || !file ? "#f6f7f9" : "#1769e0",
+                  color: loading || !file ? "#657287" : "#fff",
+                  padding: "11px 17px",
+                  borderRadius: "99px",
+                  fontWeight: "750",
                   cursor: loading || !file ? "not-allowed" : "pointer",
-                  fontSize: "1rem",
-                  fontWeight: "700",
-                  width: "100%",
+                  fontSize: "14px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px"
+                  gap: "8px"
                 }}
               >
                 {loading ? (
                   <>
-                    <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1.2rem" }}>⟳</span>
-                    Analyzing with AI...
+                    <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1rem" }}>⟳</span>
+                    Analyzing...
                   </>
                 ) : (
                   <>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    Start Analysis
+                    Analyze resume →
                   </>
                 )}
               </button>
             </div>
           </div>
-
-          <div style={{ flex: "1 1 50%", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "20px", padding: "2.5rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
-             
-             {!feedback && !loading && (
-               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
-                 
-                 <div style={{ fontSize: "4rem", marginBottom: "2rem" }}>✨</div>
-
-                 <h3 style={{ margin: "0 0 12px", color: "#111827", fontSize: "1.3rem", fontWeight: "800" }}>Ready for Analysis</h3>
-                 <p style={{ margin: "0 0 2rem", color: "#6b7280", fontSize: "0.95rem", maxWidth: "300px", lineHeight: "1.5" }}>Upload your resume to unlock a deep AI evaluation of your profile.</p>
-
-                 <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center", maxWidth: "350px" }}>
-                   {["ATS Compatibility", "Impact Metrics", "Skill Gaps", "Action Verbs"].map((tag, i) => (
-                     <span key={i} style={{ background: "#f9fafb", border: "1px solid #e5e7eb", padding: "8px 16px", borderRadius: "20px", fontSize: "0.75rem", color: "#0d9488", fontWeight: "600" }}>
-                       {tag}
-                     </span>
-                   ))}
-                 </div>
-               </div>
-             )}
-
-             {loading && (
-               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
-                 
-                 <div style={{ fontSize: "3rem", marginBottom: "1.5rem" }}>📄</div>
-
-                 <h3 style={{ margin: "0 0 8px", color: "#111827", fontSize: "1.2rem", fontWeight: "700" }}>Extracting Data...</h3>
-                 <p style={{ margin: 0, color: "#14b8a6", fontSize: "0.85rem", fontWeight: "600" }}>Running against ATS criteria</p>
-               </div>
-             )}
-
-             {feedback && !loading && (
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "2rem",
-                  paddingBottom: "1.5rem", borderBottom: "1px solid #e5e7eb" }}>
-                  <div style={{ width: "48px", height: "48px", borderRadius: "14px",
-                    background: "rgba(20, 184, 166, 0.08)", 
-                    border: "1px solid rgba(20, 184, 166, 0.15)",
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
-                    🤖
-                  </div>
-                  <div>
-                    <h3 style={{ margin: "0 0 4px 0", fontSize: "1.2rem", fontWeight: "800", color: "#111827" }}>Analysis Complete</h3>
-                    <p style={{ margin: 0, color: "#14b8a6", fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
-                  </div>
-                </div>
-                
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {renderFeedback()}
-                </div>
-              </div>
-             )}
-          </div>
-          
         </div>
+
+        {/* Results Section */}
+        {(feedback || loading) && (
+          <div>
+            <div style={{ margin: "26px 0 12px" }}>
+              <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>ANALYSIS DASHBOARD</span>
+              <h2 style={{ color: "#10264a", fontSize: "1.5rem", fontWeight: "700", margin: "8px 0" }}>Your resume analysis</h2>
+              <p style={{ color: "#657287", margin: 0 }}>AI-powered evaluation of your profile.</p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 290px", gap: "18px", alignItems: "start" }}>
+
+              {/* Main Results Area */}
+              <div>
+                {/* Score Card */}
+                {feedback && !loading && (
+                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "145px 1fr", gap: "25px", alignItems: "center", marginBottom: "18px" }}>
+                    <div style={{ width: "130px", height: "130px", borderRadius: "50%", background: "conic-gradient(#1769e0 82%, #e6ebf1 0)", display: "grid", placeItems: "center", position: "relative", margin: isMobile ? "0 auto" : "0" }}>
+                      <div style={{ position: "absolute", width: "98px", height: "98px", borderRadius: "50%", background: "#fff" }}></div>
+                      <b style={{ zIndex: 1, fontSize: "29px", color: "#10264a", position: "relative" }}>82%</b>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>STRONG FOUNDATION</span>
+                      <h2 style={{ color: "#10264a", fontSize: "1.3rem", fontWeight: "700", margin: "8px 0" }}>Your resume is competitive, with a few high-impact improvements.</h2>
+                      <p style={{ color: "#657287", margin: "0 0 12px 0" }}>The strongest gains should come from adding role-specific keywords, quantifying project outcomes, and simplifying one ATS-sensitive section.</p>
+                      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                        {["ATS 88%", "Keywords 76%", "Readability 91%", "Formatting 84%"].map((tag, i) => (
+                          <span key={i} style={{ padding: "5px 8px", borderRadius: "99px", background: "#eaf3ff", color: "#0e54bd", fontSize: "11px", fontWeight: "700" }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", marginBottom: "18px" }}>
+                    <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", animation: "spin 2s linear infinite" }}>⟳</div>
+                    <h3 style={{ margin: "0 0 8px", color: "#10264a", fontSize: "1.2rem", fontWeight: "700" }}>Extracting Data...</h3>
+                    <p style={{ margin: 0, color: "#1769e0", fontSize: "0.85rem", fontWeight: "600" }}>Running against ATS criteria</p>
+                  </div>
+                )}
+
+                {/* Feedback Details */}
+                {feedback && !loading && (
+                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", overflow: "hidden" }}>
+                    {/* Analysis Complete Header */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "24px", borderBottom: "1px solid #dedbd5" }}>
+                      <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
+                        🤖
+                      </div>
+                      <div>
+                        <h3 style={{ margin: "0 0 4px 0", fontSize: "1.2rem", fontWeight: "800", color: "#10264a" }}>Analysis Complete</h3>
+                        <p style={{ margin: 0, color: "#1769e0", fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: "24px" }}>
+                      {renderFeedback()}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sidebar */}
+              {feedback && !loading && (
+                <aside style={{ position: isMobile ? "static" : "sticky", top: "98px" }}>
+                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "18px", marginBottom: "12px" }}>
+                    <h3 style={{ color: "#10264a", fontSize: "1rem", fontWeight: "700", margin: "0 0 12px 0" }}>Actions</h3>
+                    <div style={{ display: "grid", gap: "8px" }}>
+                      <button style={{ padding: "10px", textAlign: "center", border: "0", background: "#1769e0", color: "#fff", borderRadius: "8px", fontWeight: "750", cursor: "pointer", fontSize: "14px" }}>
+                        ✦ Apply Suggested Fixes
+                      </button>
+                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
+                        ⇩ Export PDF report
+                      </button>
+                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
+                        {"{ }"} Export JSON data
+                      </button>
+                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
+                        ↗ Create shareable link
+                      </button>
+                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
+                        ⇆ Compare previous versions
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "18px" }}>
+                    <h3 style={{ color: "#10264a", fontSize: "1rem", fontWeight: "700", margin: "0 0 12px 0" }}>Revision history</h3>
+                    <div style={{ borderLeft: "1px solid #dedbd5", marginLeft: "5px", paddingLeft: "15px" }}>
+                      {[
+                        { title: "Current version · 82%", date: "Today · Deep Analysis" },
+                        { title: "Product role version · 76%", date: "Jul 12, 2026" },
+                        { title: "Internship resume · 71%", date: "Jun 28, 2026" },
+                        { title: "Original upload · 64%", date: "Jun 10, 2026" },
+                      ].map((item, i) => (
+                        <div key={i} style={{ marginBottom: "16px" }}>
+                          <b style={{ display: "block", color: "#172033", fontSize: "14px" }}>{item.title}</b>
+                          <small style={{ display: "block", color: "#657287", fontSize: "12px" }}>{item.date}</small>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </aside>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

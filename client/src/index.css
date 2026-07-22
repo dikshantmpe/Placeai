@@ -4,30 +4,47 @@
   box-sizing: border-box;
 }
 
-body {
-  background-color: #0a0a0a;
-  color: #ffffff;
+/* =========================================
+   GLOBAL BACKGROUND (ELASTIC BOUNCE RESTORED)
+   ========================================= */
+html, body {
+  /* This colors the empty "bounce" space to match your app perfectly */
+  background-color: #f3f2ef !important; 
+  color: #172033; 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow-x: hidden;
+  
+  /* We removed overscroll-behavior here so the native bounce works again */
 }
 
+#root {
+  min-height: 100vh;
+}
+
+/* =========================================
+   CUSTOM SCROLLBAR (GREY)
+   ========================================= */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: #111111;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #dc2626;
-  border-radius: 3px;
+  background: #aab3c2;
+  border-radius: 5px;
+  border: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ef4444;
+  background: #68758a;
 }
 
+/* =========================================
+   ELEMENT RESETS & TRANSITIONS
+   ========================================= */
 a {
   text-decoration: none;
   color: inherit;
@@ -35,6 +52,7 @@ a {
 
 button {
   transition: opacity 0.2s, transform 0.1s;
+  cursor: pointer;
 }
 
 button:hover {
@@ -45,22 +63,38 @@ button:active {
   transform: scale(0.98);
 }
 
+/* =========================================
+   FORM ELEMENTS (Theme Friendly)
+   ========================================= */
 input, textarea, select {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  color: white;
+  background: transparent;
+  border: 1px solid #dfe5ec;
+  color: inherit;
   border-radius: 8px;
   padding: 10px 14px;
   font-family: inherit;
   font-size: 14px;
   outline: none;
-  transition: border 0.2s;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #dc2626;
+  border-color: #1769e0; 
+  box-shadow: 0 0 0 3px rgba(23,105,224,0.12);
 }
 
 ::placeholder {
-  color: #555;
+  color: #68758a; 
+}
+/* =========================================
+   DISABLED / COMING SOON UI
+   ========================================= */
+.coming-soon-btn {
+  opacity: 0.4 !important;         /* Visually dims the icon to indicate it's inactive */
+  cursor: not-allowed !important;  /* Shows the standard 'disabled' circle-slash cursor */
+  transform: none !important;      /* Stops the scale-down animation on click */
+}
+
+.coming-soon-btn:hover {
+  opacity: 0.4 !important;         /* Prevents the standard hover brightening */
 }

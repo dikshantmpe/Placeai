@@ -7,6 +7,15 @@
     <title>client</title>
   </head>
   <body>
+    <script>
+  (function () {
+    try {
+      var t = localStorage.getItem('crackin-theme');
+      var dark = t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    } catch (e) {}
+  })();
+</script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

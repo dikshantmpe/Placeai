@@ -1,149 +1,177 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase.js";
+import Topbar from "../components/Topbar";
 import DSATracker from "../DSATracker";
 import ProblemDetail from "./ProblemDetail.jsx";
 import ResumeAnalyzer from "../ResumeAnalyzer";
 import MockInterview from "../MockInterview";
-import AptitudeQuiz from "../AptitudeQuiz";
-import CompanyQuestions from "../CompanyQuestions";
 import Dashboard from "../Dashboard";
-import DailyChallenge from "../DailyChallenge";
 import Chatbot from "../Chatbot";
 import Login from "../Login";
 import Profile from "../Profile";
 import Home from "../Home";
 import Signup from "../Signup";
+import ComingSoon from "../ComingSoon";
+
+/* ── TopbarWrapper: Hides Topbar on landing page ("/") ── */
+function TopbarWrapper(props) {
+  const location = useLocation();
+  const isLandingPage = location.pathname === "/";
+
+  if (isLandingPage) return null; // No topbar on landing page
+
+  return <Topbar {...props} />;
+}
 
 export default function App() {
+  /* ── Wake up backend ── */
   useEffect(() => {
-    fetch('https://placeai-sqjj.onrender.com/api/ping').catch(() => {});
+    fetch("https://placeai-sqjj.onrender.com/api/ping").catch(() => {});
   }, []);
 
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  /* ── Auth state: Firebase + JWT Token ── */
+  const [user, setUser] = useState(null);
+  const [authResolved, setAuthResolved] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) setSidebarOpen(false);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    // Check if JWT token exists in localStorage (from Google Sign-In)
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      console.log("✅ JWT token found in localStorage - user stays signed in");
+    }
+
+    // Firebase persists auth via IndexedDB (not localStorage).
+    // This listener fires on every page load with the current user (or null).
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in — keep the full Firebase user object
+        setUser(firebaseUser);
+        // Also store a minimal serializable copy for components that need it
+        localStorage.setItem("user", JSON.stringify({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+        }));
+      } else {
+        // User is signed out
+        setUser(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        setToken(null);
+      }
+      setAuthResolved(true);
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  /* ── Logout Function ── */
+  const handleLogout = async () => {
+    try {
+      // Clear JWT token
+      localStorage.removeItem("token");
+      setToken(null);
+
+      // Sign out from Firebase
+      await signOut(auth);
+      setUser(null);
+
+      console.log("✅ User logged out successfully");
+      window.location.href = "/"; // Redirect to home
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  /* ── Shared theme state (lifted up so Topbar + Dashboard stay in sync) ── */
+  const [theme, setTheme] = useState(
+    localStorage.getItem("crackin-theme") || "light"
+  );
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem("crackin-theme", newTheme);
+  };
+
+  /* ── Show loading spinner while Firebase checks auth state ── */
+  if (!authResolved) {
+    return (
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        background: theme === "dark" ? "#171a1f" : "#f3f2ef",
+        gap: 16,
+      }}>
+        <div style={{
+          width: 40, height: 40,
+          borderRadius: "50%",
+          border: "3px solid #dfe5ec",
+          borderTopColor: "#1769e0",
+          animation: "spin 0.9s linear infinite",
+        }} />
+        <p style={{ color: "#68758a", fontSize: 14, fontWeight: 500 }}>
+          Checking authentication…
+        </p>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
       {!user ? (
         <Routes>
-          <Route path="/" element={<Login setUser={setUser} />} />
+          {/* Public Routes */}
+          <Route path="/" element={<Home setUser={setUser} />} />
+          <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/signup" element={<Signup setUser={setUser} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       ) : (
-        <div style={{ display: "flex", minHeight: "100vh", background: "#0c0a14" }}>
+        <>
+          {/* ═══════ GLOBAL TOPBAR ═══════
+              Hidden on landing page ("/") — only show on authenticated feature pages 
+              Now includes handleLogout for logout functionality */}
+          <TopbarWrapper
+            user={user}
+            setUser={setUser}
+            theme={theme}
+            onThemeChange={handleThemeChange}
+            onLogout={handleLogout}
+          />
 
-          {/* Mobile top bar — Upgraded to premium branding */}
-          {isMobile && (
-            <div style={{
-              position: "fixed", top: 0, left: 0, right: 0, height: "60px",
-              background: "rgba(12, 10, 20, 0.9)", borderBottom: "1px solid rgba(255,255,255,0.05)",
-              backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "0 16px", zIndex: 500
-            }}>
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
-                background: "transparent", border: "none", cursor: "pointer",
-                display: "flex", flexDirection: "column", gap: "5px", padding: "4px"
-              }}>
-                <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#ff3f81" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
-                <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#ff3f81" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
-                <div style={{ width: "22px", height: "2px", background: sidebarOpen ? "#ff3f81" : "#fff", borderRadius: "2px", transition: "all 0.3s" }} />
-              </button>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{
-                  width: "30px", height: "30px", borderRadius: "8px", overflow: "hidden",
-                  background: "rgba(0,0,0,0.3)", boxShadow: "0 0 10px rgba(255,63,129,0.3)"
-                }}>
-                  <img src="/logo.png" alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-                <span style={{ fontSize: "16px", fontWeight: "800", color: "#fff", letterSpacing: "0.5px" }}>
-                  Crackin <span style={{ color: "#ff7aab" }}>Ai</span>
-                </span>
-              </div>
-
-              {user?.avatar
-                ? <img src={user.avatar} alt="avatar" style={{
-                    width: "34px", height: "34px", borderRadius: "50%",
-                    border: "2px solid #7c3aed", objectFit: "cover"
-                  }} />
-                : <div style={{
-                    width: "34px", height: "34px", borderRadius: "50%",
-                    background: "linear-gradient(135deg, #7c3aed, #ff3f81)", color: "white", fontSize: "13px",
-                    fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 0 10px rgba(124,58,237,0.4)"
-                  }}>
-                    {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "A"}
-                  </div>
-              }
-            </div>
-          )}
-
-          {/* Dark overlay when sidebar open on mobile */}
-          {isMobile && sidebarOpen && (
-            <div onClick={() => setSidebarOpen(false)} style={{
-              position: "fixed", inset: 0,
-              background: "rgba(0,0,0,0.7)",
-              zIndex: 300, backdropFilter: "blur(4px)"
-            }} />
-          )}
-
-          {/* Sidebar */}
-          <div style={{
-            position: "fixed",
-            left: isMobile ? (sidebarOpen ? "0" : "-260px") : "0",
-            top: isMobile ? "60px" : "0",
-            bottom: 0,
-            zIndex: 400,
-            transition: "left 0.3s ease",
-            overflowY: "auto",
-            width: "260px"
-          }}>
-            <Sidebar user={user} onNavigate={() => setSidebarOpen(false)} isMobile={isMobile} />
-          </div>
-
-          {/* Main content - ALL MARGINS FIXED */}
-          <div style={{
-            marginLeft: isMobile ? "0" : "260px", // Matches exactly with the new sidebar width
-            marginRight: "0",                     // Removed the ghost spacing!
-            marginTop: isMobile ? "60px" : "0",
-            flex: 1, 
-            minHeight: "100vh", 
-            overflowY: "auto",
-            position: "relative"                  // Crucial constraint for the Vanta.js background
-          }}>
+          {/* ═══════ PAGE CONTENT ═══════ */}
+          <main style={{ minHeight: "100vh", position: "relative" }}>
             <Routes>
-              <Route path="/" element={<Home user={user} />} />
-              <Route path="/login" element={<Navigate to="/" />} />
-              <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/daily" element={<DailyChallenge />} />
-              <Route path="/dsa" element={<DSATracker />} />
-              <Route path="/problem/:id" element={<ProblemDetail />} />
-              <Route path="/resume" element={<ResumeAnalyzer />} />
-              <Route path="/interview" element={<MockInterview />} />
-              <Route path="/quiz" element={<AptitudeQuiz />} />
-              <Route path="/company" element={<CompanyQuestions />} />
-              <Route path="*" element={<Navigate to="/" />} />
+              {/* Authenticated user redirects to Dashboard instead of seeing Home/Login */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+              
+              <Route path="/profile" element={<Profile user={user} setUser={setUser} theme={theme} />} />
+              <Route path="/dashboard" element={<Dashboard theme={theme} />} />
+              
+              <Route path="/daily" element={<ComingSoon theme={theme} />} />
+              <Route path="/dsa" element={<DSATracker theme={theme} />} />
+              <Route path="/problem/:id" element={<ProblemDetail theme={theme} />} />
+              <Route path="/resume" element={<ResumeAnalyzer theme={theme} />} />
+              <Route path="/interview" element={<MockInterview theme={theme} />} />
+              <Route path="/quiz" element={<ComingSoon theme={theme} />} />
+              <Route path="/company" element={<ComingSoon theme={theme} />} />
+              
+              {/* "Coming Soon" component implemented as a fallback for incomplete routes */}
+              <Route path="*" element={<ComingSoon theme={theme} />} />
             </Routes>
-            <Chatbot />
-          </div>
-        </div>
+            <Chatbot theme={theme} />
+          </main>
+        </>
       )}
     </BrowserRouter>
   );

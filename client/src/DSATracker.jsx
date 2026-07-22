@@ -1,351 +1,390 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { auth } from "./firebase.js"; 
-import { onAuthStateChanged } from "firebase/auth";
+import React, { useState, useEffect } from "react";
 
-const formatName = (name) => {
-  if (!name) return "Guest";
-  return name
-    .split(/[^a-zA-Z0-9]+/)
-    .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : "")
-    .join(" ");
-};
+const DSATracker = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [status, setStatus] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [openTopic, setOpenTopic] = useState(0);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem("crackin-theme") || "light");
 
-const topics = ["All", "Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
-const diffColor = { Easy: "#10b981", Medium: "#f59e0b", Hard: "#ef4444" };
-const diffBg = { Easy: "rgba(16, 185, 129, 0.08)", Medium: "rgba(245, 158, 11, 0.08)", Hard: "rgba(239, 68, 68, 0.08)" };
-const diffBorder = { Easy: "rgba(16, 185, 129, 0.2)", Medium: "rgba(245, 158, 11, 0.2)", Hard: "rgba(239, 68, 68, 0.2)" };
+  const data = [
+    ["Arrays", "▦", 24, 45],
+    ["Linked List", "⛓", 14, 24],
+    ["Stack", "▤", 12, 18],
+    ["Queue", "⇥", 8, 14],
+    ["Tree", "♧", 18, 32],
+    ["Graph", "⌘", 13, 28],
+    ["Dynamic Programming", "◇", 11, 30],
+    ["Greedy", "↗", 9, 16],
+    ["Backtracking", "↶", 7, 18],
+    ["Bit Manipulation", "01", 8, 12],
+    ["Math", "∑", 10, 15],
+    ["String", "Aa", 16, 25],
+    ["Hash Table", "#", 14, 20],
+    ["Heap", "△", 7, 14],
+    ["Trie", "T", 4, 10],
+    ["Segment Tree", "▥", 2, 8],
+    ["Binary Search", "⌕", 12, 18],
+    ["Two Pointers", "⇆", 11, 16],
+    ["Sliding Window", "▭", 9, 15],
+    ["Union Find", "∪", 5, 10],
+    ["Topological Sort", "⇣", 4, 9],
+  ];
 
-const generateDummyData = () => {
-  return Array.from({ length: 45 }).map((_, i) => ({
-    _id: `demo-${i}`,
-    title: `Standard Technical Interview Problem ${i + 1}`,
-    topic: topics[(i % (topics.length - 1)) + 1],
-    difficulty: i % 4 === 0 ? "Hard" : i % 2 === 0 ? "Medium" : "Easy",
-    status: i % 5 === 0 
-  }));
-};
+  const names = ["Two Sum", "Maximum Subarray", "Reverse Linked List"];
+  const difficulties = ["Easy", "Medium", "Hard"];
+  const statuses = ["Solved", "Revision Needed", "Pending"];
 
-export default function DSATracker() {
-  const navigate = useNavigate();
-  const [problems, setProblems] = useState([]);
-  const [filter, setFilter] = useState("All");
-  const [loading, setLoading] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(false);
-  const [firebaseUser, setFirebaseUser] = useState(null);
+  const heatmapData = Array.from({ length: 371 }, (_, i) => {
+    const r = (i * 17 + Math.floor(i / 8)) % 13;
+    if (r > 10) return "l4";
+    if (r > 7) return "l3";
+    if (r > 4) return "l2";
+    if (r > 2) return "l1";
+    return "";
+  });
+
+  const activityData = [
+    { text: "Solved Maximum Subarray", time: "1 hour ago" },
+    { text: "Marked Linked List Cycle for revision", time: "2 hours ago" },
+    { text: "Completed 4 Array problems", time: "3 hours ago" },
+    { text: "Started DP roadmap", time: "4 hours ago" },
+  ];
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) setFirebaseUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
+    document.body.className = theme === "dark" ? "dark" : "";
+    localStorage.setItem("crackin-theme", theme);
+  }, [theme]);
 
-  let rawName = "Guest";
-  if (firebaseUser?.displayName) {
-    rawName = firebaseUser.displayName;
-  } else if (firebaseUser?.email) {
-    rawName = firebaseUser.email.split("@")[0];
-  }
-  const displayName = formatName(rawName);
-
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("https://placeai-sqjj.onrender.com/api/problems", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setProblems(res.data);
-        setIsDemoMode(false);
-      } catch (err) {
-        console.error("Backend fetch failed. Loading Demo Data instead...", err);
-        setProblems(generateDummyData());
-        setIsDemoMode(true); 
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProblems();
-  }, []);
-
-  const toggleStatus = async (id) => {
-    setProblems(problems.map(p => p._id === id ? { ...p, status: !p.status } : p));
-    if (isDemoMode) return; 
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`https://placeai-sqjj.onrender.com/api/problems/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch (err) {
-      console.error("Failed to update status on server.", err);
-    }
+  const toggleTheme = (e) => {
+    e.stopPropagation();
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const filtered = filter === "All" ? problems : problems.filter(p => p.topic === filter);
-  const doneCount = filtered.filter(p => p.status).length;
-  const percent = filtered.length ? Math.round((doneCount / filtered.length) * 100) : 0;
-  const totalDone = problems.filter(p => p.status).length;
+  const filteredData = data.filter(
+    (topic) => !selectedTopic || topic[0] === selectedTopic
+  );
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setDifficulty("");
+    setStatus("");
+    setSelectedTopic("");
+  };
 
   return (
-    <div style={{
-      flex: 1,
-      minHeight: "100vh",
-      position: "relative",
-      padding: "2.5rem 3rem",
-      color: "#111827",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      overflowY: "auto",
-      overflowX: "hidden",
-      background: "#ffffff"
-    }}>
+    <div style={styles.body}>
       <style>{`
-        ::-webkit-scrollbar {
-          width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #f3f4f6;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #d1d5db;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #9ca3af;
-        }
-        ::-webkit-scrollbar-corner {
-          background: #f3f4f6;
-        }
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #d1d5db #f3f4f6;
-        }
-
-        @keyframes spin { 
-          to { transform: rotate(360deg); } 
-        }
-
-        @media (max-width: 768px) {
-          .problems-desktop { display: none; }
-          .problems-mobile { display: block; }
-        }
+        :root{--b:#1769e0;--n:#10264a;--bg:#f3f2ef;--c:#fff;--t:#172033;--m:#68758a;--l:#dedbd5}*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui;background:var(--bg);color:var(--t)}body.dark{--bg:#171a1f;--c:#22262d;--t:#eef4ff;--n:#eef4ff;--m:#aab3c2;--l:#3b414b}button,input,select,textarea{font:inherit}.shell{max-width:1400px;margin:24px auto;padding:0 20px 70px;display:grid;grid-template-columns:1fr 280px;gap:18px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px}.hero{padding:25px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:30px;margin:4px 0;color:var(--n)}.hero p,.muted{color:var(--m)}.blue{color:var(--b);font-size:11px;font-weight:800;letter-spacing:.1em}.primary{border:0;background:var(--b);color:#fff;padding:11px 17px;border-radius:99px;font-weight:750;cursor:pointer}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:13px 0}.stat{padding:18px}.stat strong{display:block;font-size:27px;color:var(--n);margin:6px 0}.filters{padding:14px;display:grid;grid-template-columns:1.5fr repeat(3,1fr) auto;gap:8px;margin-bottom:13px}.control,.reset{border:1px solid var(--l);background:var(--c);color:var(--t);padding:10px;border-radius:8px}.head{padding:19px}.head h2{margin:0;color:var(--n)}.topics{padding:0 12px 12px}.topic{border-top:1px solid var(--l)}.th{display:grid;grid-template-columns:220px 1fr 65px 190px 25px;gap:12px;align-items:center;padding:15px 8px;cursor:pointer}.name{font-weight:750}.icon{display:inline-grid;place-items:center;width:34px;height:34px;background:#eaf3ff;color:var(--b);border-radius:9px;margin-right:9px}.track{height:9px;background:#e8edf3;border-radius:9px;overflow:hidden}.fill{height:100%;background:var(--b)}.badge{font-size:10px;padding:4px 7px;border-radius:99px}.e{background:#e1f3ec;color:#20705d}.m{background:#fff0cb;color:#946315}.h{background:#fde3e3;color:#ad3f3f}.problems{display:none;padding:0 8px 15px;overflow:auto}.topic.open .problems{display:block}.topic.open .arrow{transform:rotate(180deg)}table{width:100%;border-collapse:collapse;min-width:800px;font-size:12px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--l)}a{color:var(--b);font-weight:700;text-decoration:none}.heat{padding:20px;margin-top:13px;overflow:auto}.grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);grid-auto-columns:11px;gap:3px;min-width:750px}.day{background:#e3e2de;width:11px;height:11px;border-radius:2px}.l1{background:#cce2ff}.l2{background:#86b9f5}.l3{background:#3f8bea}.l4{background:#1769e0}.side{position:sticky;top:96px;align-self:start}.side .card{padding:18px;margin-bottom:13px}.activity{padding:11px 0;border-bottom:1px solid var(--l)}.activity small{display:block;color:var(--m)}.challenge{background:#10264a!important;color:#fff}.challenge h3{color:#fff}.fab{position:fixed;right:28px;bottom:25px;width:58px;height:58px;border:0;border-radius:50%;background:var(--b);color:#fff;font-size:28px;cursor:pointer}.back{display:none;position:fixed;inset:0;background:#0d1725aa;z-index:50;align-items:center;justify-content:center;padding:18px}.back.show{display:flex}.modal{width:min(560px,100%);background:var(--c);border-radius:14px;padding:22px}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.form label{display:block;font-size:11px;font-weight:700;margin-bottom:5px}.form .control{width:100%}textarea{min-height:90px}.actions{text-align:right;margin-top:15px}
+        @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:static}.stats{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}}@media(max-width:700px){.shell{padding:0 10px 70px}.stats,.filters{grid-template-columns:1fr}.th{grid-template-columns:1fr 60px 25px}.th .track,.badges{display:none}.hero{display:block}.hero button{margin-top:15px}.form{grid-template-columns:1fr}.full{grid-column:auto}}
       `}</style>
 
-      {loading ? (
-        <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-          <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "2rem 3rem", display: "flex", alignItems: "center", gap: "16px", color: "#111827", fontWeight: "700", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
-            <div style={{ width: "24px", height: "24px", border: "3px solid rgba(20,184,166,0.3)", borderTop: "3px solid #14b8a6", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-            Decrypting DSA Sheet...
-          </div>
-        </div>
-      ) : (
-        <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          
-          {isDemoMode && (
-            <div style={{
-              background: "#fffbeb",
-              border: "1px solid #fcd34d",
-              borderRadius: "16px",
-              padding: "16px 24px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{ background: "rgba(245, 158, 11, 0.1)", padding: "8px", borderRadius: "8px", color: "#f59e0b" }}>⚠️</div> 
-              <div>
-                <h4 style={{ margin: "0 0 4px 0", color: "#92400e", fontSize: "1rem", fontWeight: "700" }}>Demo Mode Active</h4>
-                <p style={{ margin: 0, color: "#a16207", fontSize: "0.85rem" }}>Your Render backend is asleep or rejected the auth token. Showing offline dummy data.</p>
-              </div>
+      {/* Main Content */}
+      <div className="shell">
+        <main>
+          {/* Hero Section */}
+          <section className="card hero">
+            <div>
+              <span className="blue">STRUCTURED CODING PREPARATION</span>
+              <h1>DSA Tracker</h1>
+              <p>Track problems, revisit weak areas, and build consistency one topic at a time.</p>
             </div>
-          )}
+            <button className="primary" onClick={() => setShowModal(true)}>
+              + Add new problem
+            </button>
+          </section>
 
-          <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{
-                width: "40px", height: "40px", borderRadius: "10px",
-                background: "linear-gradient(135deg, #115e59, #14b8a6)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: "800", fontSize: "1.1rem", color: "white"
-              }}>
-                C
-              </div>
-              <div>
-                <div style={{ fontWeight: "700", fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#111827" }}>Crackin AI</div>
-                <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "-2px" }}>An AI Powered Placement Preparation Platform</div>
-              </div>
+          {/* Stats */}
+          <section className="stats">
+            <div className="card stat">
+              <span className="muted">Total solved</span>
+              <strong>184</strong>
+              <span>↑ 12 this week</span>
             </div>
-            
-            <div style={{
-              display: "flex", alignItems: "center", gap: "12px",
-              background: "#f9fafb",
-              border: "1px solid #e5e7eb",
-              padding: "8px 16px", borderRadius: "100px"
-            }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }} />
-              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#374151" }}>
-                {displayName} • Ready to work
-              </span>
+            <div className="card stat">
+              <span className="muted">Current streak</span>
+              <strong>12 days</strong>
+              <span>Best: 21 days</span>
             </div>
-          </header>
+            <div className="card stat">
+              <span className="muted">Solved this week</span>
+              <strong>12</strong>
+              <span>↑ 4 vs last week</span>
+            </div>
+            <div className="card stat">
+              <span className="muted">Overall completion</span>
+              <strong>61%</strong>
+              <span>184 / 302 curated</span>
+            </div>
+          </section>
 
-          <div style={{ marginBottom: "0.5rem" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", letterSpacing: "-0.02em", color: "#111827" }}>
-              DSA <span style={{ color: "#14b8a6" }}>Tracker</span>
-            </h2>
-            <p style={{ color: "#6b7280", margin: 0, fontSize: "1rem" }}>Master data structures problem by problem.</p>
-          </div>
+          {/* Filters */}
+          <section className="card filters">
+            <input
+              className="control"
+              placeholder="Search problems…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <select
+              className="control"
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
+              <option value="">All difficulties</option>
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+            <select
+              className="control"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <option value="">All statuses</option>
+              <option>Solved</option>
+              <option>Pending</option>
+              <option>Revision Needed</option>
+            </select>
+            <select
+              className="control"
+              value={selectedTopic}
+              onChange={(e) => setSelectedTopic(e.target.value)}
+            >
+              <option value="">All topics</option>
+              {data.map((topic) => (
+                <option key={topic[0]} value={topic[0]}>
+                  {topic[0]}
+                </option>
+              ))}
+            </select>
+            <button className="reset" onClick={resetFilters}>
+              Reset
+            </button>
+          </section>
 
-          {/* Stats Row */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "1.5rem" }}>
-            {[
-              { label: "Total Solved", value: totalDone, total: `/ ${problems.length}`, color: "#14b8a6", bg: "rgba(20,184,166,0.08)", border: "rgba(20,184,166,0.15)", icon: "⟨/⟩" },
-              { label: `${filter} Solved`, value: doneCount, total: `/ ${filtered.length}`, color: "#8b5cf6", bg: "rgba(139,92,246,0.08)", border: "rgba(139,92,246,0.15)", icon: "🎯" },
-              { label: "Completion Rate", value: `${percent}%`, total: "Overall", color: "#22c55e", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.15)", icon: "📊" },
-            ].map((s, i) => (
-              <div key={i} style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "20px", padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
-                <div>
-                  <p style={{ color: "#6b7280", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{s.label}</p>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-                    <span style={{ fontSize: "2.2rem", fontWeight: "800", color: "#111827", lineHeight: "1" }}>{s.value}</span>
-                    <span style={{ fontSize: "0.9rem", color: "#6b7280", fontWeight: "600" }}>{s.total}</span>
-                  </div>
-                </div>
-                <div style={{
-                  width: "48px", height: "48px", borderRadius: "12px",
-                  background: s.bg, 
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", 
-                  border: `1px solid ${s.border}`, color: s.color
-                }}>{s.icon}</div>
+          {/* Topics Section */}
+          <section className="card">
+            <div className="head">
+              <h2>Topic-wise progress</h2>
+              <div className="muted">Expand a topic to review individual problems.</div>
+            </div>
+            <div className="topics">
+              {filteredData.map((topic, idx) => {
+                const problems = names.map((name, i) => ({
+                  name: `${topic[0]} · ${name}`,
+                  difficulty: difficulties[i],
+                  status: statuses[i],
+                }));
+                const isOpen = openTopic === idx;
+
+                return (
+                  <article
+                    key={topic[0]}
+                    className={`topic ${isOpen ? "open" : ""}`}
+                  >
+                    <div
+                      className="th"
+                      onClick={() => setOpenTopic(isOpen ? -1 : idx)}
+                    >
+                      <div className="name">
+                        <span className="icon">{topic[1]}</span>
+                        {topic[0]}
+                      </div>
+                      <div className="track">
+                        <div
+                          className="fill"
+                          style={{ width: `${Math.round((topic[2] / topic[3]) * 100)}%` }}
+                        ></div>
+                      </div>
+                      <span>
+                        {topic[2]}/{topic[3]}
+                      </span>
+                      <div className="badges">
+                        <span className="badge e">Easy</span>
+                        <span className="badge m">Medium</span>
+                        <span className="badge h">Hard</span>
+                      </div>
+                      <span className="arrow">⌄</span>
+                    </div>
+                    {isOpen && (
+                      <div className="problems">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Problem</th>
+                              <th>Difficulty</th>
+                              <th>Status</th>
+                              <th>Last attempted</th>
+                              <th>Time</th>
+                              <th>Notes</th>
+                              <th>Update</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {problems.map((problem, pIdx) => (
+                              <tr key={pIdx}>
+                                <td>
+                                  <a href="#">{problem.name} ↗</a>
+                                </td>
+                                <td>
+                                  <span
+                                    className={`badge ${problem.difficulty[0].toLowerCase()}`}
+                                  >
+                                    {problem.difficulty}
+                                  </span>
+                                </td>
+                                <td>{problem.status}</td>
+                                <td>{pIdx ? "Yesterday" : "Today"}</td>
+                                <td>{18 + pIdx * 9} min</td>
+                                <td>
+                                  <button style={{ ...styles.button }}>Notes</button>
+                                </td>
+                                <td>
+                                  <button style={{ ...styles.button }}>Toggle</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Heatmap */}
+          <section className="card heat">
+            <h2>Problem-solving activity</h2>
+            <p className="muted">Your consistency over the past year.</p>
+            <div className="grid">
+              {heatmapData.map((level, i) => (
+                <i key={i} className={`day ${level}`}></i>
+              ))}
+            </div>
+          </section>
+        </main>
+
+        {/* Sidebar */}
+        <aside className="side">
+          <section className="card challenge">
+            <span className="blue">TODAY'S CHALLENGE</span>
+            <h3>Longest Substring Without Repeating Characters</h3>
+            <p>Sliding Window · Medium · ~25 min</p>
+            <button className="primary">Solve challenge</button>
+          </section>
+          <section className="card">
+            <h3>Recent activity</h3>
+            {activityData.map((activity, i) => (
+              <div key={i} className="activity">
+                <b>{activity.text}</b>
+                <small>{activity.time}</small>
               </div>
             ))}
-          </div>
+          </section>
+        </aside>
+      </div>
 
-          {/* Global Progress Bar */}
-          <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "20px", padding: "1.5rem 2rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-              <span style={{ fontSize: "0.9rem", color: "#374151", fontWeight: "700" }}>Overall Sheet Progress</span>
-              <span style={{ fontSize: "0.9rem", color: "#14b8a6", fontWeight: "800" }}>{percent}%</span>
-            </div>
-            <div style={{ background: "#e5e7eb", borderRadius: "10px", height: "10px", overflow: "hidden" }}>
-              <div style={{
-                width: `${percent}%`, background: "linear-gradient(90deg, #0d9488, #14b8a6)",
-                height: "100%", borderRadius: "10px"
-              }} />
-            </div>
-          </div>
+      {/* FAB */}
+      <button className="fab" onClick={() => setShowModal(true)}>
+        +
+      </button>
 
-          {/* Topic Filters */}
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", margin: "0.5rem 0" }}>
-            {topics.map(t => {
-              const topicDone = t === "All" ? problems.filter(p => p.status).length : problems.filter(p => p.topic === t && p.status).length;
-              const topicTotal = t === "All" ? problems.length : problems.filter(p => p.topic === t).length;
-              return (
-                <button 
-                  key={t} 
-                  onClick={() => setFilter(t)} 
-                  style={{
-                    background: filter === t ? "linear-gradient(135deg, #0d9488, #14b8a6)" : "#f9fafb",
-                    color: filter === t ? "white" : "#6b7280",
-                    padding: "10px 18px",
-                    borderRadius: "12px",
-                    border: filter === t ? "none" : "1px solid #e5e7eb",
-                    cursor: "pointer",
-                    fontSize: "0.85rem",
-                    fontWeight: "600",
-                    whiteSpace: "nowrap"
+      {/* Modal */}
+      {showModal && (
+        <div className="back show">
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Add a custom problem</h2>
+            <form>
+              <div className="form">
+                <label className="full">
+                  Problem name
+                  <input className="control" />
+                </label>
+                <label className="full">
+                  Problem link
+                  <input className="control" type="url" />
+                </label>
+                <label>
+                  Topic
+                  <select className="control">
+                    {data.map((topic) => (
+                      <option key={topic[0]} value={topic[0]}>
+                        {topic[0]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Difficulty
+                  <select className="control">
+                    <option>Easy</option>
+                    <option>Medium</option>
+                    <option>Hard</option>
+                  </select>
+                </label>
+                <label>
+                  Status
+                  <select className="control">
+                    <option>Pending</option>
+                    <option>Solved</option>
+                    <option>Revision Needed</option>
+                  </select>
+                </label>
+                <label>
+                  Time spent
+                  <input className="control" placeholder="25 min" />
+                </label>
+                <label className="full">
+                  Notes
+                  <textarea className="control"></textarea>
+                </label>
+              </div>
+              <div className="actions">
+                <button
+                  type="button"
+                  className="reset"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="primary"
+                  onClick={() => {
+                    alert("Problem added!");
+                    setShowModal(false);
                   }}
                 >
-                  {t} <span style={{ opacity: filter === t ? 0.8 : 0.5, fontSize: "0.75rem", marginLeft: "6px", fontWeight: filter === t ? "700" : "500" }}>{topicDone}/{topicTotal}</span>
+                  Save problem
                 </button>
-              );
-            })}
-          </div>
-
-          {/* Problem List (Desktop) */}
-          <div className="problems-desktop" style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "24px", padding: "0", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
-            
-            <div style={{
-              display: "grid", gridTemplateColumns: "44px 1fr 120px 100px 80px",
-              padding: "16px 24px", borderBottom: "1px solid #e5e7eb",
-              background: "#f9fafb",
-              fontSize: "0.75rem", color: "#6b7280", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px"
-            }}>
-              <span></span>
-              <span>Problem Title</span>
-              <span>Topic</span>
-              <span>Difficulty</span>
-              <span>Status</span>
-            </div>
-
-            {filtered.length === 0 ? (
-              <div style={{ padding: "5rem", textAlign: "center", color: "#6b7280", fontWeight: "600", fontSize: "1rem" }}>
-                <div style={{ fontSize: "2.5rem", marginBottom: "1rem", opacity: 0.5 }}>📭</div>
-                No problems found for this topic.
               </div>
-            ) : (
-              <div>
-                {filtered.map((p, i) => (
-                  <div 
-                    key={p._id} 
-                    style={{
-                      display: "grid", 
-                      gridTemplateColumns: "44px 1fr 120px 100px 80px",
-                      padding: "16px 24px", 
-                      borderBottom: i < filtered.length - 1 ? "1px solid #f3f4f6" : "none",
-                      alignItems: "center",
-                      background: p.status ? "rgba(16, 185, 129, 0.04)" : "transparent"
-                    }}
-                  >
-                    
-                    <div onClick={() => toggleStatus(p._id)} style={{
-                      width: "24px", height: "24px", borderRadius: "8px", cursor: "pointer",
-                      background: p.status ? "linear-gradient(135deg, #10b981, #059669)" : "#ffffff",
-                      border: `1px solid ${p.status ? "#10b981" : "#d1d5db"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "white"
-                    }}>
-                      {p.status && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                    </div>
-
-                    <button onClick={() => navigate(`/problem/${p._id}`)} style={{
-                      color: p.status ? "#6b7280" : "#111827", fontSize: "0.95rem", fontWeight: "600",
-                      textDecoration: p.status ? "line-through" : "none",
-                      background: "transparent", border: "none", cursor: "pointer",
-                      textAlign: "left", padding: 0
-                    }}>
-                      <span style={{ color: p.status ? "#9ca3af" : "#6b7280", marginRight: "12px", fontSize: "0.85rem", fontWeight: "700" }}>
-                        {String(i + 1).padStart(2, "0")}.
-                      </span>
-                      {p.title}
-                    </button>
-
-                    <span style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: "600" }}>{p.topic}</span>
-
-                    <span style={{
-                      fontSize: "0.7rem", fontWeight: "800", padding: "6px 12px",
-                      borderRadius: "6px", display: "inline-flex", alignItems: "center", justifyContent: "center",
-                      color: diffColor[p.difficulty], background: diffBg[p.difficulty],
-                      border: `1px solid ${diffBorder[p.difficulty]}`, letterSpacing: "0.5px", textTransform: "uppercase"
-                    }}>
-                      {p.difficulty}
-                    </span>
-
-                    <span style={{
-                      fontSize: "0.85rem", color: p.status ? "#10b981" : "#9ca3af",
-                      fontWeight: "800", display: "flex", alignItems: "center", gap: "6px"
-                    }}>
-                      {p.status ? (
-                        <>Done <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg></>
-                      ) : "—"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            </form>
           </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+const styles = {
+  body: {
+    margin: 0,
+    background: "var(--bg)",
+  },
+  button: {
+    border: 0,
+    background: "var(--c)",
+    color: "var(--t)",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "12px",
+  },
+};
+
+export default DSATracker;
