@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const socketIo = require("socket.io");
-const admin = require("firebase-admin"); // Updated: Standard import to fix admin.auth() error
 const seedDatabase = require("./seed");
+const { initializeApp, cert } = require("firebase-admin/app");
 
 const app = express();
 const server = http.createServer(app);
@@ -101,31 +101,41 @@ app.use((req, res, next) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// FIREBASE INITIALIZATION
+// FIREBASE INITIALIZATION - USING INDIVIDUAL ENV VARS
 // ═══════════════════════════════════════════════════════════════
-const { initializeApp, cert, getApps } = require("firebase-admin/app");
-
 try {
-  if (!process.env.FIREBASE_CREDENTIALS) {
-    throw new Error("FIREBASE_CREDENTIALS is missing from .env file");
+  console.log("Initializing Firebase Admin...");
+  
+  // Try to use FIREBASE_CREDENTIALS if it exists (for Render with combined JSON)
+  let firebaseConfig;
+  
+  if (process.env.FIREBASE_CREDENTIALS) {
+    console.log("Using FIREBASE_CREDENTIALS from env...");
+    firebaseConfig = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+  } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+    // Use individual environment variables (your current setup)
+    console.log("Using individual Firebase env variables...");
+    firebaseConfig = {
+      type: "service_account",
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "key-id",
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle escaped newlines
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID || "client-id",
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: process.env.FIREBASE_CERT_URL || "https://www.googleapis.com/robot/v1/metadata/x509/firebase@appspot.gserviceaccount.com"
+    };
+  } else {
+    throw new Error("No Firebase credentials found in environment variables");
   }
 
-  const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+  console.log("Service account loaded, project_id:", firebaseConfig.project_id);
   
-  // Safely fix the private key formatting
-  if (serviceAccount.private_key) {
-    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-  }
-
-  console.log("Service account loaded, project_id:", serviceAccount.project_id);
-  
-  // Only initialize if it hasn't been initialized yet
-  if (getApps().length === 0) {
-    initializeApp({
-      credential: cert(serviceAccount)
-    });
-  }
-  
+  initializeApp({
+    credential: cert(firebaseConfig)
+  });
   console.log("✅ Firebase Admin initialized successfully");
 } catch (error) {
   console.error("❌ Firebase init error:", error.message);
