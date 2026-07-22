@@ -11,75 +11,7 @@ const app = express();
 const server = http.createServer(app);
 
 // ═══════════════════════════════════════════════════════════════
-// SOCKET.IO SETUP
-// ═══════════════════════════════════════════════════════════════
-const io = socketIo(server, {
-  cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com"],
-    credentials: true,
-    methods: ["GET", "POST"],
-  },
-});
-
-// Import WebSocket handlers
-const {
-  registerUserConnection,
-  unregisterUserConnection,
-  handleProblemSolved,
-  handleInterviewCompleted,
-  handleResumeUpdated,
-  handleQuizAttempted,
-} = require("./utils/websocket-handler");
-
-// ═══════════════════════════════════════════════════════════════
-// SOCKET.IO EVENT HANDLERS
-// ═══════════════════════════════════════════════════════════════
-io.on("connection", (socket) => {
-  console.log(`🔌 New WebSocket connection: ${socket.id}`);
-
-  // User joins their personal room
-  socket.on("joinDashboard", (userId) => {
-    console.log(`📍 User ${userId} joined dashboard room`);
-    socket.join(`user-${userId}`);
-    registerUserConnection(userId, socket);
-  });
-
-  // Problem solved event
-  socket.on("problemSolved", async (data) => {
-    const { userId, problemId, details } = data;
-    console.log(`✅ Problem solved - User: ${userId}, Problem: ${problemId}`);
-    await handleProblemSolved(userId, problemId, details);
-  });
-
-  // Interview completed event
-  socket.on("interviewCompleted", async (data) => {
-    const { userId, interviewId, score } = data;
-    console.log(`🎤 Interview completed - User: ${userId}, Score: ${score}`);
-    await handleInterviewCompleted(userId, interviewId, score);
-  });
-
-  // Resume updated event
-  socket.on("resumeUpdated", async (data) => {
-    const { userId, score } = data;
-    console.log(`📄 Resume updated - User: ${userId}, Score: ${score}`);
-    await handleResumeUpdated(userId, score);
-  });
-
-  // Quiz attempted event
-  socket.on("quizAttempted", async (data) => {
-    const { userId, score } = data;
-    console.log(`📝 Quiz attempted - User: ${userId}, Score: ${score}`);
-    await handleQuizAttempted(userId, score);
-  });
-
-  // Disconnect
-  socket.on("disconnect", () => {
-    console.log(`❌ WebSocket disconnected: ${socket.id}`);
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════
-// EXPRESS MIDDLEWARE
+// EXPRESS MIDDLEWARE (FIRST - before anything else)
 // ═══════════════════════════════════════════════════════════════
 app.use(cors({
   origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com"],
@@ -90,7 +22,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Security Headers for popup communication
+// Security Headers
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
@@ -101,25 +33,87 @@ app.use((req, res, next) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// FIREBASE INITIALIZATION - USING INDIVIDUAL ENV VARS
+// SOCKET.IO SETUP (Optional - with error handling)
+// ═══════════════════════════════════════════════════════════════
+let wsHandler = null;
+try {
+  const io = socketIo(server, {
+    cors: {
+      origin: ["http://localhost:5173", "http://localhost:3000", "https://placeai-sqjj.onrender.com"],
+      credentials: true,
+      methods: ["GET", "POST"],
+    },
+  });
+
+  // Try to load websocket handler
+  try {
+    wsHandler = require("./utils/websocket-handler");
+    console.log("✅ WebSocket handler loaded");
+  } catch (err) {
+    console.warn("⚠️ WebSocket handler not available:", err.message);
+  }
+
+  io.on("connection", (socket) => {
+    console.log(`🔌 WebSocket connection: ${socket.id}`);
+
+    socket.on("joinDashboard", (userId) => {
+      console.log(`📍 User ${userId} joined dashboard`);
+      socket.join(`user-${userId}`);
+      if (wsHandler?.registerUserConnection) {
+        wsHandler.registerUserConnection(userId, socket);
+      }
+    });
+
+    socket.on("problemSolved", async (data) => {
+      if (wsHandler?.handleProblemSolved) {
+        await wsHandler.handleProblemSolved(data.userId, data.problemId, data.details);
+      }
+    });
+
+    socket.on("interviewCompleted", async (data) => {
+      if (wsHandler?.handleInterviewCompleted) {
+        await wsHandler.handleInterviewCompleted(data.userId, data.interviewId, data.score);
+      }
+    });
+
+    socket.on("resumeUpdated", async (data) => {
+      if (wsHandler?.handleResumeUpdated) {
+        await wsHandler.handleResumeUpdated(data.userId, data.score);
+      }
+    });
+
+    socket.on("quizAttempted", async (data) => {
+      if (wsHandler?.handleQuizAttempted) {
+        await wsHandler.handleQuizAttempted(data.userId, data.score);
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`❌ WebSocket disconnected: ${socket.id}`);
+    });
+  });
+
+  console.log("✅ WebSocket initialized");
+} catch (err) {
+  console.warn("⚠️ WebSocket initialization warning:", err.message);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FIREBASE INITIALIZATION
 // ═══════════════════════════════════════════════════════════════
 try {
-  console.log("Initializing Firebase Admin...");
-  
-  // Try to use FIREBASE_CREDENTIALS if it exists (for Render with combined JSON)
   let firebaseConfig;
   
   if (process.env.FIREBASE_CREDENTIALS) {
-    console.log("Using FIREBASE_CREDENTIALS from env...");
+    console.log("Using FIREBASE_CREDENTIALS (combined JSON)");
     firebaseConfig = JSON.parse(process.env.FIREBASE_CREDENTIALS);
   } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
-    // Use individual environment variables (your current setup)
-    console.log("Using individual Firebase env variables...");
+    console.log("Using individual Firebase environment variables");
     firebaseConfig = {
       type: "service_account",
       project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "key-id",
-      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle escaped newlines
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
       client_id: process.env.FIREBASE_CLIENT_ID || "client-id",
       auth_uri: "https://accounts.google.com/o/oauth2/auth",
@@ -128,24 +122,38 @@ try {
       client_x509_cert_url: process.env.FIREBASE_CERT_URL || "https://www.googleapis.com/robot/v1/metadata/x509/firebase@appspot.gserviceaccount.com"
     };
   } else {
-    throw new Error("No Firebase credentials found in environment variables");
+    throw new Error("Firebase credentials not found in environment");
   }
 
   console.log("Service account loaded, project_id:", firebaseConfig.project_id);
-  
   initializeApp({
     credential: cert(firebaseConfig)
   });
   console.log("✅ Firebase Admin initialized successfully");
 } catch (error) {
-  console.error("❌ Firebase init error:", error.message);
+  console.error("❌ Firebase initialization failed:", error.message);
   process.exit(1);
 }
 
 // ═══════════════════════════════════════════════════════════════
+// HEALTH CHECK ENDPOINTS (no auth required)
+// ═══════════════════════════════════════════════════════════════
+app.get('/api/ping', (req, res) => {
+  console.log("✅ Ping endpoint hit");
+  res.status(200).json({ status: 'awake', timestamp: new Date() });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy',
+    timestamp: new Date(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
 // ROUTES
 // ═══════════════════════════════════════════════════════════════
-app.get('/api/ping', (req, res) => res.status(200).send('awake'));
 app.use("/api/auth", require("./routes/auth"));
 
 // Protected routes
@@ -161,12 +169,33 @@ app.use("/api/chatbot", require("./routes/chatbot"));
 // ═══════════════════════════════════════════════════════════════
 // MONGODB CONNECTION
 // ═══════════════════════════════════════════════════════════════
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
   .then(async () => {
     console.log("✅ MongoDB connected");
-    await seedDatabase();
+    try {
+      await seedDatabase();
+    } catch (err) {
+      console.warn("⚠️ Seed database warning:", err.message);
+    }
   })
-  .catch((err) => console.log("❌ DB Error:", err));
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  });
+
+// ═══════════════════════════════════════════════════════════════
+// ERROR HANDLING MIDDLEWARE
+// ═══════════════════════════════════════════════════════════════
+app.use((err, req, res, next) => {
+  console.error("❌ Server error:", err.message);
+  res.status(500).json({ 
+    error: "Internal server error",
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
 
 // ═══════════════════════════════════════════════════════════════
 // SERVER START
@@ -174,8 +203,9 @@ mongoose.connect(process.env.MONGO_URI)
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 WebSocket ready on ws://localhost:${PORT}`);
+  console.log(`📡 WebSocket ready`);
+  console.log(`🏥 Health check: /api/health`);
+  console.log(`🔔 Ping: /api/ping`);
 });
 
-// Export io for use in other modules if needed
-module.exports = { app, server, io };
+module.exports = { app, server };
