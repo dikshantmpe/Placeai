@@ -9,6 +9,7 @@ const { initializeApp, cert } = require("firebase-admin/app");
 
 const app = express();
 const server = http.createServer(app);
+const dsaRouter = require("./routes/dsa");
 
 // ═══════════════════════════════════════════════════════════════
 // EXPRESS MIDDLEWARE (FIRST - before anything else)
@@ -165,6 +166,7 @@ app.use("/api/company", require("./routes/company"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/daily", require("./routes/daily"));
 app.use("/api/chatbot", require("./routes/chatbot"));
+app.use("/api/dsa", dsaRouter);
 
 // ═══════════════════════════════════════════════════════════════
 // MONGODB CONNECTION
