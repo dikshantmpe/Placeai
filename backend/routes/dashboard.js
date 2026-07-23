@@ -113,31 +113,33 @@ router.get("/", requireAuth, async (req, res) => {
     }
 
     // READINESS SCORE
-    const stats = userStats || { aptitudePercent: 0, csPercent: 0, interviewPercent: 0, mockInterviewsCount: 0, resumeScore: 0 };
+    const statsForCalc = userStats || { aptitudePercent: 0, csPercent: 0, interviewPercent: 0, mockInterviewsCount: 0, resumeScore: 0 };
     const readinessScore = Math.round(
       dsaPercent * 0.4 +
-      (stats.aptitudePercent || 0) * 0.2 +
-      (stats.csPercent || 0) * 0.2 +
-      (stats.interviewPercent || 0) * 0.2
+      (statsForCalc?.aptitudePercent || 0) * 0.2 +
+      (statsForCalc?.csPercent || 0) * 0.2 +
+      (statsForCalc?.interviewPercent || 0) * 0.2
     );
 
     if (userStats) {
-      userStats.dsaPercent = dsaPercent;
-      userStats.readinessScore = readinessScore;
-      await userStats.save();
+      await UserStats.updateOne(
+        { userId },
+        { dsaPercent, readinessScore },
+        { upsert: true }
+      );
     }
 
     // FETCH REMAINING DATA IN PARALLEL
     const [totalQuestions, companyQuestions] = await Promise.all([
-      Question.countDocuments().lean(),
+      Question.countDocuments(),
       CompanyQuestion.aggregate([
         { $group: { _id: "$company", count: { $sum: 1 } } }
       ])
     ]);
 
-    const companyStats = companyQuestions.map(c => ({
-      company: c._id,
-      count: c.count
+    const companyStats = (companyQuestions || []).map(c => ({
+      company: c._id || "Unknown",
+      count: c.count || 0
     }));
 
     // RESPONSE
