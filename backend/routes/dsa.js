@@ -10,7 +10,6 @@ const authenticateUser = (req, res, next) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ success: false, error: "No auth token" });
   }
-  // Extract user ID from token (simplified - in production use proper Firebase verification)
   req.userId = req.headers["x-user-id"] || "demo-user";
   next();
 };
@@ -46,9 +45,10 @@ router.get("/problems", authenticateUser, async (req, res) => {
       const userProblemData = problemProgress[problem._id.toString()] || {};
       const problemData = {
         _id: problem._id,
-        name: problem.name,
+        name: problem.name || problem.title,
         link: problem.link || "#",
         difficulty: problem.difficulty,
+        description: problem.description || "",
         status: userProblemData.status || "Pending",
         lastAttempted: userProblemData.lastAttempted || null,
         timeSpent: userProblemData.timeSpent || 0,
@@ -69,6 +69,41 @@ router.get("/problems", authenticateUser, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching problems:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single problem details
+router.get("/problems/:problemId", authenticateUser, async (req, res) => {
+  try {
+    const { problemId } = req.params;
+    const userId = req.userId;
+
+    const problem = await Problem.findById(problemId).lean();
+    if (!problem) {
+      return res.status(404).json({ success: false, error: "Problem not found" });
+    }
+
+    const userProgress = await UserProgress.findOne({ userId }).lean();
+    const problemProgress = userProgress?.problems?.[problemId.toString()] || {};
+
+    res.json({
+      success: true,
+      problem: {
+        _id: problem._id,
+        name: problem.name || problem.title,
+        topic: problem.topic,
+        difficulty: problem.difficulty,
+        link: problem.link,
+        description: problem.description || "",
+        status: problemProgress.status || "Pending",
+        timeSpent: problemProgress.timeSpent || 0,
+        notes: problemProgress.notes || "",
+        lastAttempted: problemProgress.lastAttempted || null,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching problem:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -104,6 +139,7 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
       }
 
       milestones.totalProblemsSolved = (milestones.totalProblemsSolved || 0) + 1;
+      milestones.thisWeekSolved = (milestones.thisWeekSolved || 0) + 1;
       milestones.lastActivityDate = new Date();
       await milestones.save();
     }
@@ -119,17 +155,19 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
 router.post("/problems/add", authenticateUser, async (req, res) => {
   try {
     const userId = req.userId;
-    const { name, link, topic, difficulty, status, timeSpent, notes } = req.body;
+    const { name, link, topic, difficulty, status, timeSpent, notes, description } = req.body;
 
     if (!name || !topic || !difficulty) {
       return res.status(400).json({ success: false, error: "Missing required fields" });
     }
 
     const problem = new Problem({
-      name,
+      title: name,
+      name: name,
       link: link || "",
       topic,
       difficulty,
+      description: description || "",
       createdBy: userId,
       isCustom: true,
     });
