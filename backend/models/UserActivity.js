@@ -1,35 +1,17 @@
 const mongoose = require("mongoose");
 
 const userActivitySchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  // FIXED: Changed from ObjectId to String for Firebase UIDs
+  userId: { type: String, required: true },
   
-  // Activity type: "problem_solved", "interview_completed", "quiz_attempted", "resume_updated"
-  activityType: { 
-    type: String, 
-    enum: ["problem_solved", "interview_completed", "quiz_attempted", "resume_updated", "milestone_reached"],
-    required: true 
-  },
+  activityType: { type: String, required: true }, // "problem_solved", "quiz_completed", etc.
+  details: { type: String },
   
-  // Reference IDs
-  problemId: { type: mongoose.Schema.Types.ObjectId, ref: "Problem" },
-  interviewId: { type: mongoose.Schema.Types.ObjectId, ref: "Interview" },
-  quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Question" },
-  
-  // Activity details
-  details: {
-    category: String, // e.g., "Arrays", "Trees", "DP"
-    difficulty: String, // "Easy", "Medium", "Hard"
-    timeTaken: Number, // in minutes
-    score: Number, // if applicable
-    feedback: String
-  },
-  
-  // Timestamp
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
-// Index for fast queries
+// Indexes for fast queries
 userActivitySchema.index({ userId: 1, createdAt: -1 });
-userActivitySchema.index({ userId: 1, activityType: 1 });
+userActivitySchema.index({ userId: 1, activityType: 1, createdAt: -1 });
 
 module.exports = mongoose.models.UserActivity || mongoose.model("UserActivity", userActivitySchema);
