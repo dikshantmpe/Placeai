@@ -173,49 +173,40 @@ const DSATracker = () => {
   const handleRunCode = async () => {
     setOutput("Executing code...");
     
-    // Piston uses specific language names/aliases. We map our dropdown values to Piston's identifiers.
+    // Wandbox requires specific compiler names
     const languageMap = {
-      javascript: "javascript",
-      python: "python",
-      cpp: "cpp",
-      java: "java"
-    };
-
-    const payload = {
-      language: languageMap[language],
-      version: "*", // Using "*" automatically selects the latest installed version on Piston
-      files: [
-        {
-          content: code
-        }
-      ],
-      stdin: "", 
-      args: []
+      javascript: "nodejs-head",
+      python: "cpython-head",
+      cpp: "gcc-head",
+      java: "openjdk-head"
     };
 
     try {
-      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+      const response = await fetch("https://wandbox.org/api/compile.json", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          compiler: languageMap[language],
+          code: code,
+          save: false // We don't need to permanently save the snippet on their servers
+        })
       });
 
       const data = await response.json();
 
-      if (data.compile && data.compile.code !== 0) {
-        // Handle compilation errors (e.g., C++ or Java syntax errors)
-        setOutput(`Compilation Error:\n${data.compile.output}`);
-      } else if (data.run) {
-        // Display runtime output or runtime errors
-        setOutput(data.run.output || "Code executed successfully with no output.");
+      // Check the specific key-value pairs returned by Wandbox
+      if (data.compiler_error) {
+        setOutput(`Compilation Error:\n${data.compiler_error}`);
+      } else if (data.program_error) {
+        setOutput(`Runtime Error:\n${data.program_error}`);
       } else {
-        setOutput(data.message || "An unknown error occurred.");
+        setOutput(data.program_output || "Executed successfully with no output.");
       }
     } catch (error) {
       console.error("Execution error:", error);
-      setOutput("Error connecting to the execution engine.");
+      setOutput("Error connecting to the free execution engine.");
     }
   };
 
