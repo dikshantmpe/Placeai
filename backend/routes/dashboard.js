@@ -14,68 +14,34 @@ router.get("/", requireAuth, async (req, res) => {
     const userId = req.user.uid;
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // BATCH ALL QUERIES TOGETHER (parallel, not sequential)
-    const [userStats, userMilestones, recentActivities, allProgress] = await Promise.all([
-      UserStats.findOne({ userId }).lean(),
-      UserMilestones.findOne({ userId }).lean(),
-      UserActivity.find({ userId })
-        .sort({ createdAt: -1 })
-        .limit(100)
-        .lean(),
-      UserProgress.find({ userId }).lean(), // Get ALL user progress once
-    ]);
-
-    // CREATE IF NOT EXISTS
+    // 1. GET USER STATS & MILESTONES (or create if missing)
+    let userStats = await UserStats.findOne({ userId }).lean();
     if (!userStats) {
       const newStats = new UserStats({ userId });
       await newStats.save();
+      userStats = { aptitudePercent: 0, csPercent: 0, interviewPercent: 0, mockInterviewsCount: 0, resumeScore: 0 };
     }
+
+    let userMilestones = await UserMilestones.findOne({ userId }).lean();
     if (!userMilestones) {
       const newMilestones = new UserMilestones({ userId });
       await newMilestones.save();
+      userMilestones = { currentStreak: 0, longestStreak: 0, totalProblemsSolved: 0, thisWeekSolved: 0 };
     }
 
-    // OPTIMIZATION: Cache problem IDs in memory to avoid N+1
-    const allProblems = await Problem.find().select("_id topic").lean();
-    const problemsByTopic = {};
-    allProblems.forEach(p => {
-      if (!problemsByTopic[p.topic]) problemsByTopic[p.topic] = [];
-      problemsByTopic[p.topic].push(p._id);
-    });
-    const totalDSA = allProblems.length;
+    // 2. GET RECENT ACTIVITIES (limits queries with lean)
+    const recentActivities = await UserActivity.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .lean();
 
-    // Convert progress to Set for O(1) lookup
-    const solvedProblemIds = new Set(allProgress.map(p => String(p.problemId)));
-
-    // CALCULATE STATS WITHOUT EXTRA QUERIES
-    const dsaDone = solvedProblemIds.size;
-    const dsaPercent = totalDSA ? Math.round((dsaDone / totalDSA) * 100) : 0;
-
-    // DSA BY TOPIC (no extra queries, use cached data)
-    const topics = ["Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
-    const dsaByTopic = topics.map(topic => {
-      const topicIds = problemsByTopic[topic] || [];
-      const done = topicIds.filter(id => solvedProblemIds.has(String(id))).length;
-      return {
-        topic,
-        total: topicIds.length,
-        done,
-        percent: topicIds.length ? Math.round((done / topicIds.length) * 100) : 0,
-      };
-    });
-
-    // ACTIVITY STATS (from recentActivities we already fetched)
-    const thisWeekSolved = recentActivities.filter(
-      a => a.activityType === "problem_solved" && a.createdAt >= weekAgo
+    // 3. CALCULATE ACTIVITY STATS
+    const thisWeekSolved = recentActivities.filter(a => 
+      a.activityType === "problem_solved" && a.createdAt >= weekAgo
     ).length;
 
-    const thisMonthSolved = recentActivities.filter(
-      a => a.activityType === "problem_solved" && a.createdAt >= monthAgo
-    ).length;
-
-    // STREAK CALCULATION (from same recentActivities)
+    // 4. CALCULATE STREAK
     let streak = 0;
     if (recentActivities.length > 0) {
       const uniqueDates = new Set(
@@ -102,70 +68,104 @@ router.get("/", requireAuth, async (req, res) => {
       }
     }
 
-    // UPDATE MILESTONES
-    if (userMilestones) {
-      userMilestones.currentStreak = streak;
-      userMilestones.longestStreak = Math.max(userMilestones.longestStreak || 0, streak);
-      userMilestones.totalProblemsSolved = dsaDone;
-      userMilestones.thisWeekSolved = thisWeekSolved;
-      userMilestones.lastActivityDate = recentActivities[0]?.createdAt || null;
-      await userMilestones.save();
-    }
+    // 5. GET DSA DATA
+    const allProblems = await Problem.find().select("_id topic").lean();
+    const allProgress = await UserProgress.find({ userId }).lean();
+    
+    const problemsByTopic = {};
+    allProblems.forEach(p => {
+      if (!problemsByTopic[p.topic]) problemsByTopic[p.topic] = [];
+      problemsByTopic[p.topic].push(String(p._id));
+    });
+    const totalDSA = allProblems.length;
+    const solvedIds = new Set(allProgress.map(p => String(p.problemId)));
+    const dsaDone = solvedIds.size;
+    const dsaPercent = totalDSA ? Math.round((dsaDone / totalDSA) * 100) : 0;
 
-    // READINESS SCORE
-    const statsForCalc = userStats || { aptitudePercent: 0, csPercent: 0, interviewPercent: 0, mockInterviewsCount: 0, resumeScore: 0 };
+    // 6. DSA BY TOPIC
+    const topics = ["Arrays", "Linked List", "Trees", "Binary Search", "DP", "Stack", "Graphs"];
+    const dsaByTopic = topics.map(topic => {
+      const topicIds = problemsByTopic[topic] || [];
+      const done = topicIds.filter(id => solvedIds.has(id)).length;
+      return {
+        topic,
+        total: topicIds.length,
+        done,
+        percent: topicIds.length ? Math.round((done / topicIds.length) * 100) : 0,
+      };
+    });
+
+    // 7. CALCULATE READINESS
     const readinessScore = Math.round(
       dsaPercent * 0.4 +
-      (statsForCalc?.aptitudePercent || 0) * 0.2 +
-      (statsForCalc?.csPercent || 0) * 0.2 +
-      (statsForCalc?.interviewPercent || 0) * 0.2
+      (userStats.aptitudePercent || 0) * 0.2 +
+      (userStats.csPercent || 0) * 0.2 +
+      (userStats.interviewPercent || 0) * 0.2
     );
 
-    if (userStats) {
-      await UserStats.updateOne(
-        { userId },
-        { dsaPercent, readinessScore },
-        { upsert: true }
-      );
-    }
+    // 8. UPDATE STATS (upsert to avoid errors)
+    await UserStats.findOneAndUpdate(
+      { userId },
+      { 
+        dsaPercent, 
+        readinessScore,
+        aptitudePercent: userStats.aptitudePercent || 0,
+        csPercent: userStats.csPercent || 0,
+        interviewPercent: userStats.interviewPercent || 0,
+        mockInterviewsCount: userStats.mockInterviewsCount || 0,
+        resumeScore: userStats.resumeScore || 0,
+      },
+      { upsert: true, new: true }
+    );
 
-    // FETCH REMAINING DATA IN PARALLEL
-    const [totalQuestions, companyQuestions] = await Promise.all([
-      Question.countDocuments(),
-      CompanyQuestion.aggregate([
-        { $group: { _id: "$company", count: { $sum: 1 } } }
-      ])
+    // 9. UPDATE MILESTONES
+    await UserMilestones.findOneAndUpdate(
+      { userId },
+      {
+        currentStreak: streak,
+        longestStreak: Math.max(userMilestones.longestStreak || 0, streak),
+        totalProblemsSolved: dsaDone,
+        thisWeekSolved,
+        lastActivityDate: recentActivities[0]?.createdAt || null,
+      },
+      { upsert: true }
+    );
+
+    // 10. GET COMPANY & QUIZ DATA
+    const totalQuestions = await Question.countDocuments();
+    const companyStats = await CompanyQuestion.aggregate([
+      { $group: { _id: "$company", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
     ]);
 
-    const companyStats = (companyQuestions || []).map(c => ({
-      company: c._id || "Unknown",
-      count: c.count || 0
-    }));
-
-    // RESPONSE
+    // 11. RETURN COMPLETE DATA
     res.json({
       dsa: { total: totalDSA, done: dsaDone, percent: dsaPercent },
       dsaByTopic,
-      aptitude: { percent: stats.aptitudePercent || 0 },
-      coreCs: { percent: stats.csPercent || 0 },
-      interviews: { percent: stats.interviewPercent || 0 },
+      aptitude: { percent: userStats.aptitudePercent || 0 },
+      coreCs: { percent: userStats.csPercent || 0 },
+      interviews: { percent: userStats.interviewPercent || 0 },
       readiness: readinessScore,
       streak,
-      longestStreak: userMilestones?.longestStreak || 0,
+      longestStreak: userMilestones.longestStreak || 0,
       thisWeekSolved,
-      mockInterviewsCount: stats.mockInterviewsCount || 0,
-      resumeScore: stats.resumeScore || 0,
+      mockInterviewsCount: userStats.mockInterviewsCount || 0,
+      resumeScore: userStats.resumeScore || 0,
       quiz: { total: totalQuestions },
-      companyStats,
+      companyStats: companyStats.map(c => ({ company: c._id, count: c.count })),
       recentActivity: recentActivities.slice(0, 5).map(act => ({
         type: act.activityType,
         details: act.details,
         createdAt: act.createdAt,
       })),
     });
+
   } catch (err) {
-    console.error("Dashboard error:", err.message);
-    res.status(500).json({ error: "Failed to fetch dashboard data" });
+    console.error("❌ Dashboard error:", err.message, err.stack);
+    res.status(500).json({ 
+      error: "Failed to fetch dashboard data",
+      message: err.message 
+    });
   }
 });
 
