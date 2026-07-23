@@ -31,6 +31,7 @@ const DSATracker = () => {
   });
 
   const auth = getAuth();
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
   useEffect(() => {
     fetchProblems();
@@ -63,7 +64,7 @@ const DSATracker = () => {
       if (status) params.append("status", status);
       if (searchQuery) params.append("search", searchQuery);
 
-      const response = await fetch(`/api/dsa/problems?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/api/dsa/problems?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -83,7 +84,7 @@ const DSATracker = () => {
       const token = await getAuthToken();
       if (!token) return;
 
-      const response = await fetch("/api/dsa/stats", {
+      const response = await fetch(`${API_BASE_URL}/api/dsa/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -100,7 +101,7 @@ const DSATracker = () => {
       const token = await getAuthToken();
       if (!token) return;
 
-      const response = await fetch(`/api/dsa/problems/${problemId}/update`, {
+      const response = await fetch(`${API_BASE_URL}/api/dsa/problems/${problemId}/update`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,7 +125,7 @@ const DSATracker = () => {
       const token = await getAuthToken();
       if (!token) return;
 
-      const response = await fetch("/api/dsa/problems/add", {
+      const response = await fetch(`${API_BASE_URL}/api/dsa/problems/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
