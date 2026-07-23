@@ -20,7 +20,7 @@ const DSATracker = () => {
   const [theme, setTheme] = useState(() => localStorage.getItem("crackin-theme") || "light");
   const [loading, setLoading] = useState(true);
 
-  // New states for the IDE
+  // States for the IDE
   const [code, setCode] = useState("// Write your solution here...\n");
   const [language, setLanguage] = useState("javascript");
   const [output, setOutput] = useState("");
@@ -162,13 +162,61 @@ const DSATracker = () => {
   };
 
   const handleSaveCode = () => {
-    // For now, this saves it to personal notes. We can create a dedicated 'code' field in MongoDB later!
     const updatedNotes = selectedProblem.notes 
       ? `${selectedProblem.notes}\n\n=== Code Solution ===\n${code}`
       : `=== Code Solution ===\n${code}`;
       
     handleUpdateProblem(selectedProblem._id, { notes: updatedNotes });
     setOutput("Code saved to your notes successfully!");
+  };
+
+  const handleRunCode = async () => {
+    setOutput("Executing code...");
+    
+    // Piston uses specific language names/aliases. We map our dropdown values to Piston's identifiers.
+    const languageMap = {
+      javascript: "javascript",
+      python: "python",
+      cpp: "cpp",
+      java: "java"
+    };
+
+    const payload = {
+      language: languageMap[language],
+      version: "*", // Using "*" automatically selects the latest installed version on Piston
+      files: [
+        {
+          content: code
+        }
+      ],
+      stdin: "", 
+      args: []
+    };
+
+    try {
+      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (data.compile && data.compile.code !== 0) {
+        // Handle compilation errors (e.g., C++ or Java syntax errors)
+        setOutput(`Compilation Error:\n${data.compile.output}`);
+      } else if (data.run) {
+        // Display runtime output or runtime errors
+        setOutput(data.run.output || "Code executed successfully with no output.");
+      } else {
+        setOutput(data.message || "An unknown error occurred.");
+      }
+    } catch (error) {
+      console.error("Execution error:", error);
+      setOutput("Error connecting to the execution engine.");
+    }
   };
 
   const resetFilters = () => {
@@ -210,7 +258,7 @@ const DSATracker = () => {
             </button>
           </section>
 
-          {/* Stats and Filters remain exactly the same */}
+          {/* Stats Section */}
           <section className="stats">
             <div className="card stat">
               <span className="muted">Total solved</span>
@@ -234,6 +282,7 @@ const DSATracker = () => {
             </div>
           </section>
 
+          {/* Filters Section */}
           <section className="card filters">
             <input
               className="control"
@@ -426,7 +475,7 @@ const DSATracker = () => {
                 </button>
                 <button 
                   style={{ background: "var(--b)", color: "#fff", border: "none", padding: "5px 15px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
-                  onClick={() => setOutput("Executing code...\n(Note: Code execution engine integration required to run tests)")}
+                  onClick={handleRunCode}
                 >
                   Run Code
                 </button>
@@ -448,10 +497,10 @@ const DSATracker = () => {
                 />
               </div>
 
-              {/* Fake Console Output */}
+              {/* Console Output */}
               <div className="console-window">
                 <div style={{ color: "#888", marginBottom: "5px" }}>Output:</div>
-                {output}
+                <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>{output}</pre>
               </div>
             </div>
 
