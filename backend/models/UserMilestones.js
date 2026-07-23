@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const userMilestonesSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+  // FIXED: Changed from ObjectId to String for Firebase UIDs
+  userId: { type: String, required: true, unique: true },
   
   // Streak tracking
   currentStreak: { type: Number, default: 0 },
