@@ -115,20 +115,21 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
     const { problemId } = req.params;
     const { status, timeSpent, notes } = req.body;
 
-    let userProgress = await UserProgress.findOne({ userId });
-    if (!userProgress) {
-      userProgress = new UserProgress({ userId, problems: {} });
-    }
-
-    const problemIdStr = problemId.toString();
-    userProgress.problems[problemIdStr] = {
-      ...userProgress.problems[problemIdStr],
-      status: status || userProgress.problems[problemIdStr]?.status || "Pending",
-      timeSpent: timeSpent || userProgress.problems[problemIdStr]?.timeSpent || 0,
-      notes: notes !== undefined ? notes : userProgress.problems[problemIdStr]?.notes || "",
-      lastAttempted: new Date(),
-    };
-
+    // Use findOneAndUpdate to find the specific user-problem pair.
+    // upsert: true ensures it creates a new document if one doesn't exist yet.
+    const updatedProgress = await UserProgress.findOneAndUpdate(
+      { userId: userId, problemId: problemId },
+      {
+        $set: {
+          status: status || "Pending",
+          timeSpent: timeSpent || 0,
+          lastAttempted: new Date(),
+          // Conditionally update notes only if they were sent in the request
+          ...(notes !== undefined && { notes: notes })
+        }
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
     await userProgress.save();
 
     // Update milestones if solved
