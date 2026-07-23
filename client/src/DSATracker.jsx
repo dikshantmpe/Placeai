@@ -172,42 +172,37 @@ const DSATracker = () => {
 
   const handleRunCode = async () => {
     setOutput("Executing code...");
-    
-    // Wandbox requires specific compiler names
-    const languageMap = {
-      javascript: "nodejs-head",
-      python: "cpython-head",
-      cpp: "gcc-head",
-      java: "openjdk-head"
-    };
 
-    try {
-      const response = await fetch("https://wandbox.org/api/compile.json", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          compiler: languageMap[language],
-          code: code,
-          save: false // We don't need to permanently save the snippet on their servers
-        })
-      });
-
-      const data = await response.json();
-
-      // Check the specific key-value pairs returned by Wandbox
-      if (data.compiler_error) {
-        setOutput(`Compilation Error:\n${data.compiler_error}`);
-      } else if (data.program_error) {
-        setOutput(`Runtime Error:\n${data.program_error}`);
-      } else {
-        setOutput(data.program_output || "Executed successfully with no output.");
+    if (language === "javascript") {
+      try {
+        // 1. Create an array to hold our intercepted logs
+        let logs = [];
+        
+        // 2. Save the original console.log function
+        const originalLog = console.log;
+        
+        // 3. Override console.log to push to our array instead of the browser console
+        console.log = (...args) => {
+          logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(" "));
+        };
+        
+        // 4. Safely evaluate and execute the user's code
+        const execFn = new Function(code);
+        execFn(); // Run the code
+        
+        // 5. Restore the original console.log so we don't break the rest of the app
+        console.log = originalLog;
+        
+        // 6. Display the captured logs in the output window
+        setOutput(logs.join("\n") || "Code executed successfully with no output.");
+      } catch (error) {
+        setOutput(`Runtime Error:\n${error.message}`);
       }
-    } catch (error) {
-      console.error("Execution error:", error);
-      setOutput("Error connecting to the free execution engine.");
+      return; // Stop here so it doesn't try to hit an API
     }
+
+    // Fallback for Python, C++, Java 
+    setOutput("To run Python, C++, or Java, you will need to connect a free API key (like JDoodle) to your backend. JavaScript runs natively in the browser!");
   };
 
   const resetFilters = () => {
