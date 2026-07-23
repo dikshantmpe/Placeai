@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const userMilestonesSchema = new mongoose.Schema({
-userId: { type: String, required: true, unique: true }
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
   
   // Streak tracking
   currentStreak: { type: Number, default: 0 },
