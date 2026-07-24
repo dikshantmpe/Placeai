@@ -353,7 +353,7 @@ const DSATracker = () => {
             <div className="card stat">
               <span className="muted">Total attempted</span>
               <strong>{stats.totalAttempted}</strong>
-              <span>{stats.totalSolved > 0 ? Math.round((stats.totalSolved / stats.totalAttempted) * 100) : 0}% completion</span>
+              <span>{stats.totalAttempted > 0 ? Math.round((stats.totalSolved / stats.totalAttempted) * 100) : 0}% completion</span>
             </div>
           </section>
 
@@ -494,6 +494,74 @@ const DSATracker = () => {
       </div>
 
       <button className="fab" onClick={() => setShowModal("add")}>+</button>
+
+      {/* Add New Problem Modal */}
+      {showModal === "add" && (
+        <div className="back show" onClick={() => setShowModal("")}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ margin: 0 }}>Add New Problem</h2>
+              <button className="close-btn" onClick={() => setShowModal("")}>×</button>
+            </div>
+            <form className="form" onSubmit={handleAddProblem}>
+              <div>
+                <label>Problem Name *</label>
+                <input 
+                  required 
+                  className="control" 
+                  value={formData.name} 
+                  onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                  placeholder="e.g. Two Sum" 
+                />
+              </div>
+              <div>
+                <label>Problem Link</label>
+                <input 
+                  className="control" 
+                  value={formData.link} 
+                  onChange={(e) => setFormData({...formData, link: e.target.value})} 
+                  placeholder="https://leetcode.com/..." 
+                />
+              </div>
+              <div>
+                <label>Topic *</label>
+                <select 
+                  className="control" 
+                  value={formData.topic} 
+                  onChange={(e) => setFormData({...formData, topic: e.target.value})}
+                >
+                  {allTopicsForDropdown.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label>Difficulty *</label>
+                <select 
+                  className="control" 
+                  value={formData.difficulty} 
+                  onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                >
+                  <option>Easy</option>
+                  <option>Medium</option>
+                  <option>Hard</option>
+                </select>
+              </div>
+              <div className="full">
+                <label>Description (Optional)</label>
+                <textarea 
+                  className="control" 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                  placeholder="Paste problem description here..." 
+                />
+              </div>
+              <div className="full actions">
+                <button type="button" className="control" style={{ width: "auto", marginRight: "10px", display: "inline-block" }} onClick={() => setShowModal("")}>Cancel</button>
+                <button type="submit" className="primary">Add Problem</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Workspace / IDE Modal */}
       {showModal === "workspace" && selectedProblem && (
