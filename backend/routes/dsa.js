@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
+// 🚨 Moved these to the TOP so they don't crash the individual routes!
+const Problem = require("../models/Problem");
+const UserProgress = require("../models/UserProgress");
+const UserMilestones = require("../models/UserMilestones");
+
 // Inline middleware for auth
 const authenticateUser = (req, res, next) => {
   try {
@@ -28,9 +33,6 @@ router.get("/test", (req, res) => {
 router.get("/solutions", authenticateUser, async (req, res) => {
   try {
     console.log("📍 GET /solutions called");
-    
-    const Problem = require("../models/Problem");
-    const UserProgress = require("../models/UserProgress");
 
     const userId = req.userId;
     const { topic, difficulty, search } = req.query;
@@ -119,9 +121,6 @@ router.get("/problems", authenticateUser, async (req, res) => {
   try {
     console.log("📍 GET /problems called");
 
-    const Problem = require("../models/Problem");
-    const UserProgress = require("../models/UserProgress");
-
     const userId = req.userId;
     const { topic, difficulty, search } = req.query;
 
@@ -187,9 +186,6 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
   try {
     console.log("📍 POST /save-code called");
 
-    const UserProgress = require("../models/UserProgress");
-    const UserMilestones = require("../models/UserMilestones");
-
     const userId = req.userId;
     const { problemId } = req.params;
     const { code, output, testResults, status, timeSpent } = req.body;
@@ -247,9 +243,6 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
   try {
     console.log("📍 POST /update called");
 
-    const UserProgress = require("../models/UserProgress");
-    const UserMilestones = require("../models/UserMilestones");
-
     const userId = req.userId;
     const { problemId } = req.params;
     const { status, timeSpent, notes } = req.body;
@@ -294,9 +287,6 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
 router.get("/stats", authenticateUser, async (req, res) => {
   try {
     console.log("📍 GET /stats called");
-
-    const UserProgress = require("../models/UserProgress");
-    const UserMilestones = require("../models/UserMilestones");
 
     const userId = req.userId;
 
