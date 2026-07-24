@@ -130,7 +130,7 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
-    await userProgress.save();
+
 
     // Update milestones if solved
     if (status === "Solved") {
@@ -145,7 +145,7 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
       await milestones.save();
     }
 
-    res.json({ success: true, message: "Problem updated" });
+res.json({ success: true, progress: updatedProgress });
   } catch (error) {
     console.error("Error updating problem:", error);
     res.status(500).json({ success: false, error: error.message });
