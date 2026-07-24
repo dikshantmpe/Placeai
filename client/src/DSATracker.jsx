@@ -7,7 +7,7 @@ const DSATracker = () => {
   const [stats, setStats] = useState({
     totalSolved: 0,
     totalAttempted: 0,
-    currentStreak: 12,
+    currentStreak: 0,
     thisWeekSolved: 0,
   });
   const [searchQuery, setSearchQuery] = useState("");
@@ -204,7 +204,6 @@ const DSATracker = () => {
 
     if (language === "javascript") {
       try {
-        // Default test cases for Two Sum problem
         const defaultTestCases = [
           { input: { nums: [2, 7, 11, 15], target: 9 }, expected: [0, 1] },
           { input: { nums: [3, 2, 4], target: 6 }, expected: [1, 2] },
@@ -216,7 +215,6 @@ const DSATracker = () => {
         let results = [];
         let outputText = "";
 
-        // Extract function name from code
         const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
         const functionName = functionMatch ? functionMatch[1] : null;
 
@@ -226,11 +224,9 @@ const DSATracker = () => {
           return;
         }
 
-        // Create and execute user function
         const contextCode = `${code}\nreturn ${functionName};`;
         const userFunction = new Function(contextCode)();
 
-        // Run each test case
         for (let i = 0; i < testCases.length; i++) {
           const testCase = testCases[i];
           try {
@@ -266,14 +262,12 @@ const DSATracker = () => {
           }
         }
 
-        // Set final status
         if (allTestsPassed) {
           outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
           setSolutionStatus("solved");
           setOutput(outputText);
           setTestResults(results);
           
-          // Auto-save to database
           setTimeout(() => {
             saveCodeToDatabase(code, outputText, "Solved", results);
           }, 500);
@@ -290,7 +284,6 @@ const DSATracker = () => {
       return;
     }
 
-    // Fallback for other languages
     setOutput("To run Python, C++, or Java, you will need to connect a free API key (like JDoodle) to your backend. JavaScript runs natively in the browser!");
   };
 
@@ -343,12 +336,10 @@ const DSATracker = () => {
             <div className="card stat">
               <span className="muted">Current streak</span>
               <strong>{stats.currentStreak} days</strong>
-              <span>Best: 21 days</span>
             </div>
             <div className="card stat">
               <span className="muted">Solved this week</span>
               <strong>{stats.thisWeekSolved}</strong>
-              <span>↑ 4 vs last week</span>
             </div>
             <div className="card stat">
               <span className="muted">Total attempted</span>
