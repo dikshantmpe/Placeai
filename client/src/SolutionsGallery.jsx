@@ -261,13 +261,6 @@ const SolutionsGallery = () => {
                     </div> 
                   )}
 
-                  {solution.notes && (
-                    <div style={styles.notesSection}>
-                      <h4>Notes</h4>
-                      <p>{solution.notes}</p>
-                    </div>
-                  )}
-
                   {solution.link && (
                     <a
                       href={solution.link}
@@ -444,9 +437,6 @@ const styles = {
     borderRadius: "4px",
     fontSize: "12px",
     marginBottom: "8px",
-  },
-  notesSection: {
-    marginBottom: "16px",
   },
   problemLink: {
     display: "inline-block",
