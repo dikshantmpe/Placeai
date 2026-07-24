@@ -24,6 +24,8 @@ const DSATracker = () => {
   const [code, setCode] = useState("// Write your solution here...\n");
   const [language, setLanguage] = useState("javascript");
   const [output, setOutput] = useState("");
+  const [solutionStatus, setSolutionStatus] = useState("pending");
+  const [testResults, setTestResults] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -167,41 +169,103 @@ const DSATracker = () => {
       : `=== Code Solution ===\n${code}`;
       
     handleUpdateProblem(selectedProblem._id, { notes: updatedNotes });
-    setOutput("Code saved to your notes successfully!");
+    alert("Code saved to your notes successfully!");
   };
 
   const handleRunCode = async () => {
-    setOutput("Executing code...");
+    setOutput("Running tests...\n");
+    setSolutionStatus("pending");
+    setTestResults([]);
 
     if (language === "javascript") {
       try {
-        // 1. Create an array to hold our intercepted logs
-        let logs = [];
-        
-        // 2. Save the original console.log function
-        const originalLog = console.log;
-        
-        // 3. Override console.log to push to our array instead of the browser console
-        console.log = (...args) => {
-          logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(" "));
-        };
-        
-        // 4. Safely evaluate and execute the user's code
-        const execFn = new Function(code);
-        execFn(); // Run the code
-        
-        // 5. Restore the original console.log so we don't break the rest of the app
-        console.log = originalLog;
-        
-        // 6. Display the captured logs in the output window
-        setOutput(logs.join("\n") || "Code executed successfully with no output.");
+        // Default test cases for Two Sum problem
+        const defaultTestCases = [
+          { input: { nums: [2, 7, 11, 15], target: 9 }, expected: [0, 1] },
+          { input: { nums: [3, 2, 4], target: 6 }, expected: [1, 2] },
+          { input: { nums: [3, 3], target: 6 }, expected: [0, 1] }
+        ];
+
+        const testCases = selectedProblem?.testCases || defaultTestCases;
+        let allTestsPassed = true;
+        let results = [];
+        let outputText = "";
+
+        // Extract function name from code
+        const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
+        const functionName = functionMatch ? functionMatch[1] : null;
+
+        if (!functionName) {
+          setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has: function twoSum(nums, target) { ... }");
+          setSolutionStatus("pending");
+          return;
+        }
+
+        // Create and execute user function
+        const contextCode = `${code}\nreturn ${functionName};`;
+        const userFunction = new Function(contextCode)();
+
+        // Run each test case
+        for (let i = 0; i < testCases.length; i++) {
+          const testCase = testCases[i];
+          try {
+            const result = userFunction(testCase.input.nums, testCase.input.target);
+            const passed = JSON.stringify(result) === JSON.stringify(testCase.expected);
+
+            results.push({
+              testNum: i + 1,
+              passed,
+              input: testCase.input,
+              expected: testCase.expected,
+              output: result
+            });
+
+            outputText += `Test ${i + 1}: ${passed ? "✓ PASSED" : "✗ FAILED"}\n`;
+            outputText += `  Input: nums = ${JSON.stringify(testCase.input.nums)}, target = ${testCase.input.target}\n`;
+            outputText += `  Expected: ${JSON.stringify(testCase.expected)}\n`;
+            outputText += `  Got: ${JSON.stringify(result)}\n\n`;
+
+            if (!passed) allTestsPassed = false;
+          } catch (err) {
+            allTestsPassed = false;
+            results.push({
+              testNum: i + 1,
+              passed: false,
+              input: testCase.input,
+              error: err.message
+            });
+
+            outputText += `Test ${i + 1}: ✗ ERROR\n`;
+            outputText += `  Input: nums = ${JSON.stringify(testCase.input.nums)}, target = ${testCase.input.target}\n`;
+            outputText += `  Error: ${err.message}\n\n`;
+          }
+        }
+
+        // Set final status
+        if (allTestsPassed) {
+          outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
+          setSolutionStatus("solved");
+          // Auto-update problem to solved
+          handleUpdateProblem(selectedProblem._id, { 
+            status: "Solved",
+            code,
+            testResults: results
+          });
+        } else {
+          outputText += "\n❌ Some tests failed. Please fix your solution.";
+          setSolutionStatus("pending");
+        }
+
+        setOutput(outputText);
+        setTestResults(results);
       } catch (error) {
-        setOutput(`Runtime Error:\n${error.message}`);
+        setOutput(`❌ Runtime Error:\n${error.message}`);
+        setSolutionStatus("pending");
       }
-      return; // Stop here so it doesn't try to hit an API
+      return;
     }
 
-    // Fallback for Python, C++, Java 
+    // Fallback for other languages
     setOutput("To run Python, C++, or Java, you will need to connect a free API key (like JDoodle) to your backend. JavaScript runs natively in the browser!");
   };
 
@@ -226,7 +290,7 @@ const DSATracker = () => {
   return (
     <div style={styles.body}>
       <style>{`
-        :root{--b:#1769e0;--n:#10264a;--bg:#f3f2ef;--c:#fff;--t:#172033;--m:#68758a;--l:#dedbd5}*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui;background:var(--bg);color:var(--t)}body.dark{--bg:#171a1f;--c:#22262d;--t:#eef4ff;--n:#eef4ff;--m:#aab3c2;--l:#3b414b}button,input,select,textarea{font:inherit}.shell{max-width:1400px;margin:24px auto;padding:0 20px 70px;display:grid;grid-template-columns:1fr 280px;gap:18px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px}.hero{padding:25px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:30px;margin:4px 0;color:var(--n)}.hero p,.muted{color:var(--m)}.blue{color:var(--b);font-size:11px;font-weight:800;letter-spacing:.1em}.primary{border:0;background:var(--b);color:#fff;padding:11px 17px;border-radius:99px;font-weight:750;cursor:pointer}.primary:hover{opacity:0.9}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:13px 0}.stat{padding:18px}.stat strong{display:block;font-size:27px;color:var(--n);margin:6px 0}.filters{padding:14px;display:grid;grid-template-columns:1.5fr repeat(3,1fr) auto;gap:8px;margin-bottom:13px}.control,.reset{border:1px solid var(--l);background:var(--c);color:var(--t);padding:10px;border-radius:8px}.head{padding:19px}.head h2{margin:0;color:var(--n)}.topics{padding:0 12px 12px}.topic{border-top:1px solid var(--l)}.th{display:grid;grid-template-columns:220px 1fr 65px 190px 25px;gap:12px;align-items:center;padding:15px 8px;cursor:pointer}.name{font-weight:750}.icon{display:inline-grid;place-items:center;width:34px;height:34px;background:#eaf3ff;color:var(--b);border-radius:9px;margin-right:9px}.track{height:9px;background:#e8edf3;border-radius:9px;overflow:hidden}.fill{height:100%;background:var(--b)}.badge{font-size:10px;padding:4px 7px;border-radius:99px}.e{background:#e1f3ec;color:#20705d}.m{background:#fff0cb;color:#946315}.h{background:#fde3e3;color:#ad3f3f}.problems{display:none;padding:0 8px 15px;overflow:auto}.topic.open .problems{display:block}.topic.open .arrow{transform:rotate(180deg)}table{width:100%;border-collapse:collapse;min-width:800px;font-size:12px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--l)}.problem-link{color:var(--b);font-weight:700;text-decoration:none;cursor:pointer}.problem-link:hover{text-decoration:underline}.fab{position:fixed;right:28px;bottom:25px;width:58px;height:58px;border:0;border-radius:50%;background:var(--b);color:#fff;font-size:28px;cursor:pointer}.back{display:none;position:fixed;inset:0;background:#0d1725aa;z-index:50;align-items:center;justify-content:center;padding:18px}.back.show{display:flex}.modal{width:min(560px,100%);background:var(--c);border-radius:14px;padding:22px;max-height:85vh;overflow-y:auto}.workspace-modal{width:95vw;height:90vh;max-height:90vh;display:flex;flex-direction:row;gap:20px;padding:20px;overflow:hidden;background:var(--bg)}.workspace-panel{background:var(--c);border-radius:12px;border:1px solid var(--l);display:flex;flex-direction:column;overflow:hidden;flex:1}.panel-header{padding:15px 20px;border-bottom:1px solid var(--l);display:flex;justify-content:space-between;align-items:center;background:var(--c)}.panel-content{padding:20px;overflow-y:auto;flex:1}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.form label{display:block;font-size:11px;font-weight:700;margin-bottom:5px}.form .control{width:100%}textarea{min-height:90px}.actions{text-align:right;margin-top:15px}.loading{text-align:center;padding:40px;color:var(--m)}.side{position:sticky;top:96px;align-self:start}.side .card{padding:18px;margin-bottom:13px}.description{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--t)}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--m);line-height:1}.ide-toolbar{display:flex;gap:10px;padding:10px 15px;background:#1e1e1e;border-bottom:1px solid #333}.console-window{height:150px;background:#1e1e1e;color:#fff;padding:15px;font-family:monospace;overflow-y:auto;border-top:1px solid #333;font-size:12px}
+        :root{--b:#1769e0;--n:#10264a;--bg:#f3f2ef;--c:#fff;--t:#172033;--m:#68758a;--l:#dedbd5}*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui;background:var(--bg);color:var(--t)}body.dark{--bg:#171a1f;--c:#22262d;--t:#eef4ff;--n:#eef4ff;--m:#aab3c2;--l:#3b414b}button,input,select,textarea{font:inherit}.shell{max-width:1400px;margin:24px auto;padding:0 20px 70px;display:grid;grid-template-columns:1fr 280px;gap:18px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px}.hero{padding:25px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:30px;margin:4px 0;color:var(--n)}.hero p,.muted{color:var(--m)}.blue{color:var(--b);font-size:11px;font-weight:800;letter-spacing:.1em}.primary{border:0;background:var(--b);color:#fff;padding:11px 17px;border-radius:99px;font-weight:750;cursor:pointer}.primary:hover{opacity:0.9}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:13px 0}.stat{padding:18px}.stat strong{display:block;font-size:27px;color:var(--n);margin:6px 0}.filters{padding:14px;display:grid;grid-template-columns:1.5fr repeat(3,1fr) auto;gap:8px;margin-bottom:13px}.control,.reset{border:1px solid var(--l);background:var(--c);color:var(--t);padding:10px;border-radius:8px}.head{padding:19px}.head h2{margin:0;color:var(--n)}.topics{padding:0 12px 12px}.topic{border-top:1px solid var(--l)}.th{display:grid;grid-template-columns:220px 1fr 65px 190px 25px;gap:12px;align-items:center;padding:15px 8px;cursor:pointer}.name{font-weight:750}.icon{display:inline-grid;place-items:center;width:34px;height:34px;background:#eaf3ff;color:var(--b);border-radius:9px;margin-right:9px}.track{height:9px;background:#e8edf3;border-radius:9px;overflow:hidden}.fill{height:100%;background:var(--b)}.badge{font-size:10px;padding:4px 7px;border-radius:99px}.e{background:#e1f3ec;color:#20705d}.m{background:#fff0cb;color:#946315}.h{background:#fde3e3;color:#ad3f3f}.problems{display:none;padding:0 8px 15px;overflow:auto}.topic.open .problems{display:block}.topic.open .arrow{transform:rotate(180deg)}table{width:100%;border-collapse:collapse;min-width:800px;font-size:12px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--l)}.problem-link{color:var(--b);font-weight:700;text-decoration:none;cursor:pointer}.problem-link:hover{text-decoration:underline}.fab{position:fixed;right:28px;bottom:25px;width:58px;height:58px;border:0;border-radius:50%;background:var(--b);color:#fff;font-size:28px;cursor:pointer}.back{display:none;position:fixed;inset:0;background:#0d1725aa;z-index:50;align-items:center;justify-content:center;padding:18px}.back.show{display:flex}.modal{width:min(560px,100%);background:var(--c);border-radius:14px;padding:22px;max-height:85vh;overflow-y:auto}.workspace-modal{width:95vw;height:90vh;max-height:90vh;display:flex;flex-direction:row;gap:20px;padding:20px;overflow:hidden;background:var(--bg)}.workspace-panel{background:var(--c);border-radius:12px;border:1px solid var(--l);display:flex;flex-direction:column;overflow:hidden;flex:1}.panel-header{padding:15px 20px;border-bottom:1px solid var(--l);display:flex;justify-content:space-between;align-items:center;background:var(--c)}.panel-content{padding:20px;overflow-y:auto;flex:1}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.form label{display:block;font-size:11px;font-weight:700;margin-bottom:5px}.form .control{width:100%}textarea{min-height:90px}.actions{text-align:right;margin-top:15px}.loading{text-align:center;padding:40px;color:var(--m)}.side{position:sticky;top:96px;align-self:start}.side .card{padding:18px;margin-bottom:13px}.description{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--t)}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--m);line-height:1}.ide-toolbar{display:flex;gap:10px;padding:10px 15px;background:#1e1e1e;border-bottom:1px solid #333}.console-window{height:150px;background:#1e1e1e;color:#fff;padding:15px;font-family:monospace;overflow-y:auto;border-top:1px solid #333;font-size:12px}.status-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-weight:600;font-size:12px;margin-right:10px}.status-solved{background:#e1f3ec;color:#10b981}.status-pending{background:#fde3e3;color:#ef4444}
         @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:static}.stats{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}.workspace-modal{flex-direction:column;height:95vh;overflow-y:auto}.workspace-panel{flex:none;height:500px}}@media(max-width:700px){.shell{padding:0 10px 70px}.stats,.filters{grid-template-columns:1fr}.th{grid-template-columns:1fr 60px 25px}.th .track,.badges{display:none}.hero{display:block}.hero button{margin-top:15px}.form{grid-template-columns:1fr}.full{grid-column:auto}}
       `}</style>
 
@@ -353,6 +417,8 @@ const DSATracker = () => {
                                         setSelectedProblem(problem);
                                         setCode("// Write your solution here...\n");
                                         setOutput("");
+                                        setSolutionStatus("pending");
+                                        setTestResults([]);
                                         setShowModal("workspace");
                                       }}
                                     >
@@ -423,7 +489,7 @@ const DSATracker = () => {
                 <hr style={{ border: "0", borderTop: "1px solid var(--l)", margin: "20px 0" }} />
                 
                 <h3>Update Progress</h3>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
                   <select
                     className="control"
                     style={{ width: "auto" }}
@@ -435,6 +501,12 @@ const DSATracker = () => {
                     <option>Revision Needed</option>
                   </select>
                   <span style={{ fontSize: "12px", color: "var(--m)" }}>Time spent: {selectedProblem.timeSpent} min</span>
+                  {solutionStatus === "solved" && (
+                    <span className="status-badge status-solved">✓ SOLVED</span>
+                  )}
+                  {solutionStatus === "pending" && testResults.length > 0 && (
+                    <span className="status-badge status-pending">✗ ERROR</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -485,7 +557,11 @@ const DSATracker = () => {
 
               {/* Console Output */}
               <div className="console-window">
-                <div style={{ color: "#888", marginBottom: "5px" }}>Output:</div>
+                <div style={{ color: "#888", marginBottom: "5px" }}>
+                  Output:
+                  {solutionStatus === "solved" && <span style={{ color: "#10b981", marginLeft: "10px", fontWeight: "bold" }}>✓ SOLVED</span>}
+                  {solutionStatus === "pending" && testResults.length > 0 && <span style={{ color: "#ef4444", marginLeft: "10px", fontWeight: "bold" }}>✗ ERROR</span>}
+                </div>
                 <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>{output}</pre>
               </div>
             </div>
