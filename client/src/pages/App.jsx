@@ -14,7 +14,7 @@ import Profile from "../Profile";
 import Home from "../Home";
 import Signup from "../Signup";
 import ComingSoon from "../ComingSoon";
-import SolutionsGallery from "./SolutionsGallery";
+import SolutionsGallery from "../SolutionsGallery";
 
 /* ── TopbarWrapper: Hides Topbar on landing page ("/") ── */
 function TopbarWrapper(props) {
