@@ -37,20 +37,13 @@ router.get("/solutions", authenticateUser, async (req, res) => {
     const userId = req.userId;
     const { topic, difficulty, search } = req.query;
 
-    console.log("Fetching solutions for user:", userId);
-    console.log("Filters - topic:", topic, "difficulty:", difficulty, "search:", search);
-
-    // Fetch all solved problems for this user
     let progressFilter = { userId, status: "Solved" };
     
     const userProgress = await UserProgress.find(progressFilter)
       .populate("problemId")
       .lean();
 
-    console.log("Found user progress records:", userProgress?.length || 0);
-
     if (!userProgress || userProgress.length === 0) {
-      console.log("No solved problems found");
       return res.json({
         success: true,
         solutions: [],
@@ -76,39 +69,27 @@ router.get("/solutions", authenticateUser, async (req, res) => {
           solvedAt: p.solvedAt || p.createdAt,
         };
       } catch (err) {
-        console.error("Error mapping solution:", err);
         return null;
       }
     }).filter(Boolean);
 
-    console.log("Mapped solutions:", solutions.length);
-
     // Apply filters
-    if (topic) {
-      solutions = solutions.filter((s) => s.topic === topic);
-      console.log("After topic filter:", solutions.length);
-    }
-    if (difficulty) {
-      solutions = solutions.filter((s) => s.difficulty === difficulty);
-      console.log("After difficulty filter:", solutions.length);
-    }
+    if (topic) solutions = solutions.filter((s) => s.topic === topic);
+    if (difficulty) solutions = solutions.filter((s) => s.difficulty === difficulty);
     if (search) {
       const searchLower = search.toLowerCase();
       solutions = solutions.filter((s) =>
         s.name.toLowerCase().includes(searchLower) ||
         s.topic.toLowerCase().includes(searchLower)
       );
-      console.log("After search filter:", solutions.length);
     }
 
-    console.log("✅ Returning solutions:", solutions.length);
     return res.json({
       success: true,
       solutions,
       count: solutions.length,
     });
   } catch (error) {
-    console.error("❌ Error fetching solutions:", error);
     return res.status(500).json({ 
       success: false, 
       error: error.message || "Failed to fetch solutions"
@@ -176,7 +157,6 @@ router.get("/problems", authenticateUser, async (req, res) => {
       totalProblems: problems.length,
     });
   } catch (error) {
-    console.error("❌ Error fetching problems:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -190,15 +170,14 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
     const { problemId } = req.params;
     const { code, output, testResults, status, timeSpent } = req.body;
 
-    console.log("Saving code for problem:", problemId, "status:", status);
-
     let userProgress = await UserProgress.findOne({ userId, problemId });
+    let wasAlreadySolved = false;
 
     if (!userProgress) {
-      userProgress = new UserProgress({
-        userId,
-        problemId,
-      });
+      userProgress = new UserProgress({ userId, problemId });
+    } else {
+      // Check if it was already solved before we update it
+      wasAlreadySolved = userProgress.status === "Solved";
     }
 
     userProgress.code = code || userProgress.code;
@@ -208,14 +187,14 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
     userProgress.timeSpent = timeSpent || userProgress.timeSpent;
     userProgress.lastAttempted = new Date();
 
-    if (status === "Solved") {
+    if (status === "Solved" && !wasAlreadySolved) {
       userProgress.solvedAt = new Date();
     }
 
     await userProgress.save();
 
-    // Update milestones
-    if (status === "Solved") {
+    // Update milestones ONLY if it wasn't already solved previously
+    if (status === "Solved" && !wasAlreadySolved) {
       let milestones = await UserMilestones.findOne({ userId });
       if (!milestones) {
         milestones = new UserMilestones({ userId });
@@ -227,13 +206,8 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
       await milestones.save();
     }
 
-    console.log("✅ Code saved successfully");
-    return res.json({
-      success: true,
-      message: "Code saved successfully",
-    });
+    return res.json({ success: true, message: "Code saved successfully" });
   } catch (error) {
-    console.error("❌ Error saving code:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -248,9 +222,13 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
     const { status, timeSpent, notes } = req.body;
 
     let userProgress = await UserProgress.findOne({ userId, problemId });
+    let wasAlreadySolved = false;
 
     if (!userProgress) {
       userProgress = new UserProgress({ userId, problemId });
+    } else {
+      // Check if it was already solved before we update it
+      wasAlreadySolved = userProgress.status === "Solved";
     }
 
     userProgress.status = status || userProgress.status || "Pending";
@@ -258,13 +236,14 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
     userProgress.notes = notes || userProgress.notes || "";
     userProgress.lastAttempted = new Date();
 
-    if (status === "Solved") {
+    if (status === "Solved" && !wasAlreadySolved) {
       userProgress.solvedAt = new Date();
     }
 
     await userProgress.save();
 
-    if (status === "Solved") {
+    // Update milestones ONLY if it wasn't already solved previously
+    if (status === "Solved" && !wasAlreadySolved) {
       let milestones = await UserMilestones.findOne({ userId });
       if (!milestones) {
         milestones = new UserMilestones({ userId });
@@ -275,10 +254,8 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
       await milestones.save();
     }
 
-    console.log("✅ Problem updated");
     return res.json({ success: true, message: "Problem updated" });
   } catch (error) {
-    console.error("❌ Error updating problem:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -293,22 +270,20 @@ router.get("/stats", authenticateUser, async (req, res) => {
     const userProgress = await UserProgress.find({ userId }).lean();
     const milestones = await UserMilestones.findOne({ userId }).lean();
 
+    // Calculate unique totals directly from the progress documents
     const solved = userProgress.filter((p) => p.status === "Solved").length;
-    const totalAttempted = userProgress.filter(
-      (p) => p.status !== "Pending"
-    ).length;
+    const totalAttempted = userProgress.filter((p) => p.status !== "Pending").length;
 
     return res.json({
       success: true,
       stats: {
-        totalSolved: milestones?.totalProblemsSolved || solved,
-        totalAttempted,
+        totalSolved: solved, // Forces the accurate, unique count!
+        totalAttempted: totalAttempted,
         currentStreak: milestones?.currentStreak || 0,
         thisWeekSolved: milestones?.thisWeekSolved || 0,
       },
     });
   } catch (error) {
-    console.error("❌ Error fetching stats:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
