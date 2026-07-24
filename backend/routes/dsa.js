@@ -26,12 +26,12 @@ router.get("/problems", authenticateUser, async (req, res) => {
     if (search) filter.name = { $regex: search, $options: "i" };
 
     const problems = await Problem.find(filter).lean();
-    const allProgress = await UserProgress.find({ userId }).lean();
 
-    // Create a map of problemId to progress for fast lookup
-    const progressMap = new Map(
-      allProgress.map(p => [p.problemId.toString(), p])
-    );
+    const userProgress = await UserProgress.find({ userId }).lean();
+    const progressMap = {};
+    userProgress.forEach((p) => {
+      progressMap[p.problemId?.toString()] = p;
+    });
 
     const topicMap = {};
     problems.forEach((problem) => {
@@ -45,7 +45,7 @@ router.get("/problems", authenticateUser, async (req, res) => {
         };
       }
 
-      const userProblemData = progressMap.get(problem._id.toString()) || {};
+      const userProblemData = progressMap[problem._id.toString()] || {};
       const problemData = {
         _id: problem._id,
         name: problem.name || problem.title,
@@ -63,7 +63,7 @@ router.get("/problems", authenticateUser, async (req, res) => {
 
       topicMap[problem.topic].problems.push(problemData);
       topicMap[problem.topic].total += 1;
-      if (userProblemData.status === "Solved" || userProblemData.status === "solved") {
+      if (userProblemData.status === "Solved") {
         topicMap[problem.topic].solved += 1;
       }
     });
@@ -79,6 +79,69 @@ router.get("/problems", authenticateUser, async (req, res) => {
   }
 });
 
+// Get all solutions (for Solutions Gallery)
+router.get("/solutions", authenticateUser, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { topic, difficulty, search } = req.query;
+
+    // Fetch all solved problems for this user
+    let progressFilter = { userId, status: "Solved" };
+    
+    const userProgress = await UserProgress.find(progressFilter)
+      .populate("problemId")
+      .lean();
+
+    if (!userProgress || userProgress.length === 0) {
+      return res.json({
+        success: true,
+        solutions: [],
+        message: "No solutions yet",
+      });
+    }
+
+    let solutions = userProgress.map((p) => ({
+      _id: p._id,
+      problemId: p.problemId?._id,
+      name: p.problemId?.name || p.problemId?.title || "Unknown",
+      topic: p.problemId?.topic || "Unknown",
+      difficulty: p.problemId?.difficulty || "Unknown",
+      description: p.problemId?.description || "",
+      link: p.problemId?.link || "#",
+      code: p.code || "",
+      output: p.output || "",
+      testResults: p.testResults || [],
+      timeSpent: p.timeSpent || 0,
+      notes: p.notes || "",
+      solvedAt: p.solvedAt || p.createdAt,
+    }));
+
+    // Apply filters
+    if (topic) {
+      solutions = solutions.filter((s) => s.topic === topic);
+    }
+    if (difficulty) {
+      solutions = solutions.filter((s) => s.difficulty === difficulty);
+    }
+    if (search) {
+      const searchLower = search.toLowerCase();
+      solutions = solutions.filter((s) =>
+        s.name.toLowerCase().includes(searchLower) ||
+        s.topic.toLowerCase().includes(searchLower)
+      );
+    }
+
+    res.json({
+      success: true,
+      solutions,
+      count: solutions.length,
+    });
+  } catch (error) {
+    console.error("Error fetching solutions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Get single problem details
 router.get("/problems/:problemId", authenticateUser, async (req, res) => {
   try {
@@ -90,8 +153,10 @@ router.get("/problems/:problemId", authenticateUser, async (req, res) => {
       return res.status(404).json({ success: false, error: "Problem not found" });
     }
 
-    const userProgress = await UserProgress.findOne({ userId, problemId }).lean();
-    const problemProgress = userProgress || {};
+    const userProgress = await UserProgress.findOne({
+      userId,
+      problemId,
+    }).lean();
 
     res.json({
       success: true,
@@ -102,13 +167,13 @@ router.get("/problems/:problemId", authenticateUser, async (req, res) => {
         difficulty: problem.difficulty,
         link: problem.link,
         description: problem.description || "",
-        status: problemProgress.status || "Pending",
-        timeSpent: problemProgress.timeSpent || 0,
-        notes: problemProgress.notes || "",
-        code: problemProgress.code || "",
-        output: problemProgress.output || "",
-        testResults: problemProgress.testResults || [],
-        lastAttempted: problemProgress.lastAttempted || null,
+        status: userProgress?.status || "Pending",
+        timeSpent: userProgress?.timeSpent || 0,
+        notes: userProgress?.notes || "",
+        code: userProgress?.code || "",
+        output: userProgress?.output || "",
+        testResults: userProgress?.testResults || [],
+        lastAttempted: userProgress?.lastAttempted || null,
       },
     });
   } catch (error) {
@@ -117,67 +182,35 @@ router.get("/problems/:problemId", authenticateUser, async (req, res) => {
   }
 });
 
-// Update problem status
-router.post("/problems/:problemId/update", authenticateUser, async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { problemId } = req.params;
-    const { status, timeSpent, notes } = req.body;
-
-    const updatedProgress = await UserProgress.findOneAndUpdate(
-      { userId, problemId },
-      {
-        $set: {
-          status: status || "Pending",
-          timeSpent: timeSpent || 0,
-          lastAttempted: new Date(),
-          ...(notes !== undefined && { notes })
-        }
-      },
-      { new: true, upsert: true }
-    );
-
-    // Update milestones if solved
-    if (status === "Solved" || status === "solved") {
-      let milestones = await UserMilestones.findOne({ userId });
-      if (!milestones) {
-        milestones = new UserMilestones({ userId });
-      }
-
-      milestones.totalProblemsSolved = (milestones.totalProblemsSolved || 0) + 1;
-      milestones.thisWeekSolved = (milestones.thisWeekSolved || 0) + 1;
-      milestones.lastActivityDate = new Date();
-      await milestones.save();
-    }
-
-    res.json({ success: true, progress: updatedProgress });
-  } catch (error) {
-    console.error("Error updating problem:", error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Save code solution
+// Save code (auto-save when tests pass)
 router.post("/problems/:problemId/save-code", authenticateUser, async (req, res) => {
   try {
     const userId = req.userId;
     const { problemId } = req.params;
-    const { code, output, status, testResults } = req.body;
+    const { code, output, testResults, status, timeSpent } = req.body;
 
-    const updatedProgress = await UserProgress.findOneAndUpdate(
-      { userId, problemId },
-      {
-        $set: {
-          code: code || "",
-          output: output || "",
-          status: status || "Pending",
-          testResults: testResults || [],
-          lastAttempted: new Date(),
-          ...(status === "Solved" && { solvedAt: new Date() })
-        }
-      },
-      { new: true, upsert: true }
-    );
+    let userProgress = await UserProgress.findOne({ userId, problemId });
+
+    if (!userProgress) {
+      userProgress = new UserProgress({
+        userId,
+        problemId,
+      });
+    }
+
+    userProgress.code = code || userProgress.code;
+    userProgress.output = output || userProgress.output;
+    userProgress.testResults = testResults || userProgress.testResults;
+    userProgress.status = status || userProgress.status;
+    userProgress.timeSpent = timeSpent || userProgress.timeSpent;
+    userProgress.lastAttempted = new Date();
+
+    // If solved, set solvedAt
+    if (status === "Solved") {
+      userProgress.solvedAt = new Date();
+    }
+
+    await userProgress.save();
 
     // Update milestones if solved
     if (status === "Solved") {
@@ -192,9 +225,60 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
       await milestones.save();
     }
 
-    res.json({ success: true, progress: updatedProgress });
+    res.json({
+      success: true,
+      message: "Code saved successfully",
+      progress: userProgress,
+    });
   } catch (error) {
     console.error("Error saving code:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update problem status
+router.post("/problems/:problemId/update", authenticateUser, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { problemId } = req.params;
+    const { status, timeSpent, notes, code, output, testResults } = req.body;
+
+    let userProgress = await UserProgress.findOne({ userId, problemId });
+
+    if (!userProgress) {
+      userProgress = new UserProgress({ userId, problemId });
+    }
+
+    userProgress.status = status || userProgress.status || "Pending";
+    userProgress.timeSpent = timeSpent || userProgress.timeSpent || 0;
+    userProgress.notes = notes !== undefined ? notes : userProgress.notes || "";
+    userProgress.code = code || userProgress.code || "";
+    userProgress.output = output || userProgress.output || "";
+    userProgress.testResults = testResults || userProgress.testResults || [];
+    userProgress.lastAttempted = new Date();
+
+    if (status === "Solved") {
+      userProgress.solvedAt = new Date();
+    }
+
+    await userProgress.save();
+
+    // Update milestones if solved
+    if (status === "Solved") {
+      let milestones = await UserMilestones.findOne({ userId });
+      if (!milestones) {
+        milestones = new UserMilestones({ userId });
+      }
+
+      milestones.totalProblemsSolved = (milestones.totalProblemsSolved || 0) + 1;
+      milestones.thisWeekSolved = (milestones.thisWeekSolved || 0) + 1;
+      milestones.lastActivityDate = new Date();
+      await milestones.save();
+    }
+
+    res.json({ success: true, message: "Problem updated" });
+  } catch (error) {
+    console.error("Error updating problem:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -222,14 +306,12 @@ router.post("/problems/add", authenticateUser, async (req, res) => {
 
     const savedProblem = await problem.save();
 
-    // Create progress record for the new problem
-    const userProgress = new UserProgress({
+    let userProgress = new UserProgress({
       userId,
       problemId: savedProblem._id,
       status: status || "Pending",
       timeSpent: timeSpent || 0,
       notes: notes || "",
-      lastAttempted: new Date(),
     });
 
     await userProgress.save();
@@ -256,13 +338,11 @@ router.get("/stats", authenticateUser, async (req, res) => {
   try {
     const userId = req.userId;
 
-    const allProgress = await UserProgress.find({ userId }).lean();
+    const userProgress = await UserProgress.find({ userId }).lean();
     const milestones = await UserMilestones.findOne({ userId }).lean();
 
-    const solved = allProgress.filter(
-      (p) => p.status === "Solved" || p.status === "solved"
-    ).length;
-    const totalAttempted = allProgress.filter(
+    const solved = userProgress.filter((p) => p.status === "Solved").length;
+    const totalAttempted = userProgress.filter(
       (p) => p.status !== "Pending"
     ).length;
 
@@ -270,52 +350,13 @@ router.get("/stats", authenticateUser, async (req, res) => {
       success: true,
       stats: {
         totalSolved: milestones?.totalProblemsSolved || solved,
-        totalAttempted: totalAttempted || allProgress.length,
+        totalAttempted,
         currentStreak: milestones?.currentStreak || 0,
         thisWeekSolved: milestones?.thisWeekSolved || 0,
       },
     });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Get all solutions (saved code with tests passing)
-router.get("/solutions", authenticateUser, async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    // Get all solved problems with code
-    const solvedProblems = await UserProgress.find({ 
-      userId, 
-      status: { $in: ["Solved", "solved"] },
-      code: { $exists: true, $ne: "" }
-    }).lean().populate("problemId");
-
-    const solutions = solvedProblems
-      .filter(p => p.problemId) // Only include if problem exists
-      .map(p => ({
-        _id: p._id,
-        problemId: p.problemId._id,
-        name: p.problemId.name || p.problemId.title,
-        topic: p.problemId.topic,
-        difficulty: p.problemId.difficulty,
-        code: p.code,
-        output: p.output,
-        testResults: p.testResults || [],
-        solvedAt: p.solvedAt,
-        timeSpent: p.timeSpent,
-      }))
-      .sort((a, b) => new Date(b.solvedAt) - new Date(a.solvedAt));
-
-    res.json({
-      success: true,
-      solutions,
-      count: solutions.length,
-    });
-  } catch (error) {
-    console.error("Error fetching solutions:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
