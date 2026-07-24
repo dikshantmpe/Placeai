@@ -1,63 +1,122 @@
 import React, { useState, useEffect } from "react";
-import Editor from "@monaco-editor/react";
+import { getAuth } from "firebase/auth";
 
-const SolutionsGallery = ({ theme = "light" }) => {
+const SolutionsGallery = () => {
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSolution, setSelectedSolution] = useState(null);
-  const [filterTopic, setFilterTopic] = useState("");
-  const [filterDifficulty, setFilterDifficulty] = useState("");
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const [expandedId, setExpandedId] = useState(null);
+  const [theme, setTheme] = useState(() => localStorage.getItem("crackin-theme") || "light");
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+  const auth = getAuth();
+
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "dark" : "";
+    localStorage.setItem("crackin-theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     fetchSolutions();
   }, []);
 
+  const getAuthToken = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      setError("Please log in to view solutions");
+      return null;
+    }
+    try {
+      return await user.getIdToken();
+    } catch (err) {
+      console.error("Error getting auth token:", err);
+      return null;
+    }
+  };
+
   const fetchSolutions = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken");
-      if (!token) return;
+      setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/api/dsa/solutions`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const token = await getAuthToken();
+      if (!token) {
+        setError("Authentication failed. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
+      const params = new URLSearchParams();
+      if (selectedTopic) params.append("topic", selectedTopic);
+      if (selectedDifficulty) params.append("difficulty", selectedDifficulty);
+      if (searchQuery) params.append("search", searchQuery);
+
+      console.log("Fetching solutions with params:", params.toString());
+
+      const response = await fetch(`/api/dsa/solutions?${params}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch solutions");
+      console.log("Solutions response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log("Solutions fetched:", data);
+
       setSolutions(data.solutions || []);
-    } catch (error) {
-      console.error("Error fetching solutions:", error);
+      if (data.solutions?.length === 0) {
+        setError("No solutions found. Solve some problems first!");
+      }
+    } catch (err) {
+      console.error("Error fetching solutions:", err);
+      setError(err.message || "Failed to fetch solutions");
       setSolutions([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredSolutions = solutions.filter((sol) => {
-    const matchTopic = !filterTopic || sol.topic === filterTopic;
-    const matchDifficulty = !filterDifficulty || sol.difficulty === filterDifficulty;
-    const matchSearch =
-      !searchQuery ||
-      sol.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchTopic && matchDifficulty && matchSearch;
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedTopic("");
+    setSelectedDifficulty("");
+  };
+
+  const filteredSolutions = solutions.filter((solution) => {
+    const matchesSearch = solution.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTopic = !selectedTopic || solution.topic === selectedTopic;
+    const matchesDifficulty = !selectedDifficulty || solution.difficulty === selectedDifficulty;
+    return matchesSearch && matchesTopic && matchesDifficulty;
   });
 
-  const uniqueTopics = [...new Set(solutions.map((s) => s.topic))];
-  const uniqueDifficulties = [...new Set(solutions.map((s) => s.difficulty))];
+  const topics = [...new Set(solutions.map((s) => s.topic))];
+  const difficulties = ["Easy", "Medium", "Hard"];
 
-  if (loading) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.loader}>Loading solutions...</div>
-      </div>
-    );
-  }
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case "Easy":
+        return "#10b981";
+      case "Medium":
+        return "#f59e0b";
+      case "Hard":
+        return "#ef4444";
+      default:
+        return "#6b7280";
+    }
+  };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className={theme}>
       <style>{`
         :root {
           --b: #1769e0;
@@ -80,12 +139,14 @@ const SolutionsGallery = ({ theme = "light" }) => {
 
       {/* Header */}
       <div style={styles.header}>
-        <h1 style={styles.title}>📚 Solutions Gallery</h1>
-        <p style={styles.subtitle}>View all your saved code solutions</p>
+        <div>
+          <h1 style={styles.title}>🎨 Solutions Gallery</h1>
+          <p style={styles.subtitle}>View all your saved code solutions</p>
+        </div>
       </div>
 
       {/* Filters */}
-      <div style={styles.filtersSection}>
+      <div style={styles.filterSection}>
         <input
           type="text"
           placeholder="Search problems..."
@@ -95,12 +156,12 @@ const SolutionsGallery = ({ theme = "light" }) => {
         />
 
         <select
-          value={filterTopic}
-          onChange={(e) => setFilterTopic(e.target.value)}
-          style={styles.filterSelect}
+          value={selectedTopic}
+          onChange={(e) => setSelectedTopic(e.target.value)}
+          style={styles.select}
         >
           <option value="">All topics</option>
-          {uniqueTopics.map((topic) => (
+          {topics.map((topic) => (
             <option key={topic} value={topic}>
               {topic}
             </option>
@@ -108,162 +169,114 @@ const SolutionsGallery = ({ theme = "light" }) => {
         </select>
 
         <select
-          value={filterDifficulty}
-          onChange={(e) => setFilterDifficulty(e.target.value)}
-          style={styles.filterSelect}
+          value={selectedDifficulty}
+          onChange={(e) => setSelectedDifficulty(e.target.value)}
+          style={styles.select}
         >
           <option value="">All difficulties</option>
-          {uniqueDifficulties.map((diff) => (
+          {difficulties.map((diff) => (
             <option key={diff} value={diff}>
               {diff}
             </option>
           ))}
         </select>
 
-        <button
-          onClick={() => {
-            setFilterTopic("");
-            setFilterDifficulty("");
-            setSearchQuery("");
-          }}
-          style={styles.resetBtn}
-        >
+        <button onClick={resetFilters} style={styles.resetBtn}>
           Reset
         </button>
       </div>
 
-      {filteredSolutions.length === 0 ? (
-        <div style={styles.emptyState}>
-          <p>No solutions found. Start solving problems to see them here! 🚀</p>
+      {/* Content */}
+      {loading ? (
+        <div style={styles.loading}>Loading solutions...</div>
+      ) : error ? (
+        <div style={styles.error}>{error}</div>
+      ) : filteredSolutions.length === 0 ? (
+        <div style={styles.empty}>
+          No solutions found. Start solving problems to see them here! 🚀
         </div>
       ) : (
-        <div style={styles.mainContent}>
-          {/* Solutions List */}
-          <div style={styles.solutionsList}>
-            <h3 style={styles.listTitle}>Solutions ({filteredSolutions.length})</h3>
-            <div style={styles.solutionsGrid}>
-              {filteredSolutions.map((solution) => (
-                <div
-                  key={solution._id}
-                  style={{
-                    ...styles.solutionCard,
-                    ...(selectedSolution?._id === solution._id && styles.solutionCardActive),
-                  }}
-                  onClick={() => setSelectedSolution(solution)}
-                >
-                  <div style={styles.cardHeader}>
-                    <h4 style={styles.cardTitle}>{solution.name}</h4>
-                  </div>
-                  <div style={styles.cardMeta}>
-                    <span style={{
-                      ...styles.badge,
-                      background: solution.difficulty === "Easy" ? "#e1f3ec" : 
-                                 solution.difficulty === "Medium" ? "#fff0cb" : "#fde3e3",
-                      color: solution.difficulty === "Easy" ? "#20705d" : 
-                             solution.difficulty === "Medium" ? "#946315" : "#ad3f3f"
-                    }}>
-                      {solution.difficulty}
-                    </span>
-                    <span style={styles.topic}>{solution.topic}</span>
-                  </div>
-                  <div style={styles.cardFooter}>
-                    <span style={styles.status}>✓ Solved</span>
-                    <span style={styles.date}>
-                      {new Date(solution.solvedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Solution Detail */}
-          {selectedSolution && (
-            <div style={styles.detailPanel}>
-              <div style={styles.detailHeader}>
+        <div style={styles.solutionsGrid}>
+          {filteredSolutions.map((solution) => (
+            <div
+              key={solution._id}
+              style={styles.solutionCard}
+              onClick={() => setExpandedId(expandedId === solution._id ? null : solution._id)}
+            >
+              <div style={styles.cardHeader}>
                 <div>
-                  <h2 style={styles.detailTitle}>{selectedSolution.name}</h2>
-                  <p style={styles.detailTopic}>{selectedSolution.topic}</p>
+                  <h3 style={styles.solutionName}>{solution.name}</h3>
+                  <p style={styles.solutionTopic}>{solution.topic}</p>
                 </div>
-                <button
-                  onClick={() => setSelectedSolution(null)}
-                  style={styles.closeBtn}
+                <span
+                  style={{
+                    ...styles.difficultBadge,
+                    backgroundColor: getDifficultyColor(solution.difficulty),
+                  }}
                 >
-                  ✕
-                </button>
+                  {solution.difficulty}
+                </span>
               </div>
 
-              {/* Code Editor */}
-              <div style={styles.editorSection}>
-                <h3 style={styles.sectionTitle}>Solution Code</h3>
-                <div style={styles.editorWrapper}>
-                  <Editor
-                    height="300px"
-                    language="javascript"
-                    theme={theme === "dark" ? "vs-dark" : "vs"}
-                    value={selectedSolution.code || ""}
-                    options={{
-                      readOnly: true,
-                      minimap: { enabled: false },
-                      fontSize: 13,
-                    }}
-                  />
-                </div>
+              <div style={styles.cardMeta}>
+                <span>⏱️ {solution.timeSpent} min</span>
+                <span>
+                  📅 {solution.solvedAt
+                    ? new Date(solution.solvedAt).toLocaleDateString()
+                    : "N/A"}
+                </span>
               </div>
 
-              {/* Output */}
-              {selectedSolution.output && (
-                <div style={styles.outputSection}>
-                  <h3 style={styles.sectionTitle}>Test Output</h3>
-                  <pre style={styles.outputBox}>{selectedSolution.output}</pre>
-                </div>
-              )}
+              {expandedId === solution._id && (
+                <div style={styles.expandedContent}>
+                  {solution.code && (
+                    <div style={styles.codeSection}>
+                      <h4>Your Solution</h4>
+                      <pre style={styles.codeBlock}>{solution.code}</pre>
+                    </div>
+                  )}
 
-              {/* Test Results */}
-              {selectedSolution.testResults && selectedSolution.testResults.length > 0 && (
-                <div style={styles.testSection}>
-                  <h3 style={styles.sectionTitle}>Test Results</h3>
-                  <div style={styles.testResults}>
-                    {selectedSolution.testResults.map((result, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          ...styles.testResult,
-                          borderLeft: `4px solid ${result.passed ? "#10b981" : "#ef4444"}`,
-                        }}
-                      >
-                        <span
+                  {solution.testResults && solution.testResults.length > 0 && (
+                    <div style={styles.testsSection}>
+                      <h4>Test Results</h4>
+                      {solution.testResults.map((test, idx) => (
+                        <div
+                          key={idx}
                           style={{
-                            color: result.passed ? "#10b981" : "#ef4444",
-                            fontWeight: "bold",
+                            ...styles.testResult,
+                            borderLeftColor: test.passed ? "#10b981" : "#ef4444",
                           }}
                         >
-                          Test {result.testNum}: {result.passed ? "✓ PASSED" : "✗ FAILED"}
-                        </span>
-                        {result.input && (
-                          <small style={styles.testDetail}>
-                            Input: {JSON.stringify(result.input)}
-                          </small>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                          <span>{test.passed ? "✓" : "✗"} {test.testName}</span>
+                          {test.input && (
+                            <small>Input: {test.input}</small>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {solution.notes && (
+                    <div style={styles.notesSection}>
+                      <h4>Notes</h4>
+                      <p>{solution.notes}</p>
+                    </div>
+                  )}
+
+                  {solution.link && (
+                    <a
+                      href={solution.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.problemLink}
+                    >
+                      View on LeetCode →
+                    </a>
+                  )}
                 </div>
               )}
-
-              {/* Metadata */}
-              <div style={styles.metadata}>
-                <div style={styles.metadataItem}>
-                  <span>Solved on:</span>
-                  <strong>{new Date(selectedSolution.solvedAt).toLocaleString()}</strong>
-                </div>
-                <div style={styles.metadataItem}>
-                  <span>Time spent:</span>
-                  <strong>{selectedSolution.timeSpent || 0} min</strong>
-                </div>
-              </div>
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>
@@ -272,229 +285,170 @@ const SolutionsGallery = ({ theme = "light" }) => {
 
 const styles = {
   container: {
-    padding: "24px",
-    background: "var(--bg)",
-    minHeight: "100vh",
+    backgroundColor: "var(--bg)",
     color: "var(--t)",
+    minHeight: "100vh",
+    padding: "24px",
   },
   header: {
     marginBottom: "32px",
+    paddingBottom: "24px",
+    borderBottom: "1px solid var(--l)",
   },
   title: {
     fontSize: "32px",
+    fontWeight: "900",
     margin: "0 0 8px 0",
     color: "var(--n)",
   },
   subtitle: {
     fontSize: "14px",
     color: "var(--m)",
-    margin: 0,
+    margin: "0",
   },
-  loader: {
-    textAlign: "center",
-    padding: "60px 20px",
-    color: "var(--m)",
-  },
-  filtersSection: {
+  filterSection: {
     display: "grid",
-    gridTemplateColumns: "1fr 150px 150px 80px",
+    gridTemplateColumns: "1fr 200px 200px 100px",
     gap: "12px",
     marginBottom: "24px",
+    padding: "16px",
+    backgroundColor: "var(--c)",
+    borderRadius: "12px",
+    border: "1px solid var(--l)",
   },
   searchInput: {
     padding: "10px 14px",
     border: "1px solid var(--l)",
     borderRadius: "8px",
-    background: "var(--c)",
-    color: "var(--t)",
     fontSize: "14px",
+    backgroundColor: "var(--bg)",
+    color: "var(--t)",
+    outline: "none",
   },
-  filterSelect: {
-    padding: "10px 12px",
+  select: {
+    padding: "10px 14px",
     border: "1px solid var(--l)",
     borderRadius: "8px",
-    background: "var(--c)",
+    fontSize: "14px",
+    backgroundColor: "var(--bg)",
     color: "var(--t)",
-    fontSize: "13px",
+    outline: "none",
   },
   resetBtn: {
     padding: "10px 14px",
-    background: "var(--b)",
-    color: "#fff",
     border: "none",
     borderRadius: "8px",
+    backgroundColor: "var(--b)",
+    color: "#fff",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "600",
+    fontSize: "14px",
   },
-  emptyState: {
+  loading: {
     textAlign: "center",
-    padding: "80px 20px",
+    padding: "60px 24px",
+    fontSize: "16px",
     color: "var(--m)",
   },
-  mainContent: {
-    display: "grid",
-    gridTemplateColumns: "350px 1fr",
-    gap: "24px",
-    maxWidth: "1400px",
+  error: {
+    textAlign: "center",
+    padding: "24px",
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
+    borderRadius: "8px",
+    marginBottom: "24px",
   },
-  solutionsList: {
-    background: "var(--c)",
-    border: "1px solid var(--l)",
-    borderRadius: "12px",
-    padding: "20px",
-    maxHeight: "800px",
-    overflowY: "auto",
-  },
-  listTitle: {
-    margin: "0 0 16px 0",
+  empty: {
+    textAlign: "center",
+    padding: "60px 24px",
     fontSize: "16px",
-    fontWeight: "700",
-    color: "var(--n)",
+    color: "var(--m)",
   },
   solutionsGrid: {
     display: "grid",
-    gap: "10px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+    gap: "20px",
   },
   solutionCard: {
-    padding: "14px",
-    background: "var(--bg)",
+    backgroundColor: "var(--c)",
     border: "1px solid var(--l)",
-    borderRadius: "8px",
+    borderRadius: "12px",
+    padding: "20px",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
-  solutionCardActive: {
-    background: "var(--b)",
-    color: "#fff",
-    borderColor: "var(--b)",
-  },
   cardHeader: {
-    marginBottom: "8px",
-  },
-  cardTitle: {
-    margin: "0",
-    fontSize: "13px",
-    fontWeight: "700",
-  },
-  cardMeta: {
-    display: "flex",
-    gap: "6px",
-    marginBottom: "8px",
-    fontSize: "11px",
-  },
-  badge: {
-    padding: "2px 6px",
-    borderRadius: "4px",
-    fontSize: "10px",
-    fontWeight: "600",
-  },
-  topic: {
-    fontSize: "11px",
-    opacity: 0.8,
-  },
-  cardFooter: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "11px",
-    opacity: 0.7,
-  },
-  status: {
-    color: "#10b981",
-    fontWeight: "600",
-  },
-  date: {
-    fontSize: "10px",
-  },
-  detailPanel: {
-    background: "var(--c)",
-    border: "1px solid var(--l)",
-    borderRadius: "12px",
-    padding: "24px",
-    maxHeight: "800px",
-    overflowY: "auto",
-  },
-  detailHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "start",
-    marginBottom: "24px",
-    paddingBottom: "16px",
-    borderBottom: "1px solid var(--l)",
+    marginBottom: "12px",
   },
-  detailTitle: {
-    margin: "0 0 4px 0",
-    fontSize: "22px",
-    fontWeight: "800",
-  },
-  detailTopic: {
-    margin: 0,
-    fontSize: "12px",
-    color: "var(--m)",
-  },
-  closeBtn: {
-    background: "none",
-    border: "none",
-    fontSize: "20px",
-    cursor: "pointer",
-    color: "var(--m)",
-  },
-  editorSection: {
-    marginBottom: "24px",
-  },
-  sectionTitle: {
-    margin: "0 0 12px 0",
-    fontSize: "14px",
+  solutionName: {
+    fontSize: "16px",
     fontWeight: "700",
+    margin: "0 0 4px 0",
     color: "var(--n)",
   },
-  editorWrapper: {
-    border: "1px solid var(--l)",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
-  outputSection: {
-    marginBottom: "24px",
-  },
-  outputBox: {
-    margin: "0",
-    padding: "12px",
-    background: "#1e1e1e",
-    color: "#d4d4d4",
-    borderRadius: "8px",
+  solutionTopic: {
     fontSize: "12px",
-    fontFamily: "monospace",
-    maxHeight: "200px",
-    overflowY: "auto",
-  },
-  testSection: {
-    marginBottom: "24px",
-  },
-  testResults: {
-    display: "grid",
-    gap: "8px",
-  },
-  testResult: {
-    padding: "12px",
-    background: "var(--bg)",
-    borderRadius: "6px",
-    fontSize: "12px",
-  },
-  testDetail: {
-    display: "block",
-    marginTop: "4px",
     color: "var(--m)",
-    fontSize: "11px",
+    margin: "0",
   },
-  metadata: {
+  difficultBadge: {
+    padding: "4px 10px",
+    borderRadius: "6px",
+    color: "#fff",
+    fontSize: "12px",
+    fontWeight: "700",
+    whiteSpace: "nowrap",
+  },
+  cardMeta: {
+    display: "flex",
+    gap: "16px",
+    fontSize: "12px",
+    color: "var(--m)",
+    marginBottom: "12px",
+    paddingBottom: "12px",
+    borderBottom: "1px solid var(--l)",
+  },
+  expandedContent: {
+    marginTop: "16px",
     paddingTop: "16px",
     borderTop: "1px solid var(--l)",
-    display: "grid",
-    gap: "12px",
   },
-  metadataItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "13px",
+  codeSection: {
+    marginBottom: "16px",
+  },
+  codeBlock: {
+    backgroundColor: "var(--bg)",
+    padding: "12px",
+    borderRadius: "8px",
+    fontSize: "12px",
+    overflow: "auto",
+    border: "1px solid var(--l)",
+    lineHeight: "1.5",
+    margin: "8px 0 0 0",
+  },
+  testsSection: {
+    marginBottom: "16px",
+  },
+  testResult: {
+    padding: "10px",
+    backgroundColor: "var(--bg)",
+    borderLeft: "3px solid #10b981",
+    borderRadius: "4px",
+    fontSize: "12px",
+    marginBottom: "8px",
+  },
+  notesSection: {
+    marginBottom: "16px",
+  },
+  problemLink: {
+    display: "inline-block",
+    color: "var(--b)",
+    fontWeight: "700",
+    textDecoration: "none",
+    marginTop: "12px",
   },
 };
 
