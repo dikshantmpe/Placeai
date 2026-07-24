@@ -290,7 +290,6 @@ const DSATracker = () => {
       return;
     }
 
-    // Fallback for other languages
     setOutput("To run Python, C++, or Java, you will need to connect a free API key (like JDoodle) to your backend. JavaScript runs natively in the browser!");
   };
 
@@ -311,19 +310,6 @@ const DSATracker = () => {
     "DP", "Greedy", "Backtracking", "Bit Manipulation",
     "Math", "String", "Hash Table", "Heap", "Trie", "Binary Search", "Two Pointers", "Sliding Window"
   ];
-
-  // Dynamically calculate accurate unique stats directly from the topics data
-  const uniqueTotalSolved = topics.reduce((acc, topic) => acc + (topic.solved || 0), 0);
-  
-  const uniqueTotalAttempted = topics.reduce((acc, topic) => {
-    // Count any problem that is NOT pending as an attempt
-    const attemptedInTopic = topic.problems.filter(p => p.status !== "Pending").length;
-    return acc + attemptedInTopic;
-  }, 0);
-
-  const completionPercentage = uniqueTotalAttempted > 0 
-    ? Math.round((uniqueTotalSolved / uniqueTotalAttempted) * 100) 
-    : 0;
 
   return (
     <div style={styles.body}>
@@ -350,7 +336,7 @@ const DSATracker = () => {
           <section className="stats">
             <div className="card stat">
               <span className="muted">Total solved</span>
-              <strong>{uniqueTotalSolved}</strong>
+              <strong>{stats.totalSolved}</strong>
               <span>↑ {stats.thisWeekSolved} this week</span>
             </div>
             <div className="card stat">
@@ -365,8 +351,8 @@ const DSATracker = () => {
             </div>
             <div className="card stat">
               <span className="muted">Total attempted</span>
-              <strong>{uniqueTotalAttempted}</strong>
-              <span>{completionPercentage}% completion</span>
+              <strong>{stats.totalAttempted}</strong>
+              <span>{stats.totalAttempted > 0 ? Math.round((stats.totalSolved / stats.totalAttempted) * 100) : 0}% completion</span>
             </div>
           </section>
 
@@ -499,7 +485,7 @@ const DSATracker = () => {
         <aside className="side">
           <section className="card">
             <span className="blue">QUICK STAT</span>
-            <h3>You've solved {uniqueTotalSolved} problems</h3>
+            <h3>You've solved {stats.totalSolved} problems</h3>
             <p>Keep pushing! 🚀</p>
             <button className="primary" onClick={() => setShowModal("add")}>Add a problem</button>
           </section>
