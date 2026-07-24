@@ -243,21 +243,21 @@ const SolutionsGallery = () => {
                     <div style={styles.testsSection}>
                       <h4>Test Results</h4>
                       {solution.testResults.map((test, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            ...styles.testResult,
-                            borderLeftColor: test.passed ? "#10b981" : "#ef4444",
-                          }}
-                        >
-                          <span>{test.passed ? "✓" : "✗"} {test.testName}</span>
-                          {test.input && (
-                            <small>Input: {test.input}</small>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+  <div
+    key={idx}
+    style={{
+      ...styles.testResult,
+      borderLeftColor: test.passed ? "#10b981" : "#ef4444",
+    }}
+  >
+    <span>{test.passed ? "✓" : "✗"} {test.testName}</span>
+    {test.input && (
+      <small>
+        Input: {typeof test.input === 'object' ? JSON.stringify(test.input) : String(test.input)}
+      </small>
+    )}
+  </div>
+))}
 
                   {solution.notes && (
                     <div style={styles.notesSection}>
