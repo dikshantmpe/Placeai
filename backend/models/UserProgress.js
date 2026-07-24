@@ -6,9 +6,15 @@ const userProgressSchema = new mongoose.Schema({
   problemId: { type: mongoose.Schema.Types.ObjectId, ref: "Problem", required: true },
   
   // Problem tracking
+  // 🚨 FIXED: Expanded enum to catch all possible casing variations from the frontend
   status: { 
     type: String, 
-    enum: ["Pending", "Solved", "Revision Needed", "attempted", "solved"], 
+    enum: [
+      "Pending", "PENDING", "pending", 
+      "Solved", "SOLVED", "solved", 
+      "Revision Needed", "REVISION NEEDED", 
+      "Attempted", "ATTEMPTED", "attempted"
+    ], 
     default: "Pending" 
   },
   
