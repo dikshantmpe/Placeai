@@ -331,7 +331,6 @@ const DSATracker = () => {
             <div className="card stat">
               <span className="muted">Total solved</span>
               <strong>{stats.totalSolved}</strong>
-              <span>↑ {stats.thisWeekSolved} this week</span>
             </div>
             <div className="card stat">
               <span className="muted">Current streak</span>
