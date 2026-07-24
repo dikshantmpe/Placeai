@@ -290,6 +290,7 @@ const DSATracker = () => {
       return;
     }
 
+    // Fallback for other languages
     setOutput("To run Python, C++, or Java, you will need to connect a free API key (like JDoodle) to your backend. JavaScript runs natively in the browser!");
   };
 
@@ -352,7 +353,7 @@ const DSATracker = () => {
             <div className="card stat">
               <span className="muted">Total attempted</span>
               <strong>{stats.totalAttempted}</strong>
-              <span>{stats.totalAttempted > 0 ? Math.round((stats.totalSolved / stats.totalAttempted) * 100) : 0}% completion</span>
+              <span>{stats.totalSolved > 0 ? Math.round((stats.totalSolved / stats.totalAttempted) * 100) : 0}% completion</span>
             </div>
           </section>
 
