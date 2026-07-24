@@ -55,7 +55,10 @@ const SolutionsGallery = () => {
 
       console.log("Fetching solutions with params:", params.toString());
 
-      const response = await fetch(`/api/dsa/solutions?${params}`, {
+      // Define your backend URL so it doesn't default to the frontend domain
+      const BASE_URL = import.meta.env.VITE_API_URL || "https://placeai-sqjj.onrender.com";
+
+      const response = await fetch(`${BASE_URL}/api/dsa/solutions?${params}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
