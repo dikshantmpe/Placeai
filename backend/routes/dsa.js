@@ -176,7 +176,6 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
     if (!userProgress) {
       userProgress = new UserProgress({ userId, problemId });
     } else {
-      // Check if it was already solved before we update it
       wasAlreadySolved = userProgress.status === "Solved";
     }
 
@@ -193,7 +192,6 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
 
     await userProgress.save();
 
-    // Update milestones ONLY if it wasn't already solved previously
     if (status === "Solved" && !wasAlreadySolved) {
       let milestones = await UserMilestones.findOne({ userId });
       if (!milestones) {
@@ -227,7 +225,6 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
     if (!userProgress) {
       userProgress = new UserProgress({ userId, problemId });
     } else {
-      // Check if it was already solved before we update it
       wasAlreadySolved = userProgress.status === "Solved";
     }
 
@@ -242,7 +239,6 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
 
     await userProgress.save();
 
-    // Update milestones ONLY if it wasn't already solved previously
     if (status === "Solved" && !wasAlreadySolved) {
       let milestones = await UserMilestones.findOne({ userId });
       if (!milestones) {
@@ -274,13 +270,24 @@ router.get("/stats", authenticateUser, async (req, res) => {
     const solved = userProgress.filter((p) => p.status === "Solved").length;
     const totalAttempted = userProgress.filter((p) => p.status !== "Pending").length;
 
+    // Calculate "Solved this week" dynamically (last 7 days)
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    const thisWeekSolvedCount = userProgress.filter((p) => {
+      if (p.status !== "Solved") return false;
+      // Fallback to createdAt if solvedAt doesn't exist on older documents
+      const dateToCheck = p.solvedAt ? new Date(p.solvedAt) : new Date(p.createdAt);
+      return dateToCheck >= oneWeekAgo;
+    }).length;
+
     return res.json({
       success: true,
       stats: {
-        totalSolved: solved, // Forces the accurate, unique count!
+        totalSolved: solved,
         totalAttempted: totalAttempted,
         currentStreak: milestones?.currentStreak || 0,
-        thisWeekSolved: milestones?.thisWeekSolved || 0,
+        thisWeekSolved: thisWeekSolvedCount, // Uses the newly calculated correct value
       },
     });
   } catch (error) {
