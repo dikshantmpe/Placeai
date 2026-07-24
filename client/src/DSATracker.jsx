@@ -164,12 +164,37 @@ const DSATracker = () => {
   };
 
   const handleSaveCode = () => {
-    const updatedNotes = selectedProblem.notes 
-      ? `${selectedProblem.notes}\n\n=== Code Solution ===\n${code}`
-      : `=== Code Solution ===\n${code}`;
-      
-    handleUpdateProblem(selectedProblem._id, { notes: updatedNotes });
-    alert("Code saved to your notes successfully!");
+    saveCodeToDatabase(code, output, solutionStatus, testResults);
+  };
+
+  const saveCodeToDatabase = async (codeContent, outputContent, status, results) => {
+    try {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/api/dsa/problems/${selectedProblem._id}/save-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code: codeContent,
+          output: outputContent,
+          status,
+          testResults: results,
+          solvedAt: status === "solved" ? new Date() : null
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save code");
+      alert("✓ Code saved successfully!");
+      fetchProblems();
+      fetchStats();
+    } catch (error) {
+      console.error("Error saving code:", error);
+      alert("Failed to save code. Try again.");
+    }
   };
 
   const handleRunCode = async () => {
@@ -245,19 +270,19 @@ const DSATracker = () => {
         if (allTestsPassed) {
           outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
           setSolutionStatus("solved");
-          // Auto-update problem to solved
-          handleUpdateProblem(selectedProblem._id, { 
-            status: "Solved",
-            code,
-            testResults: results
-          });
+          setOutput(outputText);
+          setTestResults(results);
+          
+          // Auto-save to database
+          setTimeout(() => {
+            saveCodeToDatabase(code, outputText, "Solved", results);
+          }, 500);
         } else {
           outputText += "\n❌ Some tests failed. Please fix your solution.";
           setSolutionStatus("pending");
+          setOutput(outputText);
+          setTestResults(results);
         }
-
-        setOutput(outputText);
-        setTestResults(results);
       } catch (error) {
         setOutput(`❌ Runtime Error:\n${error.message}`);
         setSolutionStatus("pending");
@@ -415,10 +440,11 @@ const DSATracker = () => {
                                       className="problem-link"
                                       onClick={() => {
                                         setSelectedProblem(problem);
-                                        setCode("// Write your solution here...\n");
-                                        setOutput("");
-                                        setSolutionStatus("pending");
-                                        setTestResults([]);
+                                        // Load saved code if it exists
+                                        setCode(problem.code || "// Write your solution here...\n");
+                                        setOutput(problem.output || "");
+                                        setSolutionStatus(problem.status === "Solved" ? "solved" : "pending");
+                                        setTestResults(problem.testResults || []);
                                         setShowModal("workspace");
                                       }}
                                     >

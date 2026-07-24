@@ -6,24 +6,36 @@ const userProgressSchema = new mongoose.Schema({
   
   problemId: { type: mongoose.Schema.Types.ObjectId, ref: "Problem", required: true },
   
-  // Updated enum to support the new frontend dropdown options without breaking old data
-  status: { 
-    type: String, 
-    enum: ["Pending", "Solved", "Revision Needed", "attempted", "solved"], 
-    default: "Pending" 
-  },
-  
-  // New fields added from the frontend UI
-  timeSpent: { type: Number, default: 0 },
-  notes: { type: String, default: "" },
+  status: { type: String, enum: ["attempted", "solved", "pending", "revision_needed"], default: "pending" },
   
   solvedAt: { type: Date },
-  lastAttempted: { type: Date, default: Date.now },
-  attemptedAt: { type: Date, default: Date.now }, // Kept for backwards compatibility
+  attemptedAt: { type: Date, default: Date.now },
+  lastAttempted: { type: Date },
   
+  // Code solution storage
   code: { type: String },
   
-}, { timestamps: true }); // Mongoose handles createdAt and updatedAt automatically
+  // Test output storage
+  output: { type: String },
+  
+  // Test results
+  testResults: [
+    {
+      testNum: Number,
+      passed: Boolean,
+      input: mongoose.Schema.Types.Mixed,
+      expected: mongoose.Schema.Types.Mixed,
+      output: mongoose.Schema.Types.Mixed,
+      error: String
+    }
+  ],
+  
+  timeSpent: { type: Number, default: 0 },
+  notes: { type: String },
+  
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
 // Indexes for fast queries
 userProgressSchema.index({ userId: 1 });
