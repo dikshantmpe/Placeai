@@ -6,7 +6,6 @@ const userProgressSchema = new mongoose.Schema({
   problemId: { type: mongoose.Schema.Types.ObjectId, ref: "Problem", required: true },
   
   // Problem tracking
-  // 🚨 FIXED: Expanded enum to catch all possible casing variations from the frontend
   status: { 
     type: String, 
     enum: [
@@ -28,9 +27,10 @@ const userProgressSchema = new mongoose.Schema({
   testResults: [{
     testName: String,
     passed: Boolean,
-    input: String,
-    expected: String,
-    actual: String,
+    // 🚨 FIXED: Changed to Mixed so Mongoose accepts Arrays, Objects, and Numbers
+    input: mongoose.Schema.Types.Mixed,
+    expected: mongoose.Schema.Types.Mixed,
+    actual: mongoose.Schema.Types.Mixed,
     error: String,
   }],
   
