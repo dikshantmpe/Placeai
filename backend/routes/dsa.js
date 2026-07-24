@@ -281,4 +281,43 @@ router.get("/stats", authenticateUser, async (req, res) => {
   }
 });
 
+// Get all solutions (saved code with tests passing)
+router.get("/solutions", authenticateUser, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Get all solved problems with code
+    const solvedProblems = await UserProgress.find({ 
+      userId, 
+      status: { $in: ["Solved", "solved"] },
+      code: { $exists: true, $ne: "" }
+    }).lean().populate("problemId");
+
+    const solutions = solvedProblems
+      .filter(p => p.problemId) // Only include if problem exists
+      .map(p => ({
+        _id: p._id,
+        problemId: p.problemId._id,
+        name: p.problemId.name || p.problemId.title,
+        topic: p.problemId.topic,
+        difficulty: p.problemId.difficulty,
+        code: p.code,
+        output: p.output,
+        testResults: p.testResults || [],
+        solvedAt: p.solvedAt,
+        timeSpent: p.timeSpent,
+      }))
+      .sort((a, b) => new Date(b.solvedAt) - new Date(a.solvedAt));
+
+    res.json({
+      success: true,
+      solutions,
+      count: solutions.length,
+    });
+  } catch (error) {
+    console.error("Error fetching solutions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

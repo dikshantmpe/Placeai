@@ -14,6 +14,7 @@ import Profile from "../Profile";
 import Home from "../Home";
 import Signup from "../Signup";
 import ComingSoon from "../ComingSoon";
+import SolutionsGallery from "./SolutionsGallery";
 
 /* ── TopbarWrapper: Hides Topbar on landing page ("/") ── */
 function TopbarWrapper(props) {
@@ -165,7 +166,7 @@ export default function App() {
               <Route path="/interview" element={<MockInterview theme={theme} />} />
               <Route path="/quiz" element={<ComingSoon theme={theme} />} />
               <Route path="/company" element={<ComingSoon theme={theme} />} />
-              
+              <Route path="/solutions" element={<SolutionsGallery />} />
               {/* "Coming Soon" component implemented as a fallback for incomplete routes */}
               <Route path="*" element={<ComingSoon theme={theme} />} />
             </Routes>

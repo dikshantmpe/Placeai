@@ -4,7 +4,7 @@ import { auth } from "../firebase.js";
 import { signOut } from "firebase/auth";
 
 /* ═══════════════════════════════════════════════════════════════
-   CRACKIN AI — TOPBAR (with persistent login support)
+   CRACKIN AI — TOPBAR (with Solutions Gallery + persistent login support)
    ═══════════════════════════════════════════════════════════════ */
 
 const formatName = (name) => {
@@ -83,6 +83,14 @@ const CompanyIcon = () => (
 const ChallengeIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+const SolutionsIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <circle cx="9" cy="10" r="1" />
+    <circle cx="12" cy="10" r="1" />
+    <circle cx="15" cy="10" r="1" />
   </svg>
 );
 
@@ -171,7 +179,7 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
     setSearchQuery("");
   };
 
-  // UPDATED: Interview is true, Challenge badge is null
+  // UPDATED: Added Solutions Gallery with active status
   const navItems = [
     { id: "home", label: "Dashboard", path: "/dashboard", icon: <HomeIcon />, badge: null, comingSoon: false },
     { id: "dsa", label: "DSA", path: "/dsa", icon: <DsaIcon />, badge: null, comingSoon: false },
@@ -180,6 +188,7 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
     { id: "aptitude", label: "Aptitude", path: "/quiz", icon: <AptitudeIcon />, badge: null, comingSoon: true },
     { id: "companies", label: "Companies", path: "/company", icon: <CompanyIcon />, badge: null, comingSoon: true },
     { id: "challenge", label: "Challenge", path: "/daily", icon: <ChallengeIcon />, badge: null, comingSoon: true },
+    { id: "solutions", label: "Solutions", path: "/solutions", icon: <SolutionsIcon />, badge: null, comingSoon: false },
   ];
 
   return (
