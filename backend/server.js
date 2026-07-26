@@ -166,7 +166,8 @@ app.use("/api/company", require("./routes/company"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/daily", require("./routes/daily"));
 app.use("/api/chatbot", require("./routes/chatbot"));
-app.use("/api/dsa", dsaRouter);
+const authMiddleware = require("./middleware/auth");
+app.use("/api/dsa", authMiddleware, dsaRouter);
 
 // ═══════════════════════════════════════════════════════════════
 // MONGODB CONNECTION

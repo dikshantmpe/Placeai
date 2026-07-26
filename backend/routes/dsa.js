@@ -6,23 +6,8 @@ const Problem = require("../models/Problem");
 const UserProgress = require("../models/UserProgress");
 const UserMilestones = require("../models/UserMilestones");
 
-// Inline middleware for auth
-const authenticateUser = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.warn("❌ No auth header");
-      return res.status(401).json({ success: false, error: "No auth token" });
-    }
-    
-    req.userId = req.headers["x-user-id"] || "demo-user";
-    console.log(`✅ Authenticated user: ${req.userId}`);
-    next();
-  } catch (error) {
-    console.error("Auth error:", error);
-    res.status(401).json({ success: false, error: "Auth failed" });
-  }
-};
+// ✅ NOTE: authMiddleware is now applied in server.js
+// No need for inline auth here anymore!
 
 // Test endpoint
 router.get("/test", (req, res) => {
@@ -30,11 +15,11 @@ router.get("/test", (req, res) => {
 });
 
 // Get all solutions (for Solutions Gallery)
-router.get("/solutions", authenticateUser, async (req, res) => {
+router.get("/solutions", async (req, res) => {
   try {
     console.log("📍 GET /solutions called");
 
-    const userId = req.userId;
+    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
     const { topic, difficulty, search } = req.query;
 
     let progressFilter = { userId, status: "Solved" };
@@ -98,11 +83,11 @@ router.get("/solutions", authenticateUser, async (req, res) => {
 });
 
 // Get all problems
-router.get("/problems", authenticateUser, async (req, res) => {
+router.get("/problems", async (req, res) => {
   try {
     console.log("📍 GET /problems called");
 
-    const userId = req.userId;
+    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
     const { topic, difficulty, search } = req.query;
 
     let filter = {};
@@ -162,11 +147,11 @@ router.get("/problems", authenticateUser, async (req, res) => {
 });
 
 // Save code
-router.post("/problems/:problemId/save-code", authenticateUser, async (req, res) => {
+router.post("/problems/:problemId/save-code", async (req, res) => {
   try {
     console.log("📍 POST /save-code called");
 
-    const userId = req.userId;
+    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
     const { problemId } = req.params;
     const { code, output, testResults, status, timeSpent } = req.body;
 
@@ -211,11 +196,11 @@ router.post("/problems/:problemId/save-code", authenticateUser, async (req, res)
 });
 
 // Update problem status
-router.post("/problems/:problemId/update", authenticateUser, async (req, res) => {
+router.post("/problems/:problemId/update", async (req, res) => {
   try {
     console.log("📍 POST /update called");
 
-    const userId = req.userId;
+    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
     const { problemId } = req.params;
     const { status, timeSpent, notes } = req.body;
 
@@ -257,11 +242,11 @@ router.post("/problems/:problemId/update", authenticateUser, async (req, res) =>
 });
 
 // Get stats
-router.get("/stats", authenticateUser, async (req, res) => {
+router.get("/stats", async (req, res) => {
   try {
     console.log("📍 GET /stats called");
 
-    const userId = req.userId;
+    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
 
     const userProgress = await UserProgress.find({ userId }).lean();
     const milestones = await UserMilestones.findOne({ userId }).lean();
@@ -287,7 +272,7 @@ router.get("/stats", authenticateUser, async (req, res) => {
         totalSolved: solved,
         totalAttempted: totalAttempted,
         currentStreak: milestones?.currentStreak || 0,
-        thisWeekSolved: thisWeekSolvedCount, // Uses the newly calculated correct value
+        thisWeekSolved: thisWeekSolvedCount,
       },
     });
   } catch (error) {
