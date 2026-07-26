@@ -11,7 +11,8 @@ const UserMilestones = require("../models/UserMilestones");
 
 // Test endpoint
 router.get("/test", (req, res) => {
-  return res.json({ success: true, message: "DSA route working" });
+  console.log("🧪 TEST ENDPOINT - req.user:", req.user);
+  return res.json({ success: true, message: "DSA route working", user: req.user });
 });
 
 // Get all solutions (for Solutions Gallery)
@@ -19,7 +20,23 @@ router.get("/solutions", async (req, res) => {
   try {
     console.log("📍 GET /solutions called");
 
-    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
+    // 🔍 DEBUG AUTH
+    console.log("🔐 Auth Debug:", { 
+      userExists: !!req.user, 
+      uid: req.user?.uid,
+      fullUser: req.user 
+    });
+
+    const userId = req.user?.uid;
+    
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized: No valid user found",
+        debug: { user: req.user }
+      });
+    }
+
     const { topic, difficulty, search } = req.query;
 
     let progressFilter = { userId, status: "Solved" };
@@ -87,7 +104,23 @@ router.get("/problems", async (req, res) => {
   try {
     console.log("📍 GET /problems called");
 
-    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
+    // 🔍 DEBUG AUTH
+    console.log("🔐 Auth Debug:", { 
+      userExists: !!req.user, 
+      uid: req.user?.uid,
+      fullUser: req.user 
+    });
+
+    const userId = req.user?.uid;
+    
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized: No valid user found",
+        debug: { user: req.user }
+      });
+    }
+
     const { topic, difficulty, search } = req.query;
 
     let filter = {};
@@ -151,15 +184,48 @@ router.post("/problems/:problemId/save-code", async (req, res) => {
   try {
     console.log("📍 POST /save-code called");
 
-    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
+    // 🔍 DEBUG AUTH & PARAMS
+    console.log("🔐 Auth Debug:", { 
+      userExists: !!req.user, 
+      uid: req.user?.uid,
+      fullUser: req.user 
+    });
+    console.log("📦 Params:", { 
+      problemId: req.params.problemId,
+      bodyKeys: Object.keys(req.body)
+    });
+
+    const userId = req.user?.uid;
     const { problemId } = req.params;
     const { code, output, testResults, status, timeSpent } = req.body;
+
+    // ✅ VALIDATION
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized: No valid user found",
+        debug: { user: req.user }
+      });
+    }
+
+    if (!problemId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Bad request: problemId missing",
+        debug: { problemId: req.params.problemId, params: req.params }
+      });
+    }
+
+    console.log(`✅ SAVING CODE - userId: ${userId}, problemId: ${problemId}, status: ${status}`);
 
     let userProgress = await UserProgress.findOne({ userId, problemId });
     let wasAlreadySolved = false;
 
+    console.log(`📊 Existing record found:`, { found: !!userProgress, currentStatus: userProgress?.status });
+
     if (!userProgress) {
       userProgress = new UserProgress({ userId, problemId });
+      console.log(`📝 Creating new UserProgress record`);
     } else {
       wasAlreadySolved = userProgress.status === "Solved";
     }
@@ -173,9 +239,16 @@ router.post("/problems/:problemId/save-code", async (req, res) => {
 
     if (status === "Solved" && !wasAlreadySolved) {
       userProgress.solvedAt = new Date();
+      console.log(`🎯 Problem marked as SOLVED`);
     }
 
     await userProgress.save();
+    console.log(`💾 UserProgress saved:`, { 
+      userId, 
+      problemId, 
+      status: userProgress.status,
+      id: userProgress._id 
+    });
 
     if (status === "Solved" && !wasAlreadySolved) {
       let milestones = await UserMilestones.findOne({ userId });
@@ -187,10 +260,15 @@ router.post("/problems/:problemId/save-code", async (req, res) => {
       milestones.thisWeekSolved = (milestones.thisWeekSolved || 0) + 1;
       milestones.lastActivityDate = new Date();
       await milestones.save();
+      console.log(`🏆 Milestones updated:`, { 
+        totalSolved: milestones.totalProblemsSolved,
+        thisWeek: milestones.thisWeekSolved 
+      });
     }
 
     return res.json({ success: true, message: "Code saved successfully" });
   } catch (error) {
+    console.error("❌ SAVE-CODE ERROR:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -200,15 +278,48 @@ router.post("/problems/:problemId/update", async (req, res) => {
   try {
     console.log("📍 POST /update called");
 
-    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
+    // 🔍 DEBUG AUTH & PARAMS
+    console.log("🔐 Auth Debug:", { 
+      userExists: !!req.user, 
+      uid: req.user?.uid,
+      fullUser: req.user 
+    });
+    console.log("📦 Params:", { 
+      problemId: req.params.problemId,
+      bodyKeys: Object.keys(req.body)
+    });
+
+    const userId = req.user?.uid;
     const { problemId } = req.params;
     const { status, timeSpent, notes } = req.body;
+
+    // ✅ VALIDATION
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized: No valid user found",
+        debug: { user: req.user }
+      });
+    }
+
+    if (!problemId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Bad request: problemId missing",
+        debug: { problemId: req.params.problemId, params: req.params }
+      });
+    }
+
+    console.log(`✅ UPDATING PROBLEM - userId: ${userId}, problemId: ${problemId}, status: ${status}`);
 
     let userProgress = await UserProgress.findOne({ userId, problemId });
     let wasAlreadySolved = false;
 
+    console.log(`📊 Existing record found:`, { found: !!userProgress, currentStatus: userProgress?.status });
+
     if (!userProgress) {
       userProgress = new UserProgress({ userId, problemId });
+      console.log(`📝 Creating new UserProgress record`);
     } else {
       wasAlreadySolved = userProgress.status === "Solved";
     }
@@ -220,9 +331,16 @@ router.post("/problems/:problemId/update", async (req, res) => {
 
     if (status === "Solved" && !wasAlreadySolved) {
       userProgress.solvedAt = new Date();
+      console.log(`🎯 Problem marked as SOLVED`);
     }
 
     await userProgress.save();
+    console.log(`💾 UserProgress saved:`, { 
+      userId, 
+      problemId, 
+      status: userProgress.status,
+      id: userProgress._id 
+    });
 
     if (status === "Solved" && !wasAlreadySolved) {
       let milestones = await UserMilestones.findOne({ userId });
@@ -233,10 +351,15 @@ router.post("/problems/:problemId/update", async (req, res) => {
       milestones.thisWeekSolved = (milestones.thisWeekSolved || 0) + 1;
       milestones.lastActivityDate = new Date();
       await milestones.save();
+      console.log(`🏆 Milestones updated:`, { 
+        totalSolved: milestones.totalProblemsSolved,
+        thisWeek: milestones.thisWeekSolved 
+      });
     }
 
     return res.json({ success: true, message: "Problem updated" });
   } catch (error) {
+    console.error("❌ UPDATE ERROR:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -246,7 +369,22 @@ router.get("/stats", async (req, res) => {
   try {
     console.log("📍 GET /stats called");
 
-    const userId = req.user.uid; // ✅ Use Firebase UID from verified token
+    // 🔍 DEBUG AUTH
+    console.log("🔐 Auth Debug:", { 
+      userExists: !!req.user, 
+      uid: req.user?.uid,
+      fullUser: req.user 
+    });
+
+    const userId = req.user?.uid;
+    
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized: No valid user found",
+        debug: { user: req.user }
+      });
+    }
 
     const userProgress = await UserProgress.find({ userId }).lean();
     const milestones = await UserMilestones.findOne({ userId }).lean();
@@ -266,6 +404,8 @@ router.get("/stats", async (req, res) => {
       return dateToCheck >= oneWeekAgo;
     }).length;
 
+    console.log(`📊 Stats calculated:`, { solved, totalAttempted, thisWeekSolvedCount });
+
     return res.json({
       success: true,
       stats: {
@@ -276,6 +416,7 @@ router.get("/stats", async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("❌ STATS ERROR:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
