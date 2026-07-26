@@ -1,9 +1,30 @@
 const express = require("express");
 const axios = require("axios");
 const pdfParse = require("pdf-parse");
+const mammoth = require("mammoth");
 const router = express.Router();
 
-// ✅ POST /analyze - Extract PDF text and analyze with Cohere
+// ✅ Function to extract text from PDF
+const extractTextFromPDF = async (buffer) => {
+  try {
+    const data = await pdfParse(buffer);
+    return data.text;
+  } catch (err) {
+    throw new Error(`PDF parsing error: ${err.message}`);
+  }
+};
+
+// ✅ Function to extract text from DOCX
+const extractTextFromDOCX = async (buffer) => {
+  try {
+    const result = await mammoth.extractRawText({ buffer });
+    return result.value;
+  } catch (err) {
+    throw new Error(`DOCX parsing error: ${err.message}`);
+  }
+};
+
+// ✅ POST /analyze - Extract text from PDF or DOCX and analyze with Cohere
 router.post("/analyze", async (req, res) => {
   try {
     console.log("📍 POST /analyze called");
@@ -29,7 +50,7 @@ router.post("/analyze", async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ 
         success: false, 
-        error: "No file uploaded. Please select a PDF resume." 
+        error: "No file uploaded. Please select a PDF or DOCX resume." 
       });
     }
 
@@ -40,24 +61,39 @@ router.post("/analyze", async (req, res) => {
       mimetype: req.file.mimetype
     });
 
-    // Extract text from PDF
+    // Extract text based on file type
     let resumeText = "";
+
     try {
-      const data = await pdfParse(req.file.buffer);
-      resumeText = data.text;
-      console.log(`✅ PDF parsed successfully. Text length: ${resumeText.length} chars`);
-    } catch (pdfErr) {
-      console.error("❌ PDF parsing error:", pdfErr.message);
+      if (req.file.mimetype === 'application/pdf') {
+        console.log("📑 Extracting text from PDF...");
+        resumeText = await extractTextFromPDF(req.file.buffer);
+      } else if (
+        req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        req.file.mimetype === 'application/msword'
+      ) {
+        console.log("📝 Extracting text from DOCX...");
+        resumeText = await extractTextFromDOCX(req.file.buffer);
+      } else {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Unsupported file format. Please use PDF or DOCX." 
+        });
+      }
+
+      console.log(`✅ File parsed successfully. Text length: ${resumeText.length} chars`);
+    } catch (parseErr) {
+      console.error("❌ File parsing error:", parseErr.message);
       return res.status(400).json({ 
         success: false, 
-        error: "Failed to read PDF. Please ensure it's a valid PDF file." 
+        error: `Failed to read file: ${parseErr.message}` 
       });
     }
 
     if (!resumeText || resumeText.trim().length === 0) {
       return res.status(400).json({ 
         success: false, 
-        error: "PDF appears to be empty or unreadable." 
+        error: "File appears to be empty or unreadable." 
       });
     }
 

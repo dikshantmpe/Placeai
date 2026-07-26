@@ -19,11 +19,17 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
   fileFilter: (req, file, cb) => {
-    // Accept PDF files
-    if (file.mimetype === 'application/pdf') {
+    // Accept PDF and DOCX files
+    const allowedMimes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword' // For older .doc files
+    ];
+    
+    if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF files are allowed'), false);
+      cb(new Error('Only PDF and DOCX files are allowed'), false);
     }
   }
 });
@@ -192,7 +198,7 @@ app.use("/api/chatbot", require("./routes/chatbot"));
 // ✅ DSA routes with auth middleware
 app.use("/api/dsa", authMiddleware, dsaRouter);
 
-// ✅ Resume routes with auth middleware + multer for PDF uploads
+// ✅ Resume routes with auth middleware + multer for PDF & DOCX uploads
 app.use("/api/resume", authMiddleware, upload.single("resume"), require("./routes/resume"));
 
 // ═══════════════════════════════════════════════════════════════
@@ -233,9 +239,9 @@ app.use((err, req, res, next) => {
     });
   }
   
-  if (err.message === 'Only PDF files are allowed') {
+  if (err.message === 'Only PDF and DOCX files are allowed') {
     return res.status(400).json({ 
-      error: "Only PDF files are allowed." 
+      error: "Only PDF and DOCX files are allowed." 
     });
   }
 
@@ -254,7 +260,7 @@ server.listen(PORT, () => {
   console.log(`📡 WebSocket ready`);
   console.log(`🏥 Health check: /api/health`);
   console.log(`🔔 Ping: /api/ping`);
-  console.log(`📄 Resume upload: /api/resume/analyze (requires auth + PDF file)`);
+  console.log(`📄 Resume upload: /api/resume/analyze (accepts PDF & DOCX)`);
 });
 
 module.exports = { app, server };
