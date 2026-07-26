@@ -164,36 +164,88 @@ const DSATracker = () => {
   };
 
   const handleSaveCode = () => {
+    // 🔍 COMPREHENSIVE DEBUG LOGGING
+    console.log("\n🔍 ===== SAVE CODE DEBUG START =====");
+    console.log("📌 selectedProblem:", selectedProblem);
+    console.log("📌 selectedProblem._id:", selectedProblem?._id);
+    console.log("📌 selectedProblem.name:", selectedProblem?.name);
+    console.log("📌 code length:", code.length);
+    console.log("📌 output length:", output.length);
+    console.log("📌 solutionStatus:", solutionStatus);
+    console.log("📌 testResults:", testResults);
+    
+    if (!selectedProblem) {
+      console.error("❌ ERROR: selectedProblem is null/undefined!");
+      alert("❌ Error: No problem selected. Please select a problem first.");
+      return;
+    }
+
+    if (!selectedProblem._id) {
+      console.error("❌ ERROR: selectedProblem._id is missing!");
+      console.log("selectedProblem object:", JSON.stringify(selectedProblem, null, 2));
+      alert("❌ Error: Problem ID is missing. Please reload and try again.");
+      return;
+    }
+
+    console.log("✅ All validations passed, proceeding with save...");
+    console.log("🔍 ===== SAVE CODE DEBUG END =====\n");
+    
     saveCodeToDatabase(code, output, solutionStatus, testResults);
   };
 
   const saveCodeToDatabase = async (codeContent, outputContent, status, results) => {
     try {
       const token = await getAuthToken();
-      if (!token) return;
+      if (!token) {
+        console.error("❌ No auth token found");
+        alert("Authentication error. Please log in again.");
+        return;
+      }
 
-      const response = await fetch(`${API_BASE_URL}/api/dsa/problems/${selectedProblem._id}/save-code`, {
+      // 🔍 DEBUG: Log request details
+      const requestUrl = `${API_BASE_URL}/api/dsa/problems/${selectedProblem._id}/save-code`;
+      const requestBody = {
+        code: codeContent,
+        output: outputContent,
+        status,
+        testResults: results,
+        solvedAt: status === "Solved" ? new Date() : null
+      };
+
+      console.log("\n🔍 ===== SAVE CODE REQUEST DEBUG =====");
+      console.log("🌐 Request URL:", requestUrl);
+      console.log("📤 Request Body:", requestBody);
+      console.log("🔑 Token present:", !!token);
+      console.log("📊 Status:", status);
+      console.log("🔍 ===== REQUEST DEBUG END =====\n");
+
+      const response = await fetch(requestUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          code: codeContent,
-          output: outputContent,
-          status,
-          testResults: results,
-          solvedAt: status === "solved" ? new Date() : null
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      if (!response.ok) throw new Error("Failed to save code");
+      console.log("📬 Response Status:", response.status);
+      console.log("📬 Response OK:", response.ok);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("❌ Server Error Response:", errorData);
+        throw new Error(errorData.error || "Failed to save code");
+      }
+
+      const responseData = await response.json();
+      console.log("✅ Success Response:", responseData);
+
       alert("✓ Code saved successfully!");
       fetchProblems();
       fetchStats();
     } catch (error) {
-      console.error("Error saving code:", error);
-      alert("Failed to save code. Try again.");
+      console.error("❌ Error saving code:", error);
+      alert(`Failed to save code: ${error.message}`);
     }
   };
 
@@ -429,6 +481,7 @@ const DSATracker = () => {
                                     <a
                                       className="problem-link"
                                       onClick={() => {
+                                        console.log("🔗 Problem clicked:", problem);
                                         setSelectedProblem(problem);
                                         // Load saved code if it exists
                                         setCode(problem.code || "// Write your solution here...\n");
