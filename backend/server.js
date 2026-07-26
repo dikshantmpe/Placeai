@@ -4,12 +4,29 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const socketIo = require("socket.io");
+const multer = require("multer");
 const seedDatabase = require("./seed");
 const { initializeApp, cert } = require("firebase-admin/app");
 
 const app = express();
 const server = http.createServer(app);
 const dsaRouter = require("./routes/dsa");
+
+// ═══════════════════════════════════════════════════════════════
+// MULTER SETUP (File upload handling)
+// ═══════════════════════════════════════════════════════════════
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
+  fileFilter: (req, file, cb) => {
+    // Accept PDF files
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'), false);
+    }
+  }
+});
 
 // ═══════════════════════════════════════════════════════════════
 // EXPRESS MIDDLEWARE (FIRST - before anything else)
@@ -22,6 +39,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Security Headers
 app.use((req, res, next) => {
@@ -153,21 +171,29 @@ app.get('/api/health', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// AUTH MIDDLEWARE
+// ═══════════════════════════════════════════════════════════════
+const authMiddleware = require("./middleware/auth");
+
+// ═══════════════════════════════════════════════════════════════
 // ROUTES
 // ═══════════════════════════════════════════════════════════════
 app.use("/api/auth", require("./routes/auth"));
 
 // Protected routes
 app.use("/api/problems", require("./routes/problems"));
-app.use("/api/resume", require("./routes/resume"));
 app.use("/api/interview", require("./routes/interview"));
 app.use("/api/quiz", require("./routes/quiz"));
 app.use("/api/company", require("./routes/company"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/daily", require("./routes/daily"));
 app.use("/api/chatbot", require("./routes/chatbot"));
-const authMiddleware = require("./middleware/auth");
+
+// ✅ DSA routes with auth middleware
 app.use("/api/dsa", authMiddleware, dsaRouter);
+
+// ✅ Resume routes with auth middleware + multer for PDF uploads
+app.use("/api/resume", authMiddleware, upload.single("resume"), require("./routes/resume"));
 
 // ═══════════════════════════════════════════════════════════════
 // MONGODB CONNECTION
@@ -194,6 +220,25 @@ mongoose.connect(process.env.MONGO_URI, {
 // ═══════════════════════════════════════════════════════════════
 app.use((err, req, res, next) => {
   console.error("❌ Server error:", err.message);
+  
+  // Handle multer errors
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'FILE_TOO_LARGE') {
+      return res.status(400).json({ 
+        error: "File too large. Maximum size is 10 MB." 
+      });
+    }
+    return res.status(400).json({ 
+      error: `Upload error: ${err.message}` 
+    });
+  }
+  
+  if (err.message === 'Only PDF files are allowed') {
+    return res.status(400).json({ 
+      error: "Only PDF files are allowed." 
+    });
+  }
+
   res.status(500).json({ 
     error: "Internal server error",
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
@@ -209,6 +254,7 @@ server.listen(PORT, () => {
   console.log(`📡 WebSocket ready`);
   console.log(`🏥 Health check: /api/health`);
   console.log(`🔔 Ping: /api/ping`);
+  console.log(`📄 Resume upload: /api/resume/analyze (requires auth + PDF file)`);
 });
 
 module.exports = { app, server };
