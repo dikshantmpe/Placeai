@@ -279,14 +279,12 @@ SUGGESTIONS:
           </div>
         )}
 
-        {/* Hero Section - Upload + Settings */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.2fr 0.8fr", gap: "18px" }}>
-
-          {/* Upload Panel */}
-          <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "27px" }}>
+        {/* Hero Section - Centered Upload Panel */}
+        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+          <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "32px", maxWidth: "750px", width: "100%" }}>
             <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>AI-POWERED RESUME REVIEW</span>
             <h1 style={{ fontSize: "34px", lineHeight: "1.13", margin: "8px 0", color: "#10264a", fontWeight: "700" }}>Make your resume easier to notice—and harder to reject.</h1>
-            <p style={{ color: "#657287", margin: "0 0 22px 0" }}>Check ATS compatibility, role-specific keywords, skills coverage, structure, and readability.</p>
+            <p style={{ color: "#657287", margin: "0 0 26px 0" }}>Check ATS compatibility, role-specific keywords, skills coverage, structure, and readability.</p>
 
             <div
               style={{ 
@@ -354,66 +352,25 @@ SUGGESTIONS:
             </div>
 
             {file && (
-              <div style={{ marginTop: "13px", padding: "12px", border: "1px solid #dedbd5", borderRadius: "9px" }}>
+              <div style={{ marginTop: "16px", padding: "14px", border: "1px solid #dedbd5", borderRadius: "9px" }}>
                 <b>{file.name}</b>
                 <span style={{ color: "#657287" }}> · {(file.size / (1024 * 1024)).toFixed(1)} MB · Ready to analyze</span>
-                <div style={{ height: "7px", background: "#e8edf3", borderRadius: "99px", overflow: "hidden", marginTop: "7px" }}>
+                <div style={{ height: "7px", background: "#e8edf3", borderRadius: "99px", overflow: "hidden", marginTop: "10px" }}>
                   <span style={{ display: "block", height: "100%", width: "100%", background: "#1769e0", borderRadius: "99px" }}></span>
                 </div>
               </div>
             )}
 
-            <div style={{ marginTop: "9px", padding: "10px", background: "#fff1cf", color: "#765010", borderRadius: "8px", fontSize: "12px" }}>
+            <div style={{ marginTop: "12px", padding: "12px", background: "#fff1cf", color: "#765010", borderRadius: "8px", fontSize: "12px" }}>
               Unsupported formats and documents larger than 100 MB will be rejected before analysis.
             </div>
-          </div>
 
-          {/* Analysis Settings Panel */}
-          <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "27px" }}>
-            <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>ANALYSIS SETTINGS</span>
-            <h2 style={{ color: "#10264a", fontSize: "1.5rem", fontWeight: "700", margin: "8px 0" }}>Choose what to inspect</h2>
-            <p style={{ color: "#657287", margin: "0 0 18px 0" }}>Adjust the scan before starting your analysis.</p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: "#f6f7f9", padding: "4px", border: "1px solid #dedbd5", borderRadius: "10px", margin: "18px 0" }}>
-              <label style={{ textAlign: "center", padding: "10px", borderRadius: "7px", fontWeight: "700", cursor: "pointer", background: "transparent", color: "#657287" }}>
-                <input type="radio" name="depth" style={{ position: "absolute", opacity: 0 }} />
-                Quick Scan
-              </label>
-              <label style={{ textAlign: "center", padding: "10px", borderRadius: "7px", fontWeight: "700", cursor: "pointer", background: "#fff", color: "#1769e0", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                <input type="radio" name="depth" defaultChecked style={{ position: "absolute", opacity: 0 }} />
-                Deep Analysis
-              </label>
-            </div>
-
-            <div style={{ display: "grid", gap: "7px" }}>
-              {[
-                { title: "Keyword optimization", desc: "Compare terminology and role relevance." },
-                { title: "Skills gap identification", desc: "Find missing technical and soft skills." },
-                { title: "Formatting assessment", desc: "Review hierarchy and consistency." },
-                { title: "ATS compatibility score", desc: "Flag parsing and screening risks." },
-                { title: "Readability metrics", desc: "Measure clarity and information density." },
-              ].map((item, i) => (
-                <label key={i} style={{ display: "flex", gap: "9px", padding: "9px", border: "1px solid #dedbd5", borderRadius: "8px", cursor: "pointer", alignItems: "flex-start" }}>
-                  <input type="checkbox" defaultChecked style={{ accentColor: "#1769e0", marginTop: "2px" }} />
-                  <span>
-                    <b style={{ color: "#172033", fontSize: "14px" }}>{item.title}</b>
-                    <small style={{ display: "block", color: "#657287", fontSize: "12px" }}>{item.desc}</small>
-                  </span>
-                </label>
-              ))}
-            </div>
-
-            <p style={{ margin: "16px 0 8px 0" }}><b>Target job description</b> <span style={{ color: "#657287" }}>(optional)</span></p>
-            <textarea 
-              placeholder="Paste a job description here for role-specific comparison…"
-              style={{ width: "100%", minHeight: "120px", border: "1px solid #dedbd5", borderRadius: "9px", padding: "11px", resize: "vertical", fontFamily: "inherit", fontSize: "14px" }}
-            />
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "13px" }}>
+            {/* Actions Footer moved here from removed settings panel */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #dedbd5" }}>
               <small style={{ color: "#657287" }}>
-                {loading ? loadingMessage : "Deep analysis: ~30 sec"}
+                {loading ? loadingMessage : "Analysis takes ~30 seconds"}
               </small>
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
                 {loading && (
                   <button 
                     onClick={handleCancel} 
@@ -421,7 +378,7 @@ SUGGESTIONS:
                       border: "1px solid #dedbd5",
                       background: "#fff",
                       color: "#657287",
-                      padding: "11px 17px",
+                      padding: "12px 20px",
                       borderRadius: "99px",
                       fontWeight: "750",
                       cursor: "pointer",
@@ -438,7 +395,7 @@ SUGGESTIONS:
                     border: loading || !file ? "1px solid #dedbd5" : "0",
                     background: loading || !file ? "#f6f7f9" : "#1769e0",
                     color: loading || !file ? "#657287" : "#fff",
-                    padding: "11px 17px",
+                    padding: "12px 24px",
                     borderRadius: "99px",
                     fontWeight: "750",
                     cursor: loading || !file ? "not-allowed" : "pointer",
@@ -450,7 +407,7 @@ SUGGESTIONS:
                 >
                   {loading ? (
                     <>
-                      <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1rem" }}>⟳</span>
+                      <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1.1rem" }}>⟳</span>
                       {loadingMessage.split("...")[0]}...
                     </>
                   ) : (
@@ -461,6 +418,7 @@ SUGGESTIONS:
                 </button>
               </div>
             </div>
+
           </div>
         </div>
 
