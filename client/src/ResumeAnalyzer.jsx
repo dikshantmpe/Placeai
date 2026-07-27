@@ -429,7 +429,7 @@ SUGGESTIONS:
             backgroundColor: "rgba(16, 38, 74, 0.7)",
             backdropFilter: "blur(5px)",
             display: "flex", justifyContent: "center", alignItems: "center",
-            zIndex: 9999,
+            zIndex: 999999, // Increased z-index to stay above nav
             padding: "20px"
           }}>
             <div style={{ background: "#fff", borderRadius: "16px", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: "400px", width: "100%", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}>
@@ -447,7 +447,7 @@ SUGGESTIONS:
             backgroundColor: "rgba(16, 38, 74, 0.7)",
             backdropFilter: "blur(5px)",
             display: "flex", justifyContent: "center", alignItems: "center",
-            zIndex: 9999,
+            zIndex: 999999, // Increased z-index to ensure it sits on top of everything, including app headers
             padding: "20px"
           }}>
             <div style={{
@@ -455,7 +455,7 @@ SUGGESTIONS:
               borderRadius: "16px",
               maxWidth: "700px",
               width: "100%",
-              maxHeight: "90vh",
+              maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
@@ -472,7 +472,13 @@ SUGGESTIONS:
                 backgroundColor: "#fff"
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>🤖</div>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1769e0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <polyline points="9 15 11 17 15 13"></polyline>
+                    </svg>
+                  </div>
                   <div>
                     <h2 style={{ margin: 0, fontSize: "1.2rem", color: "#10264a", fontWeight: "800" }}>Analysis Complete</h2>
                   </div>
@@ -504,22 +510,7 @@ SUGGESTIONS:
                 <button 
                   onClick={() => setShowResultModal(false)}
                   style={{
-                    padding: "12px 24px",
-                    backgroundColor: "#fff",
-                    color: "#172033",
-                    border: "1px solid #dedbd5",
-                    borderRadius: "99px",
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    cursor: "pointer"
-                  }}
-                >
-                  Close
-                </button>
-                <button 
-                  onClick={() => setShowResultModal(false)}
-                  style={{
-                    padding: "12px 24px",
+                    padding: "12px 32px",
                     backgroundColor: "#1769e0",
                     color: "white",
                     border: "none",
@@ -529,7 +520,7 @@ SUGGESTIONS:
                     cursor: "pointer"
                   }}
                 >
-                  Apply Suggested Fixes ✦
+                  Close
                 </button>
               </div>
 
