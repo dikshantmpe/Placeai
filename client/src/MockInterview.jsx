@@ -13,10 +13,46 @@ const MockInterview = () => {
   const [elapsedTime, setElapsedTime] = useState("00:00");
   const [messages, setMessages] = useState([]);
   
+  // ✅ Added state for the single female voice
+  const [femaleVoice, setFemaleVoice] = useState(null);
+  
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
   const auth = getAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+  // ✅ Voice Loader: Finds the best female voice and locks it in
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      
+      const filtered = voices.filter((v) => {
+        const name = v.name.toLowerCase();
+        return (
+          name.includes("female") ||
+          name.includes("woman") ||
+          name.includes("samantha") ||
+          name.includes("victoria") ||
+          name.includes("zira") ||
+          name.includes("tessa") ||
+          name.includes("karen")
+        );
+      });
+
+      // Try to prioritize a Google/Microsoft female voice, otherwise take the first available
+      const preferredVoice = 
+        filtered.find(v => v.name.includes("Google") || v.name.includes("Microsoft")) || 
+        filtered[0] || 
+        voices[0];
+
+      setFemaleVoice(preferredVoice);
+    };
+
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
 
   // Timer
   useEffect(() => {
@@ -36,32 +72,18 @@ const MockInterview = () => {
     return () => clearInterval(timerRef.current);
   }, [setupComplete]);
 
-  // Speak question - FREE optimized Web Speech API
+  // ✅ Speak question - Uses ONLY the locked female voice
   const speakQuestion = (text) => {
     window.speechSynthesis.cancel();
     setIsSpeaking(true);
 
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Get available voices
-    const voices = window.speechSynthesis.getVoices();
-    
-    // Priority: Google > Microsoft > Apple > Default
-    let selectedVoice = voices.find(v => 
-      v.name.includes("Google") && v.lang.includes("en")
-    ) || voices.find(v => 
-      (v.name.includes("Microsoft") || v.name.includes("Zira")) && v.lang.includes("en")
-    ) || voices.find(v => 
-      v.name.includes("Samantha") && v.lang.includes("en")
-    ) || voices.find(v => 
-      v.lang.includes("en-US")
-    );
-
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
+    // Assign the chosen female voice
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
     }
 
-    // Optimize for natural sound
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;

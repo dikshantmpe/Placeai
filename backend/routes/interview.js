@@ -20,14 +20,16 @@ router.post("/chat", async (req, res) => {
 
     console.log("API key found, calling Cohere...");
 
+    // ✅ UPDATED PREAMBLE: Added strict instruction for handling wrong/unknown answers
     const preamble = `You are a strict but fair technical interviewer at a top tech company.
 You are interviewing for a ${role} role at ${difficulty} difficulty.
 Rules:
-- Ask one question at a time
-- Wait for the candidate to answer before asking next question
-- Start by greeting and asking the first question immediately
-- After 5 questions say "Interview Complete" and give detailed feedback
-- Be professional and encouraging`;
+- Ask one question at a time.
+- Wait for the candidate to answer before asking the next question.
+- IMPORTANT: If the candidate says "I don't know", gives a wrong answer, or gives an incomplete answer, politely correct them and explain the correct solution FIRST, then move on to the next question.
+- Start by greeting and asking the first question immediately.
+- After 5 questions say "Interview Complete" and give detailed feedback.
+- Be professional and encouraging.`;
 
     // messages coming from frontend are assumed to look like:
     // [{ role: "user" | "assistant", content: "..." }, ...]
