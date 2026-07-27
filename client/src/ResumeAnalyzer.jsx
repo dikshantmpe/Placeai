@@ -35,7 +35,7 @@ export default function ResumeAnalyzer() {
   const displayName = formatName(rawName);
 
   const handleUpload = async () => {
-    if (!file) return alert("Please select a PDF first!");
+    if (!file) return alert("Please select a PDF or DOCX first!");
     const formData = new FormData();
     formData.append("resume", file);
     setLoading(true);
@@ -84,7 +84,9 @@ SUGGESTIONS:
     e.preventDefault();
     setDragOver(false);
     const dropped = e.dataTransfer.files[0];
-    if (dropped?.type === "application/pdf") setFile(dropped);
+    if (dropped && (dropped.type === "application/pdf" || dropped.type.includes("word"))) {
+      setFile(dropped);
+    }
   };
 
   const renderFeedback = () => {
@@ -249,7 +251,7 @@ SUGGESTIONS:
               onDrop={handleDrop}
               onClick={() => document.getElementById("resumeInput").click()}
             >
-              <input id="resumeInput" type="file" accept=".pdf"
+              <input id="resumeInput" type="file" accept=".pdf,.docx,.doc"
                 onChange={(e) => setFile(e.target.files[0])}
                 style={{ display: "none" }} />
 
@@ -258,7 +260,7 @@ SUGGESTIONS:
                   <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", fontWeight: "700" }}>✓</div>
                   <h2 style={{ color: "#18775e", fontWeight: "700", fontSize: "1.1rem", margin: "0 0 8px" }}>{file.name}</h2>
                   <p style={{ color: "#657287", fontSize: "0.9rem", margin: 0, fontWeight: "500" }}>
-                    {(file.size / 1024).toFixed(1)} KB · Click to swap file
+                    {(file.size / (1024 * 1024)).toFixed(1)} MB · Click to swap file
                   </p>
                 </div>
               ) : (
@@ -286,7 +288,7 @@ SUGGESTIONS:
                     Browse files
                   </button>
                   <div style={{ display: "flex", gap: "7px", flexWrap: "wrap", justifyContent: "center", marginTop: "14px" }}>
-                    {["PDF", "DOCX", "TXT", "Maximum 10 MB"].map((tag, i) => (
+                    {["PDF", "DOCX", "Maximum 100 MB"].map((tag, i) => (
                       <span key={i} style={{ fontSize: "11px", padding: "5px 8px", borderRadius: "99px", border: "1px solid #dedbd5", color: "#657287" }}>
                         {tag}
                       </span>
@@ -300,7 +302,7 @@ SUGGESTIONS:
             {file && (
               <div style={{ marginTop: "13px", padding: "12px", border: "1px solid #dedbd5", borderRadius: "9px" }}>
                 <b>{file.name}</b>
-                <span style={{ color: "#657287" }}> · {(file.size / 1024).toFixed(1)} KB · Ready to analyze</span>
+                <span style={{ color: "#657287" }}> · {(file.size / (1024 * 1024)).toFixed(1)} MB · Ready to analyze</span>
                 <div style={{ height: "7px", background: "#e8edf3", borderRadius: "99px", overflow: "hidden", marginTop: "7px" }}>
                   <span style={{ display: "block", height: "100%", width: "100%", background: "#1769e0", borderRadius: "99px" }}></span>
                 </div>
@@ -308,7 +310,7 @@ SUGGESTIONS:
             )}
 
             <div style={{ marginTop: "9px", padding: "10px", background: "#fff1cf", color: "#765010", borderRadius: "8px", fontSize: "12px" }}>
-              Unsupported formats and documents larger than 10 MB will be rejected before analysis.
+              Unsupported formats and documents larger than 100 MB will be rejected before analysis.
             </div>
           </div>
 
@@ -347,7 +349,7 @@ SUGGESTIONS:
               ))}
             </div>
 
-            <p style={{ margin: "16px 0 8px 0" }}><b>Target job description</b> <span style={{ color: "#657287" }}>(optional)</span></p>
+            <p style={{ margin: "16px 0 8px 0 }}><b>Target job description</b> <span style={{ color: "#657287" }}>(optional)</span></p>
             <textarea 
               placeholder="Paste a job description here for role-specific comparison…"
               style={{ width: "100%", minHeight: "120px", border: "1px solid #dedbd5", borderRadius: "9px", padding: "11px", resize: "vertical", fontFamily: "inherit", fontSize: "14px" }}

@@ -13,11 +13,11 @@ const server = http.createServer(app);
 const dsaRouter = require("./routes/dsa");
 
 // ═══════════════════════════════════════════════════════════════
-// MULTER SETUP (File upload handling)
+// MULTER SETUP (File upload handling) - 100MB limit
 // ═══════════════════════════════════════════════════════════════
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB max
   fileFilter: (req, file, cb) => {
     // Accept PDF and DOCX files
     const allowedMimes = [
@@ -44,8 +44,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+// Increase JSON and URL-encoded body size limits to 100MB
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Security Headers
 app.use((req, res, next) => {
@@ -198,7 +199,7 @@ app.use("/api/chatbot", require("./routes/chatbot"));
 // ✅ DSA routes with auth middleware
 app.use("/api/dsa", authMiddleware, dsaRouter);
 
-// ✅ Resume routes with auth middleware + multer for PDF & DOCX uploads
+// ✅ Resume routes with auth middleware + multer for PDF & DOCX uploads (100MB limit)
 app.use("/api/resume", authMiddleware, upload.single("resume"), require("./routes/resume"));
 
 // ═══════════════════════════════════════════════════════════════
@@ -231,7 +232,7 @@ app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'FILE_TOO_LARGE') {
       return res.status(400).json({ 
-        error: "File too large. Maximum size is 10 MB." 
+        error: "File too large. Maximum size is 100 MB." 
       });
     }
     return res.status(400).json({ 
@@ -260,7 +261,7 @@ server.listen(PORT, () => {
   console.log(`📡 WebSocket ready`);
   console.log(`🏥 Health check: /api/health`);
   console.log(`🔔 Ping: /api/ping`);
-  console.log(`📄 Resume upload: /api/resume/analyze (accepts PDF & DOCX)`);
+  console.log(`📄 Resume upload: /api/resume/analyze (accepts PDF & DOCX, max 100MB)`);
 });
 
 module.exports = { app, server };
