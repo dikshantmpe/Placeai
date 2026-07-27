@@ -444,7 +444,7 @@ SUGGESTIONS:
               maxWidth: "400px", 
               width: "100%", 
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              marginTop: "80px" /* Pushes loading modal below nav */
+              marginTop: "80px"
             }}>
               <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", animation: "spin 2s linear infinite" }}>⟳</div>
               <h3 style={{ margin: "0 0 8px", color: "#10264a", fontSize: "1.2rem", fontWeight: "700" }}>{loadingMessage}</h3>
@@ -468,8 +468,8 @@ SUGGESTIONS:
               borderRadius: "16px",
               maxWidth: "700px",
               width: "100%",
-              maxHeight: "80vh", /* Reduced slightly to fit screen comfortably after top margin */
-              marginTop: "80px", /* Pushes results modal below fixed nav */
+              maxHeight: "80vh",
+              marginTop: "80px", 
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
@@ -482,11 +482,11 @@ SUGGESTIONS:
                 borderBottom: "1px solid #dedbd5", 
                 display: "flex", 
                 justifyContent: "space-between", 
-                alignItems: "center",
+                alignItems: "flex-start", /* Changed to flex-start to accommodate description */
                 backgroundColor: "#fff"
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", paddingRight: "20px" }}>
+                  <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1769e0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
@@ -494,12 +494,15 @@ SUGGESTIONS:
                     </svg>
                   </div>
                   <div>
-                    <h2 style={{ margin: 0, fontSize: "1.2rem", color: "#10264a", fontWeight: "800" }}>Analysis Complete</h2>
+                    <h2 style={{ margin: "0 0 6px 0", fontSize: "1.25rem", color: "#10264a", fontWeight: "800" }}>Analysis Complete</h2>
+                    <p style={{ margin: 0, color: "#657287", fontSize: "0.9rem", lineHeight: "1.5" }}>
+                      We have processed your resume through our evaluation engine. The analysis below highlights your core strengths, identifies potential gaps, and provides actionable suggestions to improve your ATS match score.
+                    </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowResultModal(false)}
-                  style={{ background: "none", border: "none", fontSize: "28px", cursor: "pointer", color: "#aab7c8", lineHeight: "1" }}
+                  style={{ background: "none", border: "none", fontSize: "28px", cursor: "pointer", color: "#aab7c8", lineHeight: "1", padding: "0" }}
                   onMouseOver={(e) => e.target.style.color = '#172033'}
                   onMouseOut={(e) => e.target.style.color = '#aab7c8'}
                 >
