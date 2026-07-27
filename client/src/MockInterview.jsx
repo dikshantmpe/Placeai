@@ -40,16 +40,42 @@ const MockInterview = () => {
     return () => clearInterval(timerRef.current);
   }, []);
 
-  // Speak question
+  // Speak question - Completely FREE using optimized Web Speech API
   const speakQuestion = () => {
     window.speechSynthesis.cancel();
     setIsSpeaking(true);
 
     const utterance = new SpeechSynthesisUtterance(questions[currentQuestionIndex]);
-    utterance.rate = 1;
-    utterance.pitch = 1;
+    
+    // Get available voices
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Priority: Google > Microsoft > Apple > Default
+    let selectedVoice = voices.find(v => 
+      v.name.includes("Google") && v.lang.includes("en")
+    ) || voices.find(v => 
+      (v.name.includes("Microsoft") || v.name.includes("Zira")) && v.lang.includes("en")
+    ) || voices.find(v => 
+      v.name.includes("Samantha") && v.lang.includes("en")
+    ) || voices.find(v => 
+      v.lang.includes("en-US")
+    );
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    // Optimize for natural sound
+    utterance.rate = 0.95;      // Slightly slower for clarity
+    utterance.pitch = 1.0;      // Natural pitch
+    utterance.volume = 1.0;     // Full volume
 
     utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
+    utterance.onerror = (error) => {
+      console.error("Speech error:", error);
       setIsSpeaking(false);
     };
 
