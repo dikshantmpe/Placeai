@@ -18,6 +18,7 @@ export default function ResumeAnalyzer() {
   const [dragOver, setDragOver] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [firebaseUser, setFirebaseUser] = useState(null);
+  const [showResultModal, setShowResultModal] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -83,6 +84,7 @@ export default function ResumeAnalyzer() {
       clearTimeout(timeoutId);
       setFeedback(res.data.feedback);
       setLoading(false);
+      setShowResultModal(true); // Trigger modal on success
     } catch (err) {
       console.error("❌ Error:", err.message || err);
 
@@ -132,6 +134,7 @@ SUGGESTIONS:
 - Reframe interests as soft skills
 - Consistently use your professional name across all sections`);
         setLoading(false);
+        setShowResultModal(true); // Trigger modal on demo success
       }, 1500);
     }
   };
@@ -223,6 +226,12 @@ SUGGESTIONS:
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
+  const getScore = () => {
+    if (!feedback) return "85";
+    const match = feedback.match(/^(\d+)\/100/m);
+    return match ? match[1] : "85";
+  };
 
   return (
     <div style={{
@@ -360,7 +369,6 @@ SUGGESTIONS:
               )}
             </div>
 
-            {/* Upload progress (shown when file selected) */}
             {file && (
               <div style={{ marginTop: "13px", padding: "12px", border: "1px solid #dedbd5", borderRadius: "9px" }}>
                 <b>{file.name}</b>
@@ -474,7 +482,7 @@ SUGGESTIONS:
 
         {/* Results Section */}
         {(feedback || loading) && (
-          <div>
+          <div id="analysis-dashboard">
             <div style={{ margin: "26px 0 12px" }}>
               <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>ANALYSIS DASHBOARD</span>
               <h2 style={{ color: "#10264a", fontSize: "1.5rem", fontWeight: "700", margin: "8px 0" }}>Your resume analysis</h2>
@@ -490,7 +498,7 @@ SUGGESTIONS:
                   <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "145px 1fr", gap: "25px", alignItems: "center", marginBottom: "18px" }}>
                     <div style={{ width: "130px", height: "130px", borderRadius: "50%", background: "conic-gradient(#1769e0 82%, #e6ebf1 0)", display: "grid", placeItems: "center", position: "relative", margin: isMobile ? "0 auto" : "0" }}>
                       <div style={{ position: "absolute", width: "98px", height: "98px", borderRadius: "50%", background: "#fff" }}></div>
-                      <b style={{ zIndex: 1, fontSize: "29px", color: "#10264a", position: "relative" }}>82%</b>
+                      <b style={{ zIndex: 1, fontSize: "29px", color: "#10264a", position: "relative" }}>{getScore()}%</b>
                     </div>
                     <div>
                       <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>STRONG FOUNDATION</span>
@@ -519,7 +527,6 @@ SUGGESTIONS:
                 {/* Feedback Details */}
                 {feedback && !loading && (
                   <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", overflow: "hidden" }}>
-                    {/* Analysis Complete Header */}
                     <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "24px", borderBottom: "1px solid #dedbd5" }}>
                       <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
                         🤖
@@ -582,6 +589,73 @@ SUGGESTIONS:
             </div>
           </div>
         )}
+
+        {/* --- RESULT MODAL OVERLAY --- */}
+        {showResultModal && feedback && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: "rgba(16, 38, 74, 0.7)",
+            backdropFilter: "blur(5px)",
+            display: "flex", justifyContent: "center", alignItems: "center",
+            zIndex: 9999,
+            padding: "20px"
+          }}>
+            <div style={{
+              backgroundColor: "#fff",
+              borderRadius: "16px",
+              padding: "36px",
+              maxWidth: "480px",
+              width: "100%",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              textAlign: "center"
+            }}>
+              <div style={{ fontSize: "40px", marginBottom: "12px" }}>🎉</div>
+              <h2 style={{ margin: "0 0 12px 0", fontSize: "24px", color: "#10264a", fontWeight: "800" }}>
+                Analysis Complete!
+              </h2>
+              
+              <p style={{ color: "#657287", marginBottom: "28px", fontSize: "15px", lineHeight: "1.5" }}>
+                We've successfully processed your resume against the current industry criteria and ATS standards.
+              </p>
+
+              {/* Score Highlight */}
+              <div style={{
+                backgroundColor: "#f5f9ff",
+                border: "1px solid #d1e0f5",
+                borderRadius: "12px",
+                padding: "24px",
+                marginBottom: "28px"
+              }}>
+                <div style={{ fontSize: "56px", fontWeight: "800", color: "#1769e0", lineHeight: "1" }}>
+                  {getScore()}%
+                </div>
+                <div style={{ marginTop: "8px", fontSize: "12px", color: "#10264a", fontWeight: "750", textTransform: "uppercase", letterSpacing: "1px" }}>
+                  Match Score
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button 
+                onClick={() => setShowResultModal(false)}
+                style={{
+                  width: "100%",
+                  padding: "16px 24px",
+                  backgroundColor: "#1769e0",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "99px",
+                  fontSize: "16px",
+                  fontWeight: "750",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
