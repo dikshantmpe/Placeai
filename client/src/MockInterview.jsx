@@ -127,7 +127,6 @@ const MockInterview = () => {
   const speakQuestion = (text) => {
     if (!text) return;
     
-    // Toggle off if already speaking
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
@@ -264,7 +263,7 @@ const MockInterview = () => {
     }
   };
 
-  // --- SVG Icons (Professional replacements for emojis) ---
+  // --- SVG Icons ---
   const SpeakerIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -313,36 +312,63 @@ const MockInterview = () => {
       <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
     </svg>
   );
+  
+  const BrainIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1769e0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+    </svg>
+  );
 
 
-  // --- Render Setup Screen ---
+  // --- Render Setup Screen (MODERNIZED) ---
   if (!setupComplete) {
     return (
       <div style={{
-        minHeight: "100vh", background: "#f3f2ef", padding: "40px 20px",
+        minHeight: "100vh", 
+        background: "radial-gradient(circle at top, #f8faff 0%, #eef2f6 100%)", // Beautiful modern subtle gradient
+        padding: "40px 20px",
         fontFamily: "Inter, system-ui, sans-serif", display: "flex",
         alignItems: "center", justifyContent: "center"
       }}>
         <div style={{
-          background: "#fff", borderRadius: "12px", border: "1px solid #dedbd5",
-          padding: "40px", maxWidth: "500px", width: "100%",
-          boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)"
+          background: "#fff", 
+          borderRadius: "20px", 
+          border: "1px solid rgba(226, 232, 240, 0.8)",
+          padding: "48px", 
+          maxWidth: "520px", 
+          width: "100%",
+          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02)" // Floated depth shadow
         }}>
-          <h1 style={{ fontSize: "28px", fontWeight: "700", color: "#10264a", margin: "0 0 12px 0" }}>
-            AI Mock Interview
-          </h1>
-          <p style={{ color: "#657287", fontSize: "14px", marginBottom: "24px" }}>
-            Practice with AI. Get real-time feedback and improve your skills.
+          
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
+            <div style={{ background: "#eaf3ff", padding: "12px", borderRadius: "14px", display: "flex" }}>
+              <BrainIcon />
+            </div>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#0f172a", margin: 0, letterSpacing: "-0.5px" }}>
+              AI Mock Interview
+            </h1>
+          </div>
+          
+          <p style={{ color: "#64748b", fontSize: "15px", lineHeight: "1.6", marginBottom: "36px" }}>
+            Practice your technical skills with our AI interviewer. Get real-time feedback and improve your performance in a stress-free environment.
           </p>
 
-          <div style={{ display: "grid", gap: "16px", marginBottom: "24px" }}>
+          <div style={{ display: "grid", gap: "20px", marginBottom: "32px" }}>
             <div>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#1769e0", textTransform: "uppercase", marginBottom: "8px" }}>
-                Position
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>
+                Select Position
               </label>
               <select
                 value={role} onChange={(e) => setRole(e.target.value)}
-                style={{ width: "100%", padding: "10px", border: "1px solid #dedbd5", borderRadius: "8px", fontSize: "14px", background: "#fff" }}
+                style={{ 
+                  width: "100%", padding: "14px 16px", border: "1px solid #cbd5e1", borderRadius: "10px", 
+                  fontSize: "15px", color: "#1e293b", background: "#fff", outline: "none", cursor: "pointer",
+                  appearance: "none", // Removes default arrow
+                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
+                  backgroundRepeat: "no-repeat", backgroundPosition: "right 16px top 50%", backgroundSize: "12px auto",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.02)"
+                }}
               >
                 <option>Frontend Developer</option>
                 <option>Backend Developer</option>
@@ -353,12 +379,19 @@ const MockInterview = () => {
               </select>
             </div>
             <div>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#1769e0", textTransform: "uppercase", marginBottom: "8px" }}>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>
                 Difficulty Level
               </label>
               <select
                 value={difficulty} onChange={(e) => setDifficulty(e.target.value)}
-                style={{ width: "100%", padding: "10px", border: "1px solid #dedbd5", borderRadius: "8px", fontSize: "14px", background: "#fff" }}
+                style={{ 
+                  width: "100%", padding: "14px 16px", border: "1px solid #cbd5e1", borderRadius: "10px", 
+                  fontSize: "15px", color: "#1e293b", background: "#fff", outline: "none", cursor: "pointer",
+                  appearance: "none", // Removes default arrow
+                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
+                  backgroundRepeat: "no-repeat", backgroundPosition: "right 16px top 50%", backgroundSize: "12px auto",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.02)"
+                }}
               >
                 <option>Easy</option>
                 <option>Medium</option>
@@ -368,16 +401,28 @@ const MockInterview = () => {
             </div>
           </div>
           <button
+            className="start-btn"
             onClick={startInterview} disabled={isLoading}
             style={{
-              width: "100%", padding: "12px", background: isLoading ? "#ccc" : "#1769e0",
-              color: "#fff", border: "0", borderRadius: "99px", fontWeight: "700",
-              fontSize: "15px", cursor: isLoading ? "not-allowed" : "pointer"
+              width: "100%", padding: "14px", 
+              background: isLoading ? "#94a3b8" : "linear-gradient(135deg, #2563eb, #1d4ed8)",
+              color: "#fff", border: "0", borderRadius: "10px", fontWeight: "700",
+              fontSize: "16px", cursor: isLoading ? "not-allowed" : "pointer",
+              boxShadow: isLoading ? "none" : "0 4px 14px 0 rgba(37, 99, 235, 0.39)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease"
             }}
           >
-            {isLoading ? "Starting..." : "Start Interview →"}
+            {isLoading ? "Starting Interview..." : "Start Interview →"}
           </button>
         </div>
+        
+        {/* CSS for button hover effect */}
+        <style>{`
+          .start-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+          }
+        `}</style>
       </div>
     );
   }
