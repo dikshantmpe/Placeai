@@ -199,23 +199,6 @@ const MockInterview = () => {
           )}
         </div>
 
-        {/* Question Display */}
-        <div style={{
-          background: "#fff",
-          borderRadius: "12px",
-          border: "1px solid #dedbd5",
-          padding: "20px",
-          marginBottom: "20px"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-            <span style={{ fontSize: "11px", fontWeight: "700", color: "#1769e0", textTransform: "uppercase" }}>CURRENT QUESTION</span>
-            <span style={{ fontSize: "12px", color: "#657287" }}>Question {currentQuestionIndex + 1} of {questions.length}</span>
-          </div>
-          <h2 style={{ margin: "0", fontSize: "1.2rem", fontWeight: "700", color: "#10264a", lineHeight: "1.5" }}>
-            {questions[currentQuestionIndex]}
-          </h2>
-        </div>
-
         {/* Input Area */}
         <div style={{
           background: "#fff",
