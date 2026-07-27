@@ -349,7 +349,7 @@ SUGGESTIONS:
               ))}
             </div>
 
-            <p style={{ margin: "16px 0 8px 0 }}><b>Target job description</b> <span style={{ color: "#657287" }}>(optional)</span></p>
+            <p style={{ margin: "16px 0 8px 0" }}><b>Target job description</b> <span style={{ color: "#657287" }}>(optional)</span></p>
             <textarea 
               placeholder="Paste a job description here for role-specific comparison…"
               style={{ width: "100%", minHeight: "120px", border: "1px solid #dedbd5", borderRadius: "9px", padding: "11px", resize: "vertical", fontFamily: "inherit", fontSize: "14px" }}
