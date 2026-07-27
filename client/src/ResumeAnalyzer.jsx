@@ -34,13 +34,18 @@ export default function ResumeAnalyzer() {
   }
   const displayName = formatName(rawName);
 
+  const [loadingMessage, setLoadingMessage] = useState("Extracting text from file...");
+  const [cancelRequest, setCancelRequest] = useState(false);
+
   const handleUpload = async () => {
     if (!file) return alert("Please select a PDF or DOCX first!");
     const formData = new FormData();
     formData.append("resume", file);
     setLoading(true);
+    setCancelRequest(false);
     setFeedback("");
     setIsDemoMode(false);
+    setLoadingMessage("Extracting text from file...");
 
     try {
       let token = localStorage.getItem("token");
@@ -48,36 +53,93 @@ export default function ResumeAnalyzer() {
         token = await auth.currentUser.getIdToken();
       }
 
-      const res = await axios.post("https://placeai-sqjj.onrender.com/api/resume/analyze", formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Create abort controller for timeout (60 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        setLoadingMessage("Request timed out. Retrying with demo...");
+      }, 60000);
+
+      // Update loading message after 3 seconds
+      setTimeout(() => {
+        if (!cancelRequest) setLoadingMessage("Processing file with AI...");
+      }, 3000);
+
+      // Update loading message after 6 seconds
+      setTimeout(() => {
+        if (!cancelRequest) setLoadingMessage("Analyzing with Cohere API...");
+      }, 6000);
+
+      const res = await axios.post(
+        "https://placeai-sqjj.onrender.com/api/resume/analyze",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 65000,
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
       setFeedback(res.data.feedback);
+      setLoading(false);
     } catch (err) {
-      console.error("Backend fetch failed. Loading Demo Feedback instead...", err);
+      console.error("❌ Error:", err.message || err);
+
+      // Handle timeout
+      if (err.code === "ECONNABORTED" || err.message.includes("timeout")) {
+        alert("⏱️ Request timed out. The AI server is taking too long. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Handle network errors
+      if (err.message.includes("Network Error") || !navigator.onLine) {
+        alert("🌐 Network error. Please check your internet connection.");
+        setLoading(false);
+        return;
+      }
+
+      // Handle auth errors
+      if (err.response?.status === 401) {
+        alert("🔐 Authentication error. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
+      // For other errors, show demo mode
+      console.warn("Backend unavailable. Switching to demo mode...");
       setIsDemoMode(true);
+      setLoadingMessage("Backend offline, loading demo analysis...");
 
       setTimeout(() => {
         setFeedback(`OVERALL SCORE:
 82/100
 
 STRENGTHS:
-- Solid academic foundation explicitly stating your first-year standing in B.Tech (Artificial Intelligence and Machine Learning).
-- Excellent display of practical application through the deployment of the 'SIET Campus Care' full-stack platform.
-- Broad technical stack highlighted, specifically proficiency in HTML, CSS, PHP, and SQL.
-- Good inclusion of diverse technical interests, such as hardware administration (BIOS, dual-booting) and clean Windows installations.
+- Solid academic foundation
+- Excellent display of practical application
+- Broad technical stack highlighted
+- Good inclusion of diverse technical interests
 
 WEAKNESSES:
-- The SIET Campus Care project description lacks quantifiable metrics (e.g., "Reduced reporting time by X%").
-- Missing links to a live GitHub repository for your code.
-- Some artistic aliases (e.g., 'Artistic Sense') are listed without clear connection to technical frontend/design roles.
+- Project description lacks quantifiable metrics
+- Missing links to a live GitHub repository
+- Some sections need clearer connection to role
 
 SUGGESTIONS:
-- Add a direct hyperlink to collegecomplaints.infinityfree.me so recruiters can interact with your deployed project.
-- Reframe your interest in linguistics and communication studies as a soft skill demonstrating strong analytical and comprehensive listening abilities.
-- Consistently use the name Aditya Singh across all headers and project pages to avoid confusion with past aliases.`);
+- Add direct hyperlinks to your projects
+- Reframe interests as soft skills
+- Consistently use your professional name across all sections`);
         setLoading(false);
-      }, 2000);
+      }, 1500);
     }
+  };
+
+  const handleCancel = () => {
+    setCancelRequest(true);
+    setLoading(false);
+    setFeedback("");
   };
 
   const handleDrop = (e) => {
@@ -356,35 +418,56 @@ SUGGESTIONS:
             />
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "13px" }}>
-              <small style={{ color: "#657287" }}>Deep analysis: ~30 sec</small>
-              <button 
-                onClick={handleUpload} 
-                disabled={loading || !file} 
-                style={{
-                  border: loading || !file ? "1px solid #dedbd5" : "0",
-                  background: loading || !file ? "#f6f7f9" : "#1769e0",
-                  color: loading || !file ? "#657287" : "#fff",
-                  padding: "11px 17px",
-                  borderRadius: "99px",
-                  fontWeight: "750",
-                  cursor: loading || !file ? "not-allowed" : "pointer",
-                  fontSize: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px"
-                }}
-              >
-                {loading ? (
-                  <>
-                    <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1rem" }}>⟳</span>
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    Analyze resume →
-                  </>
+              <small style={{ color: "#657287" }}>
+                {loading ? loadingMessage : "Deep analysis: ~30 sec"}
+              </small>
+              <div style={{ display: "flex", gap: "8px" }}>
+                {loading && (
+                  <button 
+                    onClick={handleCancel} 
+                    style={{
+                      border: "1px solid #dedbd5",
+                      background: "#fff",
+                      color: "#657287",
+                      padding: "11px 17px",
+                      borderRadius: "99px",
+                      fontWeight: "750",
+                      cursor: "pointer",
+                      fontSize: "14px"
+                    }}
+                  >
+                    Cancel
+                  </button>
                 )}
-              </button>
+                <button 
+                  onClick={handleUpload} 
+                  disabled={loading || !file} 
+                  style={{
+                    border: loading || !file ? "1px solid #dedbd5" : "0",
+                    background: loading || !file ? "#f6f7f9" : "#1769e0",
+                    color: loading || !file ? "#657287" : "#fff",
+                    padding: "11px 17px",
+                    borderRadius: "99px",
+                    fontWeight: "750",
+                    cursor: loading || !file ? "not-allowed" : "pointer",
+                    fontSize: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <span style={{ animation: "spin 1s linear infinite", display: "inline-block", fontSize: "1rem" }}>⟳</span>
+                      {loadingMessage.split("...")[0]}...
+                    </>
+                  ) : (
+                    <>
+                      Analyze resume →
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
