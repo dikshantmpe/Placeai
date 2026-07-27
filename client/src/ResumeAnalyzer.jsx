@@ -365,7 +365,7 @@ SUGGESTIONS:
               Unsupported formats and documents larger than 100 MB will be rejected before analysis.
             </div>
 
-            {/* Actions Footer moved here from removed settings panel */}
+            {/* Actions Footer */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #dedbd5" }}>
               <small style={{ color: "#657287" }}>
                 {loading ? loadingMessage : "Analysis takes ~30 seconds"}
@@ -429,10 +429,23 @@ SUGGESTIONS:
             backgroundColor: "rgba(16, 38, 74, 0.7)",
             backdropFilter: "blur(5px)",
             display: "flex", justifyContent: "center", alignItems: "center",
-            zIndex: 999999, // Increased z-index to stay above nav
+            zIndex: 999999,
             padding: "20px"
           }}>
-            <div style={{ background: "#fff", borderRadius: "16px", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: "400px", width: "100%", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}>
+            <div style={{ 
+              background: "#fff", 
+              borderRadius: "16px", 
+              padding: "3rem", 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              textAlign: "center", 
+              maxWidth: "400px", 
+              width: "100%", 
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              marginTop: "80px" /* Pushes loading modal below nav */
+            }}>
               <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", animation: "spin 2s linear infinite" }}>⟳</div>
               <h3 style={{ margin: "0 0 8px", color: "#10264a", fontSize: "1.2rem", fontWeight: "700" }}>{loadingMessage}</h3>
               <p style={{ margin: 0, color: "#1769e0", fontSize: "0.85rem", fontWeight: "600" }}>Running against ATS criteria...</p>
@@ -447,7 +460,7 @@ SUGGESTIONS:
             backgroundColor: "rgba(16, 38, 74, 0.7)",
             backdropFilter: "blur(5px)",
             display: "flex", justifyContent: "center", alignItems: "center",
-            zIndex: 999999, // Increased z-index to ensure it sits on top of everything, including app headers
+            zIndex: 999999, 
             padding: "20px"
           }}>
             <div style={{
@@ -455,7 +468,8 @@ SUGGESTIONS:
               borderRadius: "16px",
               maxWidth: "700px",
               width: "100%",
-              maxHeight: "85vh",
+              maxHeight: "80vh", /* Reduced slightly to fit screen comfortably after top margin */
+              marginTop: "80px", /* Pushes results modal below fixed nav */
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
