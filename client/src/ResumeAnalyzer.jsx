@@ -54,19 +54,16 @@ export default function ResumeAnalyzer() {
         token = await auth.currentUser.getIdToken();
       }
 
-      // Create abort controller for timeout (60 seconds)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
         setLoadingMessage("Request timed out. Retrying with demo...");
       }, 60000);
 
-      // Update loading message after 3 seconds
       setTimeout(() => {
         if (!cancelRequest) setLoadingMessage("Processing file with AI...");
       }, 3000);
 
-      // Update loading message after 6 seconds
       setTimeout(() => {
         if (!cancelRequest) setLoadingMessage("Analyzing with Cohere API...");
       }, 6000);
@@ -84,57 +81,50 @@ export default function ResumeAnalyzer() {
       clearTimeout(timeoutId);
       setFeedback(res.data.feedback);
       setLoading(false);
-      setShowResultModal(true); // Trigger modal on success
+      setShowResultModal(true);
     } catch (err) {
       console.error("❌ Error:", err.message || err);
 
-      // Handle timeout
       if (err.code === "ECONNABORTED" || err.message.includes("timeout")) {
         alert("⏱️ Request timed out. The AI server is taking too long. Please try again.");
         setLoading(false);
         return;
       }
 
-      // Handle network errors
       if (err.message.includes("Network Error") || !navigator.onLine) {
         alert("🌐 Network error. Please check your internet connection.");
         setLoading(false);
         return;
       }
 
-      // Handle auth errors
       if (err.response?.status === 401) {
         alert("🔐 Authentication error. Please log in again.");
         setLoading(false);
         return;
       }
 
-      // For other errors, show demo mode
       console.warn("Backend unavailable. Switching to demo mode...");
       setIsDemoMode(true);
       setLoadingMessage("Backend offline, loading demo analysis...");
 
       setTimeout(() => {
         setFeedback(`OVERALL SCORE:
-82/100
+72/100
 
 STRENGTHS:
-- Solid academic foundation
-- Excellent display of practical application
-- Broad technical stack highlighted
-- Good inclusion of diverse technical interests
+- Professional presentation
+- Good technical foundation
 
 WEAKNESSES:
-- Project description lacks quantifiable metrics
-- Missing links to a live GitHub repository
-- Some sections need clearer connection to role
+- Could improve quantification of achievements
+- Limited project metrics shown
 
 SUGGESTIONS:
-- Add direct hyperlinks to your projects
-- Reframe interests as soft skills
-- Consistently use your professional name across all sections`);
+- Add specific numbers/metrics to projects
+- Include links to work samples
+- Highlight leadership or team collaboration`);
         setLoading(false);
-        setShowResultModal(true); // Trigger modal on demo success
+        setShowResultModal(true);
       }, 1500);
     }
   };
@@ -171,11 +161,11 @@ SUGGESTIONS:
             padding: '2rem', marginBottom: '2rem'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '3rem', fontWeight: '800', color: '#10264a' }}>
+              <span style={{ fontSize: '3.5rem', fontWeight: '800', color: '#10264a', lineHeight: "1" }}>
                 {line.split('/')[0]}
               </span>
               <span style={{ fontSize: '1.2rem', color: '#657287', fontWeight: '600' }}>/100</span>
-              <p style={{ margin: '8px 0 0', color: '#1769e0', fontSize: '0.8rem', fontWeight: '800', letterSpacing: '2px' }}>
+              <p style={{ margin: '12px 0 0', color: '#1769e0', fontSize: '0.85rem', fontWeight: '800', letterSpacing: '2px' }}>
                 ATS MATCH SCORE
               </p>
             </div>
@@ -190,13 +180,13 @@ SUGGESTIONS:
         return (
           <div key={i} style={{
             display: "flex", alignItems: "center", gap: "10px",
-            marginTop: "1.5rem", marginBottom: "10px"
+            marginTop: "1.8rem", marginBottom: "12px"
           }}>
             <div style={{
               width: "4px", height: "20px", borderRadius: "2px",
               background: sectionColors[header]
             }} />
-            <h3 style={{ color: sectionColors[header], margin: 0, fontSize: "0.85rem",
+            <h3 style={{ color: sectionColors[header], margin: 0, fontSize: "0.9rem",
               fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.1em" }}>
               {line}
             </h3>
@@ -208,10 +198,10 @@ SUGGESTIONS:
         return (
           <div key={i} style={{
             display: "flex", alignItems: "flex-start", gap: "10px",
-            margin: "8px 0", paddingLeft: "14px"
+            margin: "10px 0", paddingLeft: "14px"
           }}>
             <span style={{ color: "#1769e0", marginTop: "2px", fontSize: "0.85rem" }}>▸</span>
-            <p style={{ margin: 0, color: "#172033", fontSize: "0.9rem", lineHeight: "1.6", fontWeight: "500" }}>
+            <p style={{ margin: 0, color: "#172033", fontSize: "0.95rem", lineHeight: "1.6", fontWeight: "500" }}>
               {line.slice(2)}
             </p>
           </div>
@@ -219,19 +209,13 @@ SUGGESTIONS:
       }
 
       if (line.trim()) {
-        return <p key={i} style={{ color: "#172033", fontSize: "0.9rem", lineHeight: "1.6", margin: "6px 0" }}>{line}</p>;
+        return <p key={i} style={{ color: "#172033", fontSize: "0.95rem", lineHeight: "1.6", margin: "8px 0" }}>{line}</p>;
       }
       return null;
     });
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
-
-  const getScore = () => {
-    if (!feedback) return "85";
-    const match = feedback.match(/^(\d+)\/100/m);
-    return match ? match[1] : "85";
-  };
 
   return (
     <div style={{
@@ -480,117 +464,25 @@ SUGGESTIONS:
           </div>
         </div>
 
-        {/* Results Section */}
-        {(feedback || loading) && (
-          <div id="analysis-dashboard">
-            <div style={{ margin: "26px 0 12px" }}>
-              <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>ANALYSIS DASHBOARD</span>
-              <h2 style={{ color: "#10264a", fontSize: "1.5rem", fontWeight: "700", margin: "8px 0" }}>Your resume analysis</h2>
-              <p style={{ color: "#657287", margin: 0 }}>AI-powered evaluation of your profile.</p>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 290px", gap: "18px", alignItems: "start" }}>
-
-              {/* Main Results Area */}
-              <div>
-                {/* Score Card */}
-                {feedback && !loading && (
-                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "145px 1fr", gap: "25px", alignItems: "center", marginBottom: "18px" }}>
-                    <div style={{ width: "130px", height: "130px", borderRadius: "50%", background: "conic-gradient(#1769e0 82%, #e6ebf1 0)", display: "grid", placeItems: "center", position: "relative", margin: isMobile ? "0 auto" : "0" }}>
-                      <div style={{ position: "absolute", width: "98px", height: "98px", borderRadius: "50%", background: "#fff" }}></div>
-                      <b style={{ zIndex: 1, fontSize: "29px", color: "#10264a", position: "relative" }}>{getScore()}%</b>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: "11px", fontWeight: "850", letterSpacing: "0.11em", color: "#1769e0", textTransform: "uppercase" }}>STRONG FOUNDATION</span>
-                      <h2 style={{ color: "#10264a", fontSize: "1.3rem", fontWeight: "700", margin: "8px 0" }}>Your resume is competitive, with a few high-impact improvements.</h2>
-                      <p style={{ color: "#657287", margin: "0 0 12px 0" }}>The strongest gains should come from adding role-specific keywords, quantifying project outcomes, and simplifying one ATS-sensitive section.</p>
-                      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                        {["ATS 88%", "Keywords 76%", "Readability 91%", "Formatting 84%"].map((tag, i) => (
-                          <span key={i} style={{ padding: "5px 8px", borderRadius: "99px", background: "#eaf3ff", color: "#0e54bd", fontSize: "11px", fontWeight: "700" }}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Loading State */}
-                {loading && (
-                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", marginBottom: "18px" }}>
-                    <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", animation: "spin 2s linear infinite" }}>⟳</div>
-                    <h3 style={{ margin: "0 0 8px", color: "#10264a", fontSize: "1.2rem", fontWeight: "700" }}>Extracting Data...</h3>
-                    <p style={{ margin: 0, color: "#1769e0", fontSize: "0.85rem", fontWeight: "600" }}>Running against ATS criteria</p>
-                  </div>
-                )}
-
-                {/* Feedback Details */}
-                {feedback && !loading && (
-                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", overflow: "hidden" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "24px", borderBottom: "1px solid #dedbd5" }}>
-                      <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
-                        🤖
-                      </div>
-                      <div>
-                        <h3 style={{ margin: "0 0 4px 0", fontSize: "1.2rem", fontWeight: "800", color: "#10264a" }}>Analysis Complete</h3>
-                        <p style={{ margin: 0, color: "#1769e0", fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: "24px" }}>
-                      {renderFeedback()}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Sidebar */}
-              {feedback && !loading && (
-                <aside style={{ position: isMobile ? "static" : "sticky", top: "98px" }}>
-                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "18px", marginBottom: "12px" }}>
-                    <h3 style={{ color: "#10264a", fontSize: "1rem", fontWeight: "700", margin: "0 0 12px 0" }}>Actions</h3>
-                    <div style={{ display: "grid", gap: "8px" }}>
-                      <button style={{ padding: "10px", textAlign: "center", border: "0", background: "#1769e0", color: "#fff", borderRadius: "8px", fontWeight: "750", cursor: "pointer", fontSize: "14px" }}>
-                        ✦ Apply Suggested Fixes
-                      </button>
-                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
-                        ⇩ Export PDF report
-                      </button>
-                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
-                        {"{ }"} Export JSON data
-                      </button>
-                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
-                        ↗ Create shareable link
-                      </button>
-                      <button style={{ padding: "10px", textAlign: "left", border: "1px solid #dedbd5", background: "#fff", color: "#172033", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
-                        ⇆ Compare previous versions
-                      </button>
-                    </div>
-                  </div>
-
-                  <div style={{ background: "#fff", border: "1px solid #dedbd5", borderRadius: "12px", boxShadow: "0 12px 34px rgba(27, 46, 76, 0.05)", padding: "18px" }}>
-                    <h3 style={{ color: "#10264a", fontSize: "1rem", fontWeight: "700", margin: "0 0 12px 0" }}>Revision history</h3>
-                    <div style={{ borderLeft: "1px solid #dedbd5", marginLeft: "5px", paddingLeft: "15px" }}>
-                      {[
-                        { title: "Current version · 82%", date: "Today · Deep Analysis" },
-                        { title: "Product role version · 76%", date: "Jul 12, 2026" },
-                        { title: "Internship resume · 71%", date: "Jun 28, 2026" },
-                        { title: "Original upload · 64%", date: "Jun 10, 2026" },
-                      ].map((item, i) => (
-                        <div key={i} style={{ marginBottom: "16px" }}>
-                          <b style={{ display: "block", color: "#172033", fontSize: "14px" }}>{item.title}</b>
-                          <small style={{ display: "block", color: "#657287", fontSize: "12px" }}>{item.date}</small>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </aside>
-              )}
+        {/* --- LOADING MODAL OVERLAY --- */}
+        {loading && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: "rgba(16, 38, 74, 0.7)",
+            backdropFilter: "blur(5px)",
+            display: "flex", justifyContent: "center", alignItems: "center",
+            zIndex: 9999,
+            padding: "20px"
+          }}>
+            <div style={{ background: "#fff", borderRadius: "16px", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: "400px", width: "100%", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}>
+              <div style={{ width: "68px", height: "68px", margin: "0 auto 16px", borderRadius: "20px", background: "#eaf3ff", color: "#1769e0", display: "grid", placeItems: "center", fontSize: "30px", animation: "spin 2s linear infinite" }}>⟳</div>
+              <h3 style={{ margin: "0 0 8px", color: "#10264a", fontSize: "1.2rem", fontWeight: "700" }}>{loadingMessage}</h3>
+              <p style={{ margin: 0, color: "#1769e0", fontSize: "0.85rem", fontWeight: "600" }}>Running against ATS criteria...</p>
             </div>
           </div>
         )}
 
-        {/* --- RESULT MODAL OVERLAY --- */}
+        {/* --- COMPREHENSIVE RESULT MODAL OVERLAY --- */}
         {showResultModal && feedback && (
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -603,55 +495,87 @@ SUGGESTIONS:
             <div style={{
               backgroundColor: "#fff",
               borderRadius: "16px",
-              padding: "36px",
-              maxWidth: "480px",
+              maxWidth: "700px",
               width: "100%",
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              textAlign: "center"
+              overflow: "hidden"
             }}>
-              <div style={{ fontSize: "40px", marginBottom: "12px" }}>🎉</div>
-              <h2 style={{ margin: "0 0 12px 0", fontSize: "24px", color: "#10264a", fontWeight: "800" }}>
-                Analysis Complete!
-              </h2>
               
-              <p style={{ color: "#657287", marginBottom: "28px", fontSize: "15px", lineHeight: "1.5" }}>
-                We've successfully processed your resume against the current industry criteria and ATS standards.
-              </p>
-
-              {/* Score Highlight */}
-              <div style={{
-                backgroundColor: "#f5f9ff",
-                border: "1px solid #d1e0f5",
-                borderRadius: "12px",
-                padding: "24px",
-                marginBottom: "28px"
+              {/* Modal Header */}
+              <div style={{ 
+                padding: "24px 32px", 
+                borderBottom: "1px solid #dedbd5", 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center",
+                backgroundColor: "#fff"
               }}>
-                <div style={{ fontSize: "56px", fontWeight: "800", color: "#1769e0", lineHeight: "1" }}>
-                  {getScore()}%
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>🤖</div>
+                  <div>
+                    <h2 style={{ margin: "0 0 2px 0", fontSize: "1.2rem", color: "#10264a", fontWeight: "800" }}>Analysis Complete</h2>
+                    <p style={{ margin: 0, color: "#1769e0", fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
+                  </div>
                 </div>
-                <div style={{ marginTop: "8px", fontSize: "12px", color: "#10264a", fontWeight: "750", textTransform: "uppercase", letterSpacing: "1px" }}>
-                  Match Score
-                </div>
+                <button 
+                  onClick={() => setShowResultModal(false)}
+                  style={{ background: "none", border: "none", fontSize: "28px", cursor: "pointer", color: "#aab7c8", lineHeight: "1" }}
+                  onMouseOver={(e) => e.target.style.color = '#172033'}
+                  onMouseOut={(e) => e.target.style.color = '#aab7c8'}
+                >
+                  &times;
+                </button>
               </div>
 
-              {/* Action Button */}
-              <button 
-                onClick={() => setShowResultModal(false)}
-                style={{
-                  width: "100%",
-                  padding: "16px 24px",
-                  backgroundColor: "#1769e0",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "99px",
-                  fontSize: "16px",
-                  fontWeight: "750",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-              >
-                Close
-              </button>
+              {/* Scrollable Content Area */}
+              <div style={{ padding: "32px", overflowY: "auto", backgroundColor: "#fff" }}>
+                {renderFeedback()}
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{ 
+                padding: "20px 32px", 
+                borderTop: "1px solid #dedbd5", 
+                backgroundColor: "#fbfcfe", 
+                display: "flex", 
+                justifyContent: "flex-end",
+                gap: "12px"
+              }}>
+                <button 
+                  onClick={() => setShowResultModal(false)}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: "#fff",
+                    color: "#172033",
+                    border: "1px solid #dedbd5",
+                    borderRadius: "99px",
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    cursor: "pointer"
+                  }}
+                >
+                  Close
+                </button>
+                <button 
+                  onClick={() => setShowResultModal(false)}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: "#1769e0",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "99px",
+                    fontSize: "14px",
+                    fontWeight: "750",
+                    cursor: "pointer"
+                  }}
+                >
+                  Apply Suggested Fixes ✦
+                </button>
+              </div>
+
             </div>
           </div>
         )}
