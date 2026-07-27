@@ -126,10 +126,17 @@ const MockInterview = () => {
 
   const speakQuestion = (text) => {
     if (!text) return;
+    
+    // Toggle off if already speaking
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
     window.speechSynthesis.cancel();
     setIsSpeaking(true);
 
-    // Clean markdown characters before passing to speech engine
     const cleanText = text
       .replace(/\*\*/g, "")
       .replace(/\*/g, "")
@@ -152,17 +159,14 @@ const MockInterview = () => {
     window.speechSynthesis.speak(utterance);
   };
 
-  // ✅ UPDATED END INTERVIEW FUNCTION
   const endInterview = () => {
     const confirmEnd = window.confirm("Are you sure you want to end the interview?");
     if (confirmEnd) {
-      // 1. Stop background processes
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       if (isListening) recognitionRef.current?.stop();
       clearInterval(timerRef.current);
       
-      // 2. Reset completely to start page
       setIsEnded(false);
       setSetupComplete(false);
       setConversation([]);
@@ -220,7 +224,7 @@ const MockInterview = () => {
     setIsLoading(true);
 
     const currentUserAnswer = userAnswer;
-    setUserAnswer(""); // Clear input immediately for better UX
+    setUserAnswer("");
 
     try {
       const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
@@ -249,17 +253,67 @@ const MockInterview = () => {
       console.error("Failed to submit:", error);
       alert("Failed to process response. Please try again.");
       setIsLoading(false);
-      setUserAnswer(currentUserAnswer); // Restore answer on failure
+      setUserAnswer(currentUserAnswer);
     }
   };
 
-  // --- Keyboard Handler ---
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevents moving to the next line
+      e.preventDefault();
       submitAnswer();
     }
   };
+
+  // --- SVG Icons (Professional replacements for emojis) ---
+  const SpeakerIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+    </svg>
+  );
+
+  const SpeakerOffIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+      <path d="M10.54 10.54L11 11v8l-5-4H2V9h4.46"></path>
+      <path d="M11 5L8.53 7.02"></path>
+      <path d="M15.54 8.46a5 5 0 0 1 2.58 4.41"></path>
+    </svg>
+  );
+
+  const MicIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+  );
+
+  const MicOffIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+      <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+  );
+
+  const SpinnerIcon = () => (
+    <svg className="spin-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="2" x2="12" y2="6"></line>
+      <line x1="12" y1="18" x2="12" y2="22"></line>
+      <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+      <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+      <line x1="2" y1="12" x2="6" y2="12"></line>
+      <line x1="18" y1="12" x2="22" y2="12"></line>
+      <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+      <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+    </svg>
+  );
+
 
   // --- Render Setup Screen ---
   if (!setupComplete) {
@@ -386,7 +440,7 @@ const MockInterview = () => {
                 maxWidth: "70%", background: msg.type === "answer" ? "#eaf3ff" : "#f6f7f9",
                 padding: "12px 16px", borderRadius: "10px",
                 border: msg.type === "ai" ? "none" : "1px solid #dedbd5",
-                whiteSpace: "pre-wrap" // Allows displaying new lines properly if formatting exists
+                whiteSpace: "pre-wrap"
               }}>
                 <p style={{ margin: 0, color: "#172033", lineHeight: "1.5", fontSize: "14px" }}>
                   {msg.text}
@@ -396,16 +450,20 @@ const MockInterview = () => {
           ))}
 
           {isSpeaking && !isEnded && (
-            <div style={{ display: "flex", gap: "12px", marginTop: "16px", alignItems: "center" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#1769e0", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "16px", animation: "pulse 1s infinite" }}>🔊</div>
-              <div style={{ color: "#657287", fontSize: "14px" }}>AI is speaking...</div>
+            <div style={{ display: "flex", gap: "12px", marginTop: "16px", alignItems: "center", paddingLeft: "48px" }}>
+              <div style={{ color: "#1769e0", display: "flex", alignItems: "center" }}>
+                <SpeakerIcon />
+              </div>
+              <div style={{ color: "#657287", fontSize: "14px", fontStyle: "italic" }}>AI is speaking...</div>
             </div>
           )}
 
           {isLoading && !isEnded && (
-            <div style={{ display: "flex", gap: "12px", marginTop: "16px", alignItems: "center" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#1769e0", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "16px", animation: "pulse 1s infinite" }}>⟳</div>
-              <div style={{ color: "#657287", fontSize: "14px" }}>Processing your answer...</div>
+            <div style={{ display: "flex", gap: "12px", marginTop: "16px", alignItems: "center", paddingLeft: "48px" }}>
+              <div style={{ color: "#1769e0", display: "flex", alignItems: "center" }}>
+                <SpinnerIcon />
+              </div>
+              <div style={{ color: "#657287", fontSize: "14px", fontStyle: "italic" }}>Processing your answer...</div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -429,34 +487,36 @@ const MockInterview = () => {
               background: isListening ? "#f0f8ff" : "#fff"
             }}
           />
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "140px" }}>
             
             <div style={{ display: "flex", gap: "8px" }}>
               <button
                 onClick={() => speakQuestion(conversation[conversation.length - 1]?.text || "")}
                 disabled={isLoading || conversation.length === 0 || isEnded}
                 style={{
-                  flex: 1, padding: "8px 12px", background: isSpeaking ? "#1769e0" : "#fff",
-                  color: isSpeaking ? "#fff" : "#172033", border: "1px solid #dedbd5",
+                  flex: 1, padding: "8px", background: isSpeaking ? "#eaf3ff" : "#fff",
+                  color: isSpeaking ? "#1769e0" : "#172033", border: "1px solid #dedbd5",
                   borderRadius: "8px", cursor: (isLoading || isEnded) ? "not-allowed" : "pointer",
-                  fontWeight: "600", fontSize: "13px"
+                  fontWeight: "600", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px"
                 }}
               >
-                {isSpeaking ? "🔊" : "🔊 Hear"}
+                {isSpeaking ? <SpeakerOffIcon /> : <SpeakerIcon />}
+                {isSpeaking ? "Stop" : "Listen"}
               </button>
 
               <button
                 onClick={toggleVoiceTyping}
                 disabled={isLoading || isEnded}
                 style={{
-                  flex: 1, padding: "8px 12px", background: isListening ? "#d32f2f" : "#fff",
-                  color: isListening ? "#fff" : "#172033", border: "1px solid #dedbd5",
+                  flex: 1, padding: "8px", background: isListening ? "#ffebee" : "#fff",
+                  color: isListening ? "#c62828" : "#172033", border: "1px solid #dedbd5",
                   borderRadius: "8px", cursor: (isLoading || isEnded) ? "not-allowed" : "pointer",
-                  fontWeight: "600", fontSize: "13px", animation: isListening ? "pulse 1.5s infinite" : "none"
+                  fontWeight: "600", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px"
                 }}
                 title="Voice Typing"
               >
-                {isListening ? "🎙️" : "🎤 Dictate"}
+                {isListening ? <MicOffIcon /> : <MicIcon />}
+                {isListening ? "Stop" : "Dictate"}
               </button>
             </div>
 
@@ -478,9 +538,11 @@ const MockInterview = () => {
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
+        .spin-icon {
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
