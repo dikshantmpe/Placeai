@@ -152,14 +152,24 @@ const MockInterview = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  // ✅ UPDATED END INTERVIEW FUNCTION
   const endInterview = () => {
     const confirmEnd = window.confirm("Are you sure you want to end the interview?");
     if (confirmEnd) {
-      setIsEnded(true);
+      // 1. Stop background processes
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       if (isListening) recognitionRef.current?.stop();
       clearInterval(timerRef.current);
+      
+      // 2. Reset completely to start page
+      setIsEnded(false);
+      setSetupComplete(false);
+      setConversation([]);
+      setMessages([]);
+      setUserAnswer("");
+      setElapsedTime("00:00");
+      startTimeRef.current = null;
     }
   };
 
