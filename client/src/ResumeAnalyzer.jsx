@@ -516,8 +516,7 @@ SUGGESTIONS:
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "#eaf3ff", border: "1px solid #d1e0f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>🤖</div>
                   <div>
-                    <h2 style={{ margin: "0 0 2px 0", fontSize: "1.2rem", color: "#10264a", fontWeight: "800" }}>Analysis Complete</h2>
-                    <p style={{ margin: 0, color: "#1769e0", fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase" }}>Powered by Gemini</p>
+                    <h2 style={{ margin: 0, fontSize: "1.2rem", color: "#10264a", fontWeight: "800" }}>Analysis Complete</h2>
                   </div>
                 </div>
                 <button 
