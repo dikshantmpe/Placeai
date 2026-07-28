@@ -146,6 +146,9 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
   else if (propUser?.name) rawName = propUser.name;
   const displayName = formatName(rawName);
   const initials = displayName.substring(0, 2).toUpperCase();
+  
+  // ADDED: Extract the user's profile picture URL from Firebase
+  const photoURL = firebaseUser?.photoURL || null;
 
   const handleLogout = async () => {
     try {
@@ -569,12 +572,37 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
               aria-haspopup="true"
               style={{ background: "transparent", border: "none", padding: "8px 10px 5px" }}
             >
-              <span className="nav-profile" title={displayName}>{initials}</span>
+              {/* UPDATED: Profile Avatar Logic for Main Navbar */}
+              <span className="nav-profile" title={displayName} style={photoURL ? { overflow: "hidden", padding: 0 } : {}}>
+                {photoURL ? (
+                  <img 
+                    src={photoURL} 
+                    alt={displayName} 
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  initials
+                )}
+              </span>
+              
               <small style={{ fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", color: "var(--muted)" }}>Me ▾</small>
               {menuOpen && (
                 <div className="profile-menu" onClick={(e) => e.stopPropagation()}>
                   <div className="menu-user">
-                    <span className="menu-avatar">{initials}</span>
+                    {/* UPDATED: Profile Avatar Logic for Dropdown Menu */}
+                    <span className="menu-avatar" style={photoURL ? { overflow: "hidden" } : {}}>
+                      {photoURL ? (
+                        <img 
+                          src={photoURL} 
+                          alt={displayName} 
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        initials
+                      )}
+                    </span>
                     <span className="menu-user-info">
                       <b>{displayName}</b>
                       <small>B.Tech CSE · AI & ML</small>
