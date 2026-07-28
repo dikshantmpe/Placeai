@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from "./api.js";
 import { auth } from "./firebase.js";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 import loginImg from "./assets/login-illustration.png";
 import audienceImg from "./assets/audience-illustration.png";
@@ -11,64 +10,37 @@ export default function Home({ setUser }) {
   const navigate = useNavigate();
   const [activePill, setActivePill] = useState("DSA");
 
-  // Check if user is already logged in - redirect to dashboard
+  // Automatically redirect to dashboard if the user is already logged in via Firebase
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      console.log("✅ User already logged in, redirecting to dashboard");
-      navigate("/dashboard");
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("✅ User detected via Firebase, redirecting to dashboard");
+        navigate("/dashboard");
+      }
+    });
+    return () => unsubscribe();
   }, [navigate]);
 
-  // FIXED: Google Login Logic with proper redirect
+  // UNIFIED OAUTH HANDLER - Pure Firebase (No backend token calls)
   const handleGoogleLogin = async () => {
     try {
       console.log("🔵 Starting Google Sign-In...");
+      
+      // Force Firebase to remember the user across tab closes and refreshes
+      await setPersistence(auth, browserLocalPersistence);
       
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       
       console.log("🔵 Opening popup...");
-      const result = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
       
-      console.log("🔵 Popup closed, getting ID token...");
-      const idToken = await result.user.getIdToken();
-      console.log("🔵 ID Token received:", idToken.substring(0, 50) + "...");
-      
-      console.log("🔵 Sending to backend...");
-      const res = await api.post("/api/auth/google", {
-        idToken: idToken
-      });
-      
-      console.log("🔵 Response from backend:", res.data);
-      
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        console.log("✅ Token stored in localStorage");
-        
-        // Show success message
-        alert(`Welcome ${res.data.user.name}!`);
-        
-        // Redirect to dashboard
-        console.log("🔵 Redirecting to dashboard...");
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 500);
-      } else {
-        console.error("❌ No token in response");
-        alert("Login failed: No token received");
-      }
+      // Success! The onAuthStateChanged listener above will automatically detect 
+      // the new user and redirect them to the dashboard.
       
     } catch (err) {
       console.error("❌ GOOGLE LOGIN ERROR:", err.message);
-      console.error("Full error:", err);
-      
-      if (err.response) {
-        console.error("Backend error:", err.response.data);
-        alert(`Google sign-in failed: ${err.response.data.message}`);
-      } else {
-        alert(`Google sign-in failed: ${err.message}`);
-      }
+      alert(`Google sign-in failed: ${err.message}`);
     }
   };
 
