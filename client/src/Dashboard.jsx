@@ -80,6 +80,15 @@ function Ring({ score, size = 140, stroke = 10, delay = 0 }) {
   );
 }
 
+// Custom SVGs to replace Emojis
+const FlameIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{color: "#ef4444"}}><path d="M12 2C12 2 8 6.5 8 11.5C8 15.6421 11.5 19 15.5 19C17.069 19 18.5218 18.4735 19.6738 17.5938C20.6277 19.3496 21 21.055 21 22H3C3 16.5 6.5 13 8 9C8 9 9 11 10.5 11C11.9566 11 13 9.5 13 7.5C13 5.37626 12 2 12 2Z"/></svg>;
+const TargetIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+const CodeIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>;
+const VideoIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/><rect width="10" height="12" x="3" y="6" rx="2"/></svg>;
+const DocIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>;
+const QuizIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>;
+const SparkleIcon = () => <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>;
+
 export default function Dashboard({ theme: externalTheme }) {
   const navigate = useNavigate();
   const socketRef = useRef(null);
@@ -205,8 +214,6 @@ export default function Dashboard({ theme: externalTheme }) {
   const streak = data?.streak || 0;
   const readinessScore = data?.readiness || 0;
   const dsaPct = data?.dsa?.percent || 0;
-  const aptPct = data?.aptitude?.percent || 0;
-  const csPct = data?.coreCs?.percent || 0;
   const intPct = data?.interviews?.percent || 0;
   const dsaDone = data?.dsa?.done || 0;
   const dsaTotal = data?.dsa?.total || 0;
@@ -223,15 +230,6 @@ export default function Dashboard({ theme: externalTheme }) {
   
   // ADDED: Extract the user's profile picture URL from Firebase
   const photoURL = firebaseUser?.photoURL || null;
-
-  const handleQuickAction = useCallback((action) => {
-    setToast({ message: `Opening ${action}…`, type: "info" });
-    setTimeout(() => console.log("Navigate to:", action), 400);
-  }, []);
-
-  const handleChallengeClick = useCallback(() => {
-    setToast({ message: "Loading daily challenge…", type: "info" });
-  }, []);
 
   // ═══════════════════════════════════════════════════════════════
   // LOADING & ERROR STATES
@@ -710,7 +708,7 @@ export default function Dashboard({ theme: externalTheme }) {
         .quick-card:active { transform: scale(0.98); }
         .quick-card b { font-size: 13px; color: var(--navy); position: relative; z-index: 2; font-weight: 700; }
         .quick-card small { color: var(--muted); margin-top: 4px; font-size: 11px; position: relative; z-index: 2; }
-        .quick-icon { font-size: 18px; margin-bottom: 6px; position: relative; z-index: 2; }
+        .quick-icon { margin-bottom: 6px; position: relative; z-index: 2; color: var(--p); }
 
         .feature-section {
           display: grid;
@@ -935,7 +933,7 @@ export default function Dashboard({ theme: externalTheme }) {
         .focus-modal p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
         .focus-timer {
           font-size: 48px;
-          font-weight: 900,
+          font-weight: 900;
           color: var(--p);
           font-variant-numeric: tabular-nums;
           margin: 16px 0;
@@ -987,7 +985,7 @@ export default function Dashboard({ theme: externalTheme }) {
               <p>B.Tech CSE (AI &amp; ML)<br/>Placement preparation in progress</p>
               <div className="mini-row">
                 <span>Streak</span>
-                <b className="streak-flame"><span>🔥</span>{streak} days</b>
+                <b className="streak-flame"><FlameIcon /> {streak} days</b>
               </div>
               <div className="mini-row">
                 <span>Problems</span>
@@ -1003,7 +1001,7 @@ export default function Dashboard({ theme: externalTheme }) {
               <div className="welcome-label">Your Preparation Overview</div>
               <h1>Good evening, {firstName}.</h1>
               <p>One focused session today keeps your {streak}-day streak alive.</p>
-              <button className="primary-btn" onClick={() => handleQuickAction("DSA Practice")}>
+              <button className="primary-btn" onClick={() => navigate("/dsa")}>
                 Continue preparing <span>→</span>
               </button>
             </div>
@@ -1023,26 +1021,26 @@ export default function Dashboard({ theme: externalTheme }) {
             <div className="a-card stat-card" title="Overall placement readiness">
               <small>Placement readiness</small>
               <strong>{readinessScore}%</strong>
-              <span className="stat-delta">↑ Real-time</span>
-              <span className="stat-art">🎯</span>
+              <span className="stat-delta">↑ Real-time tracking</span>
+              <span className="stat-art"><TargetIcon /></span>
             </div>
             <div className="a-card stat-card" title="DSA problems solved">
               <small>DSA completed</small>
               <strong><AnimatedCounter end={dsaDone} /></strong>
-              <span className="stat-delta">{thisWeekSolved} this week</span>
-              <span className="stat-art">⌘</span>
+              <span className="stat-delta">↑ {thisWeekSolved} this week</span>
+              <span className="stat-art"><CodeIcon /></span>
             </div>
             <div className="a-card stat-card" title="Mock interviews taken">
               <small>Mock interviews</small>
               <strong>{mockInterviews}</strong>
-              <span className="stat-delta">Updated live</span>
-              <span className="stat-art">◉</span>
+              <span className="stat-delta">↑ {mockInterviews > 0 ? "Consistently practicing" : "Start practicing today"}</span>
+              <span className="stat-art"><VideoIcon /></span>
             </div>
             <div className="a-card stat-card" title="Resume ATS score">
               <small>Resume score</small>
               <strong>{resumeScore}</strong>
-              <span className="stat-delta">Strong foundation</span>
-              <span className="stat-art">📄</span>
+              <span className="stat-delta">↑ {resumeScore > 75 ? "Strong foundation" : "Update recommended"}</span>
+              <span className="stat-art"><DocIcon /></span>
             </div>
           </div>
 
@@ -1050,22 +1048,20 @@ export default function Dashboard({ theme: externalTheme }) {
             <section className="a-card panel">
               <h2>Your preparation progress</h2>
               <p className="panel-sub">Coverage across core placement areas</p>
-              <div className="prog-row" title="Data Structures &amp; Algorithms">
+              
+              <div className="prog-row" title="Data Structures &amp; Algorithms" onClick={() => navigate("/dsa")}>
                 <span className="prog-label">DSA</span>
                 <div className="track"><div className="fill" style={{ width: `${dsaPct}%` }} /></div>
                 <span className="prog-pct">{dsaPct}%</span>
               </div>
-              <div className="prog-row" title="Quantitative Aptitude">
-                <span className="prog-label">Aptitude</span>
-                <div className="track"><div className="fill" style={{ width: `${aptPct}%` }} /></div>
-                <span className="prog-pct">{aptPct}%</span>
+              
+              <div className="prog-row" title="Resume Optimization" onClick={() => navigate("/resume")}>
+                <span className="prog-label">Resume</span>
+                <div className="track"><div className="fill" style={{ width: `${resumeScore}%` }} /></div>
+                <span className="prog-pct">{resumeScore}%</span>
               </div>
-              <div className="prog-row" title="Computer Science Fundamentals">
-                <span className="prog-label">Core CS</span>
-                <div className="track"><div className="fill" style={{ width: `${csPct}%` }} /></div>
-                <span className="prog-pct">{csPct}%</span>
-              </div>
-              <div className="prog-row" title="Interview Preparation">
+              
+              <div className="prog-row" title="Interview Preparation" onClick={() => navigate("/interview")}>
                 <span className="prog-label">Interviews</span>
                 <div className="track"><div className="fill" style={{ width: `${intPct}%` }} /></div>
                 <span className="prog-pct">{intPct}%</span>
@@ -1088,12 +1084,12 @@ export default function Dashboard({ theme: externalTheme }) {
             <p className="panel-sub">Your most-used preparation tools</p>
             <div className="quick-grid">
               {[
-                { icon: "⌘", label: "Solve DSA", desc: "Dynamic Programming", action: "DSA" },
-                { icon: "◉", label: "Mock Interview", desc: "Technical practice", action: "Mock Interview" },
-                { icon: "◆", label: "Aptitude Quiz", desc: "10 quick questions", action: "Aptitude Quiz" },
-                { icon: "▧", label: "Check Resume", desc: `Latest score: ${resumeScore}`, action: "Resume" },
+                { icon: <CodeIcon />, label: "Solve DSA", desc: "Dynamic Programming", path: "/dsa" },
+                { icon: <VideoIcon />, label: "Mock Interview", desc: "Technical practice", path: "/interview" },
+                { icon: <QuizIcon />, label: "Aptitude Quiz", desc: "10 quick questions", path: "/aptitude" },
+                { icon: <DocIcon />, label: "Check Resume", desc: `Latest score: ${resumeScore}`, path: "/resume" },
               ].map((q) => (
-                <div key={q.action} className="quick-card" onClick={() => handleQuickAction(q.action)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && handleQuickAction(q.action)}>
+                <div key={q.path} className="quick-card" onClick={() => navigate(q.path)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && navigate(q.path)}>
                   <div className="quick-icon">{q.icon}</div>
                   <b>{q.label}</b>
                   <small>{q.desc}</small>
@@ -1108,7 +1104,7 @@ export default function Dashboard({ theme: externalTheme }) {
                 <span className="card-label">AI-Powered Practice</span>
                 <h3>Prepare like the interview is already scheduled.</h3>
                 <p>Move from coding practice to realistic interview sessions with focused AI feedback on the areas that matter most.</p>
-                <button className="primary-btn" onClick={() => handleQuickAction("Mock Interview")}>Start a mock interview →</button>
+                <button className="primary-btn" onClick={() => navigate("/interview")}>Start a mock interview →</button>
               </div>
               <div className="feature-ill ai-ill" aria-hidden="true">
                 <img src="Freelancer with computer, sitting and using laptop, distance work_ modern vector flat illustration _ Premium Vector.jpeg" alt="" />
@@ -1129,11 +1125,11 @@ export default function Dashboard({ theme: externalTheme }) {
         </main>
 
         <aside className="a-right">
-          <div className="a-card challenge-card" onClick={handleChallengeClick}>
-            <span className="challenge-tag">Daily Challenge</span>
+          <div className="a-card challenge-card" onClick={() => navigate("/dsa")}>
+            <span className="challenge-tag" style={{display: "block"}}>Daily Challenge</span>
             <h3>Longest Substring Without Repeating Characters</h3>
             <p>Medium · ~25 min</p>
-            <button className="challenge-btn" onClick={(e) => { e.stopPropagation(); handleChallengeClick(); }}>Solve challenge →</button>
+            <button className="challenge-btn" onClick={(e) => { e.stopPropagation(); navigate("/dsa"); }}>Solve challenge →</button>
             <div className="challenge-ill" aria-hidden="true">
               <div className="circle" /><div className="hair" />
               <div className="head" /><div className="shirt" /><div className="screen" />
@@ -1142,15 +1138,15 @@ export default function Dashboard({ theme: externalTheme }) {
 
           <div className="a-card recommend-card">
             <div className="recommend-head">
-              <span className="recommend-icon">✦</span>
+              <span className="recommend-icon"><SparkleIcon /></span>
               <h3>Recommended next</h3>
             </div>
             {[
-              { title: "Revise DBMS normalization", meta: "Core CS · 18 min", badge: "High yield", action: "DBMS Revision" },
-              { title: "Quantitative aptitude set", meta: "20 questions", badge: null, action: "Aptitude" },
-              { title: "Practice your introduction", meta: "AI interview feedback", badge: "New", action: "Interview Practice" },
+              { title: "Review Graph Algorithms", meta: "DSA · 18 min", badge: "High yield", path: "/dsa" },
+              { title: "Improve Resume Keywords", meta: "Resume Builder", badge: "Fix", path: "/resume" },
+              { title: "Practice your introduction", meta: "AI interview feedback", badge: "New", path: "/interview" },
             ].map((rec) => (
-              <div key={rec.action} className="rec-item" onClick={() => handleQuickAction(rec.action)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && handleQuickAction(rec.action)}>
+              <div key={rec.path} className="rec-item" onClick={() => navigate(rec.path)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && navigate(rec.path)}>
                 <b>{rec.title}</b>
                 <div className="rec-meta">
                   <small>{rec.meta}</small>
