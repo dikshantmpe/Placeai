@@ -276,13 +276,21 @@ export default function Home({ setUser }) {
           </div>
           <div className="pills">
             {pills.map(pill => (
-              <button 
+              <Link 
                 key={pill}
-                className={`pill ${activePill === pill ? 'active' : ''}`}
-                onClick={() => setActivePill(pill)}
+                to="/login"
+                style={{ textDecoration: 'none' }}
               >
-                {pill}
-              </button>
+                <button 
+                  className={`pill ${activePill === pill ? 'active' : ''}`}
+                  onMouseEnter={() => setActivePill(pill)}
+                  onMouseLeave={() => setActivePill("DSA")}
+                  onClick={() => setActivePill(pill)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {pill}
+                </button>
+              </Link>
             ))}
           </div>
         </div>
