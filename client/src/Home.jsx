@@ -64,8 +64,7 @@ export default function Home({ setUser }) {
   }, []);
 
   const pills = [
-    "DSA", "Aptitude", "Resume Building", "Mock Interviews", "DBMS", 
-    "Operating Systems", "Computer Networks", "SQL", "System Design", "Communication Skills"
+    "DSA", "Resume Building", "Mock Interviews", "Aptitude", "Companies", "Challenge"
   ];
 
   return (
