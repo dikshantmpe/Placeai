@@ -68,15 +68,21 @@ router.get("/", requireAuth, async (req, res) => {
       }
     }
 
-    // 5. GET DSA DATA
+    // 5. GET DSA DATA (FIXED: Handles schema's various Solved states)
     const allProblems = await Problem.find().select("_id topic").lean();
-    const allProgress = await UserProgress.find({ userId }).lean();
+    
+    // Only pull progress documents that are explicitly solved
+    const allProgress = await UserProgress.find({ 
+      userId,
+      status: { $in: ["Solved", "SOLVED", "solved"] }
+    }).lean();
     
     const problemsByTopic = {};
     allProblems.forEach(p => {
       if (!problemsByTopic[p.topic]) problemsByTopic[p.topic] = [];
       problemsByTopic[p.topic].push(String(p._id));
     });
+    
     const totalDSA = allProblems.length;
     const solvedIds = new Set(allProgress.map(p => String(p.problemId)));
     const dsaDone = solvedIds.size;
