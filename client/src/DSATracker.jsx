@@ -164,31 +164,15 @@ const DSATracker = () => {
   };
 
   const handleSaveCode = () => {
-    // 🔍 COMPREHENSIVE DEBUG LOGGING
-    console.log("\n🔍 ===== SAVE CODE DEBUG START =====");
-    console.log("📌 selectedProblem:", selectedProblem);
-    console.log("📌 selectedProblem._id:", selectedProblem?._id);
-    console.log("📌 selectedProblem.name:", selectedProblem?.name);
-    console.log("📌 code length:", code.length);
-    console.log("📌 output length:", output.length);
-    console.log("📌 solutionStatus:", solutionStatus);
-    console.log("📌 testResults:", testResults);
-    
     if (!selectedProblem) {
-      console.error("❌ ERROR: selectedProblem is null/undefined!");
       alert("❌ Error: No problem selected. Please select a problem first.");
       return;
     }
 
     if (!selectedProblem._id) {
-      console.error("❌ ERROR: selectedProblem._id is missing!");
-      console.log("selectedProblem object:", JSON.stringify(selectedProblem, null, 2));
       alert("❌ Error: Problem ID is missing. Please reload and try again.");
       return;
     }
-
-    console.log("✅ All validations passed, proceeding with save...");
-    console.log("🔍 ===== SAVE CODE DEBUG END =====\n");
     
     saveCodeToDatabase(code, output, solutionStatus, testResults);
   };
@@ -197,12 +181,10 @@ const DSATracker = () => {
     try {
       const token = await getAuthToken();
       if (!token) {
-        console.error("❌ No auth token found");
         alert("Authentication error. Please log in again.");
         return;
       }
 
-      // 🔍 DEBUG: Log request details
       const requestUrl = `${API_BASE_URL}/api/dsa/problems/${selectedProblem._id}/save-code`;
       const requestBody = {
         code: codeContent,
@@ -211,13 +193,6 @@ const DSATracker = () => {
         testResults: results,
         solvedAt: status === "Solved" ? new Date() : null
       };
-
-      console.log("\n🔍 ===== SAVE CODE REQUEST DEBUG =====");
-      console.log("🌐 Request URL:", requestUrl);
-      console.log("📤 Request Body:", requestBody);
-      console.log("🔑 Token present:", !!token);
-      console.log("📊 Status:", status);
-      console.log("🔍 ===== REQUEST DEBUG END =====\n");
 
       const response = await fetch(requestUrl, {
         method: "POST",
@@ -228,17 +203,10 @@ const DSATracker = () => {
         body: JSON.stringify(requestBody),
       });
 
-      console.log("📬 Response Status:", response.status);
-      console.log("📬 Response OK:", response.ok);
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("❌ Server Error Response:", errorData);
         throw new Error(errorData.error || "Failed to save code");
       }
-
-      const responseData = await response.json();
-      console.log("✅ Success Response:", responseData);
 
       alert("✓ Code saved successfully!");
       fetchProblems();
@@ -256,22 +224,25 @@ const DSATracker = () => {
 
     if (language === "javascript") {
       try {
-        const defaultTestCases = [
-          { input: { nums: [2, 7, 11, 15], target: 9 }, expected: [0, 1] },
-          { input: { nums: [3, 2, 4], target: 6 }, expected: [1, 2] },
-          { input: { nums: [3, 3], target: 6 }, expected: [0, 1] }
-        ];
+        // Fetch test cases directly from the database problem object
+        const testCases = selectedProblem?.testCases;
 
-        const testCases = selectedProblem?.testCases || defaultTestCases;
+        if (!testCases || testCases.length === 0) {
+          setOutput("⚠️ No test cases found for this problem. Please ensure test cases exist in your database.");
+          setSolutionStatus("pending");
+          return;
+        }
+
         let allTestsPassed = true;
         let results = [];
         let outputText = "";
 
+        // Extract function name dynamically
         const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
         const functionName = functionMatch ? functionMatch[1] : null;
 
         if (!functionName) {
-          setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has: function twoSum(nums, target) { ... }");
+          setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has a standard function wrapper (e.g., function mySolution() { ... })");
           setSolutionStatus("pending");
           return;
         }
@@ -282,7 +253,11 @@ const DSATracker = () => {
         for (let i = 0; i < testCases.length; i++) {
           const testCase = testCases[i];
           try {
-            const result = userFunction(testCase.input.nums, testCase.input.target);
+            // Dynamically grab all arguments from the input object 
+            const args = Object.values(testCase.input);
+            
+            // Execute the function dynamically with spread syntax
+            const result = userFunction(...args);
             const passed = JSON.stringify(result) === JSON.stringify(testCase.expected);
 
             results.push({
@@ -293,14 +268,24 @@ const DSATracker = () => {
               output: result
             });
 
+            // Dynamically print the inputs without hardcoding names
+            const inputString = Object.entries(testCase.input)
+              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
+              .join(", ");
+
             outputText += `Test ${i + 1}: ${passed ? "✓ PASSED" : "✗ FAILED"}\n`;
-            outputText += `  Input: nums = ${JSON.stringify(testCase.input.nums)}, target = ${testCase.input.target}\n`;
+            outputText += `  Input: ${inputString}\n`;
             outputText += `  Expected: ${JSON.stringify(testCase.expected)}\n`;
             outputText += `  Got: ${JSON.stringify(result)}\n\n`;
 
             if (!passed) allTestsPassed = false;
           } catch (err) {
             allTestsPassed = false;
+            
+            const inputString = Object.entries(testCase.input)
+              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
+              .join(", ");
+
             results.push({
               testNum: i + 1,
               passed: false,
@@ -309,7 +294,7 @@ const DSATracker = () => {
             });
 
             outputText += `Test ${i + 1}: ✗ ERROR\n`;
-            outputText += `  Input: nums = ${JSON.stringify(testCase.input.nums)}, target = ${testCase.input.target}\n`;
+            outputText += `  Input: ${inputString}\n`;
             outputText += `  Error: ${err.message}\n\n`;
           }
         }
@@ -469,9 +454,8 @@ const DSATracker = () => {
                               <tr>
                                 <th>Problem</th>
                                 <th>Difficulty</th>
-                                <th>Status</th>
                                 <th>Last attempted</th>
-                                <th>Update</th>
+                                <th>Update Status</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -481,9 +465,7 @@ const DSATracker = () => {
                                     <a
                                       className="problem-link"
                                       onClick={() => {
-                                        console.log("🔗 Problem clicked:", problem);
                                         setSelectedProblem(problem);
-                                        // Load saved code if it exists
                                         setCode(problem.code || "// Write your solution here...\n");
                                         setOutput(problem.output || "");
                                         setSolutionStatus(problem.status === "Solved" ? "solved" : "pending");
@@ -499,7 +481,6 @@ const DSATracker = () => {
                                       {problem.difficulty}
                                     </span>
                                   </td>
-                                  <td>{problem.status}</td>
                                   <td>{problem.lastAttempted ? new Date(problem.lastAttempted).toLocaleDateString() : "Never"}</td>
                                   <td>
                                     <select
