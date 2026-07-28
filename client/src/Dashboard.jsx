@@ -220,6 +220,9 @@ export default function Dashboard({ theme: externalTheme }) {
   const displayName = formatName(rawName);
   const initials = displayName.substring(0, 2).toUpperCase();
   const firstName = displayName.split(" ")[0];
+  
+  // ADDED: Extract the user's profile picture URL from Firebase
+  const photoURL = firebaseUser?.photoURL || null;
 
   const handleQuickAction = useCallback((action) => {
     setToast({ message: `Opening ${action}…`, type: "info" });
@@ -965,7 +968,21 @@ export default function Dashboard({ theme: externalTheme }) {
           <div className="a-card profile-card">
             <div className="cover" />
             <div className="profile-inner">
-              <div className="face">{initials}</div>
+              
+              {/* UPDATED: Profile Avatar Logic */}
+              <div className="face" style={{ overflow: "hidden" }}>
+                {photoURL ? (
+                  <img 
+                    src={photoURL} 
+                    alt={displayName} 
+                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} 
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
+
               <h3>{displayName}</h3>
               <p>B.Tech CSE (AI &amp; ML)<br/>Placement preparation in progress</p>
               <div className="mini-row">
