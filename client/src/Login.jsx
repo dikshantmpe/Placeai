@@ -99,7 +99,7 @@ export default function Login({ setUser }) {
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <button style={{ borderRadius: 999, padding: "11px 20px", fontWeight: 700, border: "none", background: "transparent", color: "#4b5870", cursor: "pointer", fontFamily: "inherit", fontSize: 14, transition: "0.2s" }}>Sign in</button>
-            <Link to="/signup">
+            <Link to="/">
               <button style={{ borderRadius: 999, padding: "11px 20px", fontWeight: 700, border: "none", background: "#1769e0", color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 14, transition: "0.2s" }}>Get started</button>
             </Link>
           </div>
@@ -162,11 +162,8 @@ export default function Login({ setUser }) {
               </button>
 
               <div style={{ textAlign: "center", marginTop: "24px" }}>
-                <p style={{ fontSize: 12, color: "#7b8494", margin: "4px 12px 18px", lineHeight: 1.5 }}>
+                <p style={{ fontSize: 12, color: "#7b8494", margin: "4px 12px 0", lineHeight: 1.5 }}>
                   By continuing, you agree to Crackin AI's <a href="#" style={{ color: "#1769e0", fontWeight: 700 }}>Terms</a> and <a href="#" style={{ color: "#1769e0", fontWeight: 700 }}>Privacy Policy</a>.
-                </p>
-                <p style={{ fontSize: 15, color: "#536079", margin: 0 }}>
-                  New to Crackin AI? <Link to="/signup" style={{ color: "#1769e0", fontWeight: 700 }}>Create your account</Link>
                 </p>
               </div>
             </div>

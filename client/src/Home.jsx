@@ -111,9 +111,8 @@ export default function Home({ setUser }) {
         .google:hover { background: var(--blue2); }
         .github { background: #24292e; color: #fff; border: 0; border-radius: 999px; font-weight: 750; transition: .2s; }
         .github:hover { background: #1b1f23; }
-        .legal { font-size: 12px; line-height: 1.5; color: #7b8494; text-align: center; margin: 4px 12px 18px; }
-        .legal a, .signup a { color: var(--blue); font-weight: 700; }
-        .signup { text-align: center; font-size: 15px; color: #536079; }
+        .legal { font-size: 12px; line-height: 1.5; color: #7b8494; text-align: center; margin: 4px 12px 0; }
+        .legal a { color: var(--blue); font-weight: 700; }
         
         .section-pad { padding: 94px 0; }
         .bg-soft { background: var(--soft); }
@@ -225,7 +224,7 @@ export default function Home({ setUser }) {
             </div>
             <div className="actions">
               <Link to="/login" className="btn btn-ghost">Sign in</Link>
-              <Link to="/signup" className="btn btn-primary">Get started</Link>
+              <Link to="/login" className="btn btn-primary">Get started</Link>
             </div>
           </nav>
         </div>
@@ -245,7 +244,6 @@ export default function Home({ setUser }) {
                 Continue with Google
               </button>
               
-              {/* REPLACED EMAIL BUTTON WITH GITHUB */}
               <button className="github" onClick={() => handleOAuthLogin('github')}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
@@ -254,10 +252,7 @@ export default function Home({ setUser }) {
               </button>
 
               <p className="legal">
-                By continuing, you agree to Crackin AI's <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>.
-              </p>
-              <p className="signup">
-                New to Crackin AI? <Link to="/signup">Create your account</Link>
+                By continuing, you agree to Crackin AI's <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
               </p>
             </div>
           </div>
@@ -306,7 +301,7 @@ export default function Home({ setUser }) {
               <div>✓ Difficulty and status filters</div>
               <div>✓ Progress that updates as you practice</div>
             </div>
-            <Link to="/signup" className="btn btn-outline">Open DSA Tracker</Link>
+            <Link to="/login" className="btn btn-outline">Open DSA Tracker</Link>
           </div>
           <div className="visual">
             <div className="visual-shape">
@@ -335,7 +330,7 @@ export default function Home({ setUser }) {
               <div>Clear improvement suggestions</div>
               <div>Readable readiness scoring</div>
             </div>
-            <Link to="/signup" className="btn btn-primary">Analyze my resume</Link>
+            <Link to="/login" className="btn btn-primary">Analyze my resume</Link>
           </div>
           <div className="visual">
             <div className="visual-shape" style={{ background: '#e6f2ed' }}>
@@ -369,7 +364,7 @@ export default function Home({ setUser }) {
             <h2 className="title">Practice the conversation, not just the answer.</h2>
             <p className="copy">Rehearse realistic interview questions, explain your thinking out loud, and get feedback that helps you make the next answer clearer.</p>
             <br />
-            <Link to="/signup" className="btn btn-primary">Start a mock interview</Link>
+            <Link to="/login" className="btn btn-primary">Start a mock interview</Link>
           </div>
         </div>
       </section>
@@ -415,7 +410,7 @@ export default function Home({ setUser }) {
       <section className="band reveal">
         <div className="wrap">
           <h2>Check your progress, find the weak spots, and decide what deserves your next hour.</h2>
-          <Link to="/signup" className="btn btn-outline">View progress dashboard</Link>
+          <Link to="/login" className="btn btn-outline">View progress dashboard</Link>
         </div>
       </section>
 
@@ -425,7 +420,7 @@ export default function Home({ setUser }) {
           <h2>Your first job starts long before the interview.<br />Start preparing for it properly.</h2>
           <p className="copy">Learn. Practice. Get feedback. Improve. Crackin AI keeps the pieces together while you do the work.</p>
           <br />
-          <Link to="/signup" className="btn btn-primary">Start preparing free</Link>
+          <Link to="/login" className="btn btn-primary">Start preparing free</Link>
         </div>
         <div className="campus"></div>
       </section>
@@ -441,17 +436,17 @@ export default function Home({ setUser }) {
             </div>
             <div>
               <h4>Features</h4>
-              <Link to="/dsa">DSA Tracker</Link>
-              <Link to="/resume">Resume Analyzer</Link>
-              <Link to="/interview">Mock Interviews</Link>
-              <Link to="/quiz">Aptitude Quiz</Link>
+              <Link to="/login">DSA Tracker</Link>
+              <Link to="/login">Resume Analyzer</Link>
+              <Link to="/login">Mock Interviews</Link>
+              <Link to="/login">Aptitude Quiz</Link>
             </div>
             <div>
               <h4>Prepare</h4>
-              <Link to="/company">Company Questions</Link>
-              <Link to="/daily">Daily Challenge</Link>
-              <Link to="/dashboard">Progress</Link>
-              <Link to="/signup">Learning Paths</Link>
+              <Link to="/login">Company Questions</Link>
+              <Link to="/login">Daily Challenge</Link>
+              <Link to="/login">Progress</Link>
+              <Link to="/login">Learning Paths</Link>
             </div>
             <div>
               <h4>Company</h4>
