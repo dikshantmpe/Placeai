@@ -1,21 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const Problem = require("../models/Problem");
-const requireAuth = require("../middleware/auth"); // Adjust this path if your auth middleware is named differently
+const requireAuth = require("../middleware/auth"); 
 
 // GET all problems
 router.get("/", requireAuth, async (req, res) => {
   try {
     const problems = await Problem.find({});
-    // If you have a separate UserProgress model to track solved status, 
-    // that logic goes here. For now, this returns the problems to stop the hanging!
     res.json(problems);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PUT to toggle status (since your DSATracker makes a PUT request)
+// PUT to toggle status locally for the frontend
 router.put("/:id", requireAuth, async (req, res) => {
   try {
     const problem = await Problem.findById(req.params.id);
@@ -23,12 +21,15 @@ router.put("/:id", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Problem not found" });
     }
     
-    // Toggle the status (assuming 'status' is tracked directly on the problem or via a joined progress model)
-    // Note: If you use a separate UserProgress collection, update that here instead.
-    problem.status = !problem.status; 
-    await problem.save();
+    // TEMPORARY FIX: We do NOT save to the global Problem model here anymore.
+    // When you are ready, you will create a UserProgress model and save the status there.
     
-    res.json(problem);
+    // For now, just send a 200 OK back so the frontend React state can update smoothly without breaking the global DB.
+    res.status(200).json({ 
+      message: "Status updated locally", 
+      problemId: req.params.id 
+    });
+    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

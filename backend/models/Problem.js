@@ -6,7 +6,15 @@ const problemSchema = new mongoose.Schema({
   difficulty:  { type: String, enum: ["Easy", "Medium", "Hard"] },
   description: { type: String, default: "" },
   link:        { type: String },
-  createdAt:   { type: Date, default: Date.now }
+  createdAt:   { type: Date, default: Date.now },
+  
+  // 👇 This allows Mongoose to save your test cases!
+  testCases: [
+    {
+      input: { type: mongoose.Schema.Types.Mixed },
+      expected: { type: mongoose.Schema.Types.Mixed }
+    }
+  ]
 });
 
 // Guard against OverwriteModelError when server hot-reloads
