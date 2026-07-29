@@ -94,7 +94,7 @@ const SolutionsIcon = () => (
   </svg>
 );
 
-export default function Topbar({ user: propUser, setUser, theme: externalTheme, onThemeChange, onLogout }) {
+export default function Topbar({ user: propUser, setUser, theme: externalTheme, onLogout }) {
   const navigate = useNavigate();
   const [firebaseUser, setFirebaseUser] = useState(propUser || null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -103,16 +103,8 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef(null);
 
-  const isControlled = externalTheme !== undefined && onThemeChange !== undefined;
-  const [internalTheme, setInternalTheme] = useState(
-    localStorage.getItem("crackin-theme") || "light"
-  );
-  const theme = isControlled ? externalTheme : internalTheme;
-
-  const setTheme = (next) => {
-    if (isControlled) { onThemeChange(next); }
-    else { setInternalTheme(next); localStorage.setItem("crackin-theme", next); }
-  };
+  const internalTheme = localStorage.getItem("crackin-theme") || "light";
+  const theme = externalTheme !== undefined ? externalTheme : internalTheme;
 
   useEffect(() => {
     setFirebaseUser(propUser || null);
@@ -147,7 +139,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
   const displayName = formatName(rawName);
   const initials = displayName.substring(0, 2).toUpperCase();
   
-  // ADDED: Extract the user's profile picture URL from Firebase
   const photoURL = firebaseUser?.photoURL || null;
 
   const handleLogout = async () => {
@@ -168,13 +159,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
     }
   };
 
-  const toggleTheme = (e) => {
-    e?.stopPropagation();
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    setToast({ message: `Switched to ${next} mode`, type: "info" });
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -182,7 +166,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
     setSearchQuery("");
   };
 
-  // UPDATED: Added Solutions Gallery with active status
   const navItems = [
     { id: "home", label: "Dashboard", path: "/dashboard", icon: <HomeIcon />, badge: null, comingSoon: false },
     { id: "dsa", label: "DSA", path: "/dsa", icon: <DsaIcon />, badge: null, comingSoon: false },
@@ -376,7 +359,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
           transform: none !important;
         }
         
-        /* Tooltip Box Configuration */
         .nav-btn.coming-soon-btn::after {
           content: "Coming Soon";
           position: absolute;
@@ -397,7 +379,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           z-index: 100;
         }
-        /* Tooltip Animation Trigger on Hover */
         .nav-btn.coming-soon-btn:hover::after {
           opacity: 1;
           visibility: visible;
@@ -482,40 +463,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
         .menu-link:hover { background: var(--nav-hover); color: var(--p); }
         .menu-link svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
 
-        .theme-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          margin-top: 6px;
-          padding: 10px 8px 4px;
-          border-top: 1px solid var(--line);
-        }
-        .theme-toggle {
-          width: 44px; height: 24px;
-          border-radius: 999px;
-          background: #d9dde3;
-          position: relative;
-          transition: 0.25s;
-          flex: none;
-          cursor: pointer;
-        }
-        .theme-toggle::before {
-          content: "☀";
-          position: absolute;
-          left: 3px; top: 3px;
-          width: 18px; height: 18px;
-          border-radius: 50%;
-          background: #fff;
-          display: grid; place-items: center;
-          font-size: 10px;
-          color: #172033;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-          transition: 0.25s;
-        }
-        .topbar-root.dark .theme-toggle { background: #3974c7; }
-        .topbar-root.dark .theme-toggle::before { content: "☾"; transform: translateX(20px); background: #172033; color: #fff; }
-
         @media (max-width: 860px) {
           .search-wrap { display: none; }
         }
@@ -572,7 +519,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
               aria-haspopup="true"
               style={{ background: "transparent", border: "none", padding: "8px 10px 5px" }}
             >
-              {/* UPDATED: Profile Avatar Logic for Main Navbar */}
               <span className="nav-profile" title={displayName} style={photoURL ? { overflow: "hidden", padding: 0 } : {}}>
                 {photoURL ? (
                   <img 
@@ -590,7 +536,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
               {menuOpen && (
                 <div className="profile-menu" onClick={(e) => e.stopPropagation()}>
                   <div className="menu-user">
-                    {/* UPDATED: Profile Avatar Logic for Dropdown Menu */}
                     <span className="menu-avatar" style={photoURL ? { overflow: "hidden" } : {}}>
                       {photoURL ? (
                         <img 
@@ -609,10 +554,13 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
                     </span>
                   </div>
                   
+                  {/* UPDATE: Activated profile button linking to /profile */}
                   <div 
-                    className="menu-link coming-soon-btn" 
-                    title="Coming Soon"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    className="menu-link" 
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/profile");
+                    }}
                   >
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
                     View profile
@@ -627,15 +575,6 @@ export default function Topbar({ user: propUser, setUser, theme: externalTheme, 
                     Account settings
                   </div>
 
-                  <div className="theme-row">
-                    <span>
-                      <b>Appearance</b>
-                      <small style={{ display: "block", color: "var(--muted)", fontSize: 11, marginTop: 2 }}>
-                        {theme === "light" ? "Light" : "Dark"} theme
-                      </small>
-                    </span>
-                    <span className="theme-toggle" onClick={toggleTheme} role="switch" aria-checked={theme === "dark"} />
-                  </div>
                   <div className="menu-link" onClick={handleLogout} style={{ color: "#d92d43", marginTop: 4 }}>
                     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     Sign Out
