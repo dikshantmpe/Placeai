@@ -160,6 +160,7 @@ router.get("/problems", async (req, res) => {
         timeSpent: userProblemData.timeSpent || 0,
         notes: userProblemData.notes || "",
         code: userProblemData.code || "",
+        testCases: problem.testCases || [],
       };
 
       topicMap[problem.topic].problems.push(problemData);
@@ -175,6 +176,76 @@ router.get("/problems", async (req, res) => {
       totalProblems: problems.length,
     });
   } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single problem with full details including test cases
+router.get("/problems/:problemId/details", async (req, res) => {
+  try {
+    console.log("📍 GET /problems/:problemId/details called");
+
+    // 🔍 DEBUG AUTH
+    console.log("🔐 Auth Debug:", { 
+      userExists: !!req.user, 
+      uid: req.user?.uid,
+      fullUser: req.user 
+    });
+
+    const userId = req.user?.uid;
+    const { problemId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized: No valid user found",
+        debug: { user: req.user }
+      });
+    }
+
+    if (!problemId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Bad request: problemId missing"
+      });
+    }
+
+    const problem = await Problem.findById(problemId).lean();
+    
+    if (!problem) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Problem not found"
+      });
+    }
+
+    const userProgress = await UserProgress.findOne({ userId, problemId }).lean();
+
+    const problemDetails = {
+      _id: problem._id,
+      name: problem.name || problem.title,
+      title: problem.title,
+      topic: problem.topic,
+      difficulty: problem.difficulty,
+      description: problem.description || "",
+      link: problem.link || "#",
+      testCases: problem.testCases || [],
+      status: userProgress?.status || "Pending",
+      code: userProgress?.code || "",
+      output: userProgress?.output || "",
+      testResults: userProgress?.testResults || [],
+      timeSpent: userProgress?.timeSpent || 0,
+      notes: userProgress?.notes || "",
+      lastAttempted: userProgress?.lastAttempted || null,
+      solvedAt: userProgress?.solvedAt || null,
+    };
+
+    return res.json({
+      success: true,
+      problem: problemDetails,
+    });
+  } catch (error) {
+    console.error("❌ DETAILS ERROR:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });
