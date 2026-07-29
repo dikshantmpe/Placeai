@@ -223,72 +223,154 @@ const DSATracker = () => {
       setOutput("❌ Error: Code is empty. Please write some code first.");
       return;
     }
+
+    setOutput("Running tests...\n");
+    setSolutionStatus("pending");
+    setTestResults([]);
     setIsRunning(true);
-    setOutput("⏳ Running...\n");
-    try {
-      if (language === "javascript") {
-        // Execute JavaScript directly in browser
-        const capturedOutput = [];
-        
-        // Override console.log temporarily
-        const originalLog = console.log;
-        console.log = (...args) => {
-          capturedOutput.push(args.map(arg => {
-            if (typeof arg === 'object') {
-              return JSON.stringify(arg, null, 2);
-            }
-            return String(arg);
-          }).join(' '));
-        };
-        try {
-          // Create a function and execute it
-          const func = new Function(code);
-          const result = func();
-          
-          if (result !== undefined) {
-            capturedOutput.push(String(result));
-          }
-          const finalOutput = capturedOutput.length > 0 
-            ? capturedOutput.join('\n') 
-            : "✓ Code executed successfully (no output)";
-          setOutput(finalOutput);
-          setSolutionStatus("solved");
-          setTestResults([{ status: "passed", message: "Code executed successfully" }]);
-        } catch (err) {
-          setOutput(`❌ Error: ${err.message}\n\nStack: ${err.stack}`);
+
+    if (language === "javascript") {
+      try {
+        // Fetch test cases directly from the database problem object
+        const testCases = selectedProblem?.testCases;
+
+        if (!testCases || testCases.length === 0) {
+          setOutput("⚠️ No test cases found for this problem. Please ensure test cases exist in your database.");
           setSolutionStatus("pending");
-          setTestResults([{ status: "failed", message: err.message }]);
-        } finally {
-          console.log = originalLog;
-        }
-      } else {
-        // For other languages, call backend
-        const token = await getAuthToken();
-        if (!token) {
-          setOutput("❌ Authentication error. Please log in again.");
+          setIsRunning(false);
           return;
         }
-        const response = await fetch(`${API_BASE_URL}/api/dsa/run-code`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            code,
-            language,
-            problemId: selectedProblem?._id,
-          }),
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          setOutput(`❌ Error: ${data.error || "Failed to execute code"}`);
+
+        let allTestsPassed = true;
+        let results = [];
+        let outputText = "";
+
+        // Extract function name dynamically
+        const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
+        const functionName = functionMatch ? functionMatch[1] : null;
+
+        if (!functionName) {
+          setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has a standard function wrapper (e.g., function mySolution() { ... })");
           setSolutionStatus("pending");
-          setTestResults([{ status: "failed", message: data.error }]);
+          setIsRunning(false);
+          return;
+        }
+
+        const contextCode = `${code}\nreturn ${functionName};`;
+        const userFunction = new Function(contextCode)();
+
+        for (let i = 0; i < testCases.length; i++) {
+          const testCase = testCases[i];
+          try {
+            // Dynamically grab all arguments from the input object 
+            const args = Object.values(testCase.input);
+            
+            // Execute the function dynamically with spread syntax
+            const result = userFunction(...args);
+            const passed = JSON.stringify(result) === JSON.stringify(testCase.expected);
+
+            results.push({
+              testNum: i + 1,
+              passed,
+              input: testCase.input,
+              expected: testCase.expected,
+              output: result
+            });
+
+            // Dynamically print the inputs without hardcoding names
+            const inputString = Object.entries(testCase.input)
+              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
+              .join(", ");
+
+            outputText += `Test ${i + 1}: ${passed ? "✓ PASSED" : "✗ FAILED"}\n`;
+            outputText += `  Input: ${inputString}\n`;
+            outputText += `  Expected: ${JSON.stringify(testCase.expected)}\n`;
+            outputText += `  Got: ${JSON.stringify(result)}\n\n`;
+
+            if (!passed) allTestsPassed = false;
+          } catch (err) {
+            allTestsPassed = false;
+            
+            const inputString = Object.entries(testCase.input)
+              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
+              .join(", ");
+
+            results.push({
+              testNum: i + 1,
+              passed: false,
+              input: testCase.input,
+              error: err.message
+            });
+
+            outputText += `Test ${i + 1}: ✗ ERROR\n`;
+            outputText += `  Input: ${inputString}\n`;
+            outputText += `  Error: ${err.message}\n\n`;
+          }
+        }
+
+        if (allTestsPassed) {
+          outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
+          setSolutionStatus("solved");
+          setOutput(outputText);
+          setTestResults(results);
+          
+          // AUTO-SAVE when all tests pass
+          setTimeout(() => {
+            saveCodeToDatabase(code, outputText, "Solved", results);
+          }, 500);
         } else {
-          setOutput(data.output || "✓ Code executed successfully");
-          setSolutionStatus(data.status || "pending");
-          setTestResults(data.testResults || []);
+          outputText += "\n❌ Some tests failed. Please fix your solution.";
+          setSolutionStatus("pending");
+          setOutput(outputText);
+          setTestResults(results);
+        }
+      } catch (error) {
+        setOutput(`❌ Runtime Error:\n${error.message}`);
+        setSolutionStatus("pending");
+      } finally {
+        setIsRunning(false);
+      }
+      return;
+    }
+
+    // For other languages, call backend
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        setOutput("❌ Authentication error. Please log in again.");
+        setIsRunning(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/dsa/run-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code,
+          language,
+          problemId: selectedProblem?._id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setOutput(`❌ Error: ${data.error || "Failed to execute code"}`);
+        setSolutionStatus("pending");
+        setTestResults([{ status: "failed", message: data.error }]);
+      } else {
+        setOutput(data.output || "✓ Code executed successfully");
+        setSolutionStatus(data.status || "pending");
+        setTestResults(data.testResults || []);
+
+        // AUTO-SAVE for other languages if all tests passed
+        if (data.status === "Solved") {
+          setTimeout(() => {
+            saveCodeToDatabase(code, data.output, "Solved", data.testResults || []);
+          }, 500);
         }
       }
     } catch (error) {
