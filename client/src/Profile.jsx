@@ -7,6 +7,22 @@ export default function Profile({ user, setUser }) {
   const navigate = useNavigate();
   const [theme, setTheme] = useState(() => localStorage.getItem("crackin-theme") || "light");
   
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Extract display details (defaults)
+  const defaultName = user?.displayName || user?.name || "Guest User";
+  const defaultEmail = user?.email || "No email provided";
+  const photoURL = user?.photoURL || user?.avatar || null;
+
+  // Form State for Editable Fields
+  const [formData, setFormData] = useState({
+    name: defaultName,
+    email: defaultEmail,
+    bio: "",
+    plan: "Free Tier"
+  });
+  
   // Stats from localStorage
   const streak = parseInt(localStorage.getItem("streak") || "0");
   const quizzesTaken = parseInt(localStorage.getItem("quizzesTaken") || "0");
@@ -28,15 +44,15 @@ export default function Profile({ user, setUser }) {
     }
   };
 
+  const handleSave = () => {
+    // Here you would typically make an API call to save the user data to your backend/Firebase
+    setIsEditing(false);
+  };
+
   const getInitials = (name) => {
     if (!name) return "Me";
     return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
   };
-
-  // Extract display details
-  const displayName = user?.displayName || user?.name || "Guest User";
-  const displayEmail = user?.email || "No email provided";
-  const photoURL = user?.photoURL || user?.avatar || null;
 
   return (
     <div style={styles.body}>
@@ -71,10 +87,10 @@ export default function Profile({ user, setUser }) {
           -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
         
-        /* Restored your dark/red theme for the banner */
+        /* Updated Blue Theme for Banner */
         .hero-banner {
           height: 100px;
-          background: linear-gradient(135deg, #1a0505 0%, #2d0a0a 50%, #1a0a1a 100%);
+          background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #020617 100%);
           position: relative;
           border-radius: 11px 11px 0 0;
           overflow: hidden;
@@ -87,7 +103,7 @@ export default function Profile({ user, setUser }) {
           transform: translateY(-50%);
           width: 150px;
           height: 150px;
-          background: radial-gradient(circle, rgba(220,38,38,0.3) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(37,99,235,0.4) 0%, transparent 70%);
           border-radius: 50%;
         }
 
@@ -95,8 +111,8 @@ export default function Profile({ user, setUser }) {
           width: 84px; height: 84px;
           border-radius: 50%;
           border: 4px solid var(--c);
-          background: #111; /* Changed to match dark theme */
-          color: #dc2626;   /* Changed to match red theme */
+          background: #1e3a8a; 
+          color: #fff;  
           font-size: 28px;
           font-weight: 800;
           display: grid;
@@ -117,20 +133,29 @@ export default function Profile({ user, setUser }) {
         }
         .user-name { font-size: 20px; font-weight: 750; color: var(--n); margin: 0 0 4px; }
         .user-email { font-size: 14px; color: var(--m); margin: 0 0 12px; }
+        .user-bio-preview { font-size: 13px; color: var(--m); margin: 12px 0 0; line-height: 1.5; padding: 0 10px; }
         
-        /* Restored your Placement Aspirant red pill badge */
+        /* Updated Blue Badge */
         .badge-role {
           display: inline-flex; align-items: center; gap: 6px;
-          background: rgba(220,38,38,0.1); 
-          border: 1px solid rgba(220,38,38,0.2);
+          background: #eff6ff; 
+          border: 1px solid #bfdbfe;
           padding: 4px 12px; border-radius: 99px;
-          font-size: 11px; font-weight: 700; color: #dc2626;
+          font-size: 11px; font-weight: 700; color: #1d4ed8;
+        }
+        body.dark .badge-role { 
+          background: rgba(37,99,235,0.15); 
+          border-color: rgba(37,99,235,0.3); 
+          color: #60a5fa;
         }
         
-        .section-title {
-          font-size: 18px; font-weight: 700; color: var(--n);
-          margin: 0 0 16px 0;
+        .section-header {
+          display: flex; justify-content: space-between; align-items: center; margin: 0 0 16px 0;
         }
+        .section-title {
+          font-size: 18px; font-weight: 700; color: var(--n); margin: 0;
+        }
+        
         .stats-grid {
           display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
         }
@@ -142,26 +167,46 @@ export default function Profile({ user, setUser }) {
           width: 40px; height: 40px;
           border-radius: 10px;
           display: grid; place-items: center;
-          font-size: 20px; margin-bottom: 12px;
+          margin-bottom: 12px;
         }
         .stat-val { font-size: 28px; font-weight: 800; color: var(--n); margin: 0 0 4px; }
         .stat-label { font-size: 13px; color: var(--m); margin: 0; font-weight: 500; }
         
         .details-list { padding: 20px; }
         .detail-row {
-          display: flex; align-items: center; gap: 16px;
+          display: flex; align-items: flex-start; gap: 16px;
           padding: 16px 0; border-bottom: 1px solid var(--l);
         }
         .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
         .detail-icon {
           width: 36px; height: 36px;
           background: #f3f4f6; color: var(--m);
-          border-radius: 8px; display: grid; place-items: center;
+          border-radius: 8px; display: grid; place-items: center; flex-shrink: 0;
         }
         body.dark .detail-icon { background: var(--bg); }
+        .detail-text { flex: 1; }
         .detail-text h4 { margin: 0 0 4px; font-size: 12px; color: var(--m); text-transform: uppercase; letter-spacing: 0.5px; }
-        .detail-text p { margin: 0; font-size: 15px; font-weight: 600; color: var(--t); }
+        .detail-text p { margin: 0; font-size: 14.5px; font-weight: 600; color: var(--t); line-height: 1.5; white-space: pre-wrap; }
+        
+        /* Edit Mode Inputs */
+        .edit-input, .edit-textarea {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid var(--l);
+          border-radius: 8px;
+          background: var(--bg);
+          color: var(--t);
+          font-size: 14.5px;
+          font-weight: 500;
+          font-family: inherit;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .edit-textarea { resize: vertical; min-height: 80px; }
+        .edit-input:focus, .edit-textarea:focus { border-color: var(--b); box-shadow: 0 0 0 3px rgba(23,105,224,0.12); }
+        body.dark .edit-input, body.dark .edit-textarea { background: #171a1f; border-color: #3b414b; }
 
+        /* Buttons */
         .btn-logout {
           width: 100%; margin-top: 16px;
           background: var(--danger-bg); color: var(--danger-text);
@@ -171,6 +216,24 @@ export default function Profile({ user, setUser }) {
           cursor: pointer; transition: all 0.2s;
         }
         .btn-logout:hover { opacity: 0.8; }
+        
+        .btn-edit {
+          background: var(--bg); color: var(--t);
+          border: 1px solid var(--l);
+          padding: 6px 14px; border-radius: 6px;
+          font-size: 13px; font-weight: 600;
+          cursor: pointer; transition: all 0.2s;
+        }
+        .btn-edit:hover { background: var(--l); }
+        
+        .btn-save {
+          background: #2563eb; color: #fff;
+          border: 1px solid #1d4ed8;
+          padding: 6px 14px; border-radius: 6px;
+          font-size: 13px; font-weight: 600;
+          cursor: pointer; transition: all 0.2s;
+        }
+        .btn-save:hover { background: #1d4ed8; }
 
         @media (max-width: 800px) {
           .profile-shell { grid-template-columns: 1fr; padding: 20px 15px 70px; }
@@ -188,13 +251,16 @@ export default function Profile({ user, setUser }) {
               {photoURL ? (
                 <img src={photoURL} alt="Profile" className="avatar-img" referrerPolicy="no-referrer" />
               ) : (
-                getInitials(displayName)
+                getInitials(formData.name)
               )}
             </div>
             <div className="user-info">
-              <h1 className="user-name">{displayName}</h1>
-              <p className="user-email">{displayEmail}</p>
+              <h1 className="user-name">{formData.name}</h1>
+              <p className="user-email">{formData.email}</p>
               <div className="badge-role">🎯 Placement Aspirant</div>
+              {formData.bio && !isEditing && (
+                <p className="user-bio-preview">{formData.bio}</p>
+              )}
               
               <button className="btn-logout" onClick={handleLogout}>
                 Sign Out
@@ -206,22 +272,28 @@ export default function Profile({ user, setUser }) {
         {/* Right Column: Stats & Details */}
         <main style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           
-          {/* Stats Section */}
+          {/* Stats Section with new professional SVG Icons */}
           <section>
-            <h2 className="section-title">Your Progress</h2>
+            <h2 className="section-title" style={{ marginBottom: "16px" }}>Your Progress</h2>
             <div className="stats-grid">
               <div className="card stat-card">
-                <div className="stat-icon" style={{ background: "#fff0eb", color: "#f97316" }}>🔥</div>
+                <div className="stat-icon" style={{ background: "#eef2ff", color: "#4f46e5" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                </div>
                 <h3 className="stat-val">{streak}</h3>
                 <p className="stat-label">Day Streak</p>
               </div>
               <div className="card stat-card">
-                <div className="stat-icon" style={{ background: "#f3e8ff", color: "#9333ea" }}>🧠</div>
+                <div className="stat-icon" style={{ background: "#fdf4ff", color: "#c026d3" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5A3 3 0 0 0 13.6 4"/><path d="M6.401 6.5A3 3 0 0 1 10.4 4"/></svg>
+                </div>
                 <h3 className="stat-val">{quizzesTaken}</h3>
                 <p className="stat-label">Quizzes Completed</p>
               </div>
               <div className="card stat-card">
-                <div className="stat-icon" style={{ background: "#e0f2fe", color: "#0284c7" }}>🎤</div>
+                <div className="stat-icon" style={{ background: "#e0f2fe", color: "#0284c7" }}>
+                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                </div>
                 <h3 className="stat-val">{interviewsDone}</h3>
                 <p className="stat-label">Mock Interviews</p>
               </div>
@@ -230,37 +302,101 @@ export default function Profile({ user, setUser }) {
 
           {/* Account Details Section */}
           <section>
-            <h2 className="section-title">Account Information</h2>
+            <div className="section-header">
+              <h2 className="section-title">Account Information</h2>
+              {isEditing ? (
+                <button className="btn-save" onClick={handleSave}>Save Changes</button>
+              ) : (
+                <button className="btn-edit" onClick={() => setIsEditing(true)}>Edit Profile</button>
+              )}
+            </div>
+            
             <div className="card details-list">
+              
+              {/* Full Name */}
               <div className="detail-row">
                 <div className="detail-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
                 <div className="detail-text">
                   <h4>Full Name</h4>
-                  <p>{displayName}</p>
+                  {isEditing ? (
+                    <input 
+                      className="edit-input" 
+                      value={formData.name} 
+                      onChange={e => setFormData({...formData, name: e.target.value})} 
+                      placeholder="Your name"
+                    />
+                  ) : (
+                    <p>{formData.name}</p>
+                  )}
                 </div>
               </div>
               
+              {/* Email Address */}
               <div className="detail-row">
                 <div className="detail-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                 </div>
                 <div className="detail-text">
                   <h4>Email Address</h4>
-                  <p>{displayEmail}</p>
+                  {isEditing ? (
+                    <input 
+                      className="edit-input" 
+                      type="email"
+                      value={formData.email} 
+                      onChange={e => setFormData({...formData, email: e.target.value})} 
+                      placeholder="Your email address"
+                    />
+                  ) : (
+                    <p>{formData.email}</p>
+                  )}
                 </div>
               </div>
 
+              {/* Bio Field */}
+              <div className="detail-row">
+                <div className="detail-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="12" y2="18"/></svg>
+                </div>
+                <div className="detail-text">
+                  <h4>Bio</h4>
+                  {isEditing ? (
+                    <textarea 
+                      className="edit-textarea" 
+                      value={formData.bio} 
+                      onChange={e => setFormData({...formData, bio: e.target.value})} 
+                      placeholder="e.g., 1st Year B.Tech student in AI & ML..."
+                    />
+                  ) : (
+                    <p>
+                      {formData.bio ? formData.bio : <span style={{ color: "var(--m)", fontStyle: "italic", fontWeight: 400 }}>No bio added yet. Click edit to add one.</span>}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Plan (Disabled input logic since plan is usually handled via billing) */}
               <div className="detail-row">
                 <div className="detail-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 </div>
                 <div className="detail-text">
                   <h4>Current Plan</h4>
-                  <p>Free Tier</p>
+                  {isEditing ? (
+                    <input 
+                      className="edit-input" 
+                      value={formData.plan} 
+                      disabled 
+                      style={{ opacity: 0.6, cursor: "not-allowed" }}
+                      title="Plan must be changed through billing settings"
+                    />
+                  ) : (
+                    <p>{formData.plan}</p>
+                  )}
                 </div>
               </div>
+              
             </div>
           </section>
 
