@@ -5,7 +5,7 @@ import axios from "axios";
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hello. I am Vision 🔴 Your AI placement assistant. I am here to help you with DSA, HR interviews, resume tips, and anything related to placement preparation." }
+    { role: "assistant", content: "Hello. I am Vision 🔵 Your AI placement assistant. I am here to help you with DSA, HR interviews, resume tips, and anything related to placement preparation." }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ export default function Chatbot() {
   };
 
   const clearChat = () => {
-    setMessages([{ role: "assistant", content: "Hello. I am Vision 🔴 Your AI placement assistant. I am here to help you with DSA, HR interviews, resume tips, and anything related to placement preparation." }]);
+    setMessages([{ role: "assistant", content: "Hello. I am Vision 🔵 Your AI placement assistant. I am here to help you with DSA, HR interviews, resume tips, and anything related to placement preparation." }]);
   };
 
   return (
@@ -61,10 +61,10 @@ export default function Chatbot() {
         style={{
           position: "fixed", bottom: "24px", right: "24px",
           width: "60px", height: "60px", borderRadius: "50%",
-          background: "linear-gradient(135deg, #b91c1c, #7f1d1d)",
-          color: "white", border: "2px solid #fca5a5",
+          background: "linear-gradient(135deg, #1769e0, #10264a)",
+          color: "white", border: "2px solid #93c5fd",
           cursor: "pointer", zIndex: 1000,
-          boxShadow: "0 4px 16px rgba(185,28,28,0.5)",
+          boxShadow: "0 4px 16px rgba(23,105,224,0.5)",
           display: "flex", alignItems: "center", justifyContent: "center"
         }}>
         {open ? <span style={{ fontSize: "20px", fontWeight: "bold" }}>✕</span> :
@@ -86,7 +86,7 @@ export default function Chatbot() {
 
           {/* Header */}
           <div style={{
-            background: "linear-gradient(135deg, #b91c1c, #7f1d1d)",
+            background: "linear-gradient(135deg, #1769e0, #10264a)",
             borderRadius: "16px 16px 0 0",
             padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center"
           }}>
@@ -96,7 +96,7 @@ export default function Chatbot() {
               />
               <div>
                 <p style={{ margin: 0, color: "white", fontWeight: "600", fontSize: "15px" }}>Vision</p>
-                <p style={{ margin: 0, color: "#fca5a5", fontSize: "11px" }}>Your placement assistant</p>
+                <p style={{ margin: 0, color: "#93c5fd", fontSize: "11px" }}>Your placement assistant</p>
               </div>
             </div>
             <button onClick={clearChat}
@@ -112,7 +112,7 @@ export default function Chatbot() {
               <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{
                   maxWidth: "85%", padding: "10px 12px", borderRadius: "12px",
-                  background: m.role === "user" ? "#b91c1c" : "#f3f4f6",
+                  background: m.role === "user" ? "#1769e0" : "#f3f4f6",
                   color: m.role === "user" ? "white" : "black",
                   fontSize: "13px", lineHeight: "1.6", whiteSpace: "pre-wrap"
                 }}>
@@ -135,7 +135,7 @@ export default function Chatbot() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "4px" }}>
                 {suggestions.map((s, i) => (
                   <button key={i} onClick={() => sendMessage(s)}
-                    style={{ background: "#fee2e2", color: "#b91c1c", border: "none",
+                    style={{ background: "#eff6ff", color: "#1769e0", border: "none",
                       padding: "6px 12px", borderRadius: "20px", cursor: "pointer",
                       fontSize: "12px", fontWeight: "500" }}>
                     {s}
@@ -159,7 +159,7 @@ export default function Chatbot() {
             />
             <button onClick={() => sendMessage()}
               disabled={loading || !input.trim()}
-              style={{ background: "#b91c1c", color: "white", border: "none",
+              style={{ background: "#1769e0", color: "white", border: "none",
                 padding: "8px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "16px" }}>
               ➤
             </button>
