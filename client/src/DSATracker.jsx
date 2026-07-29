@@ -26,6 +26,7 @@ const DSATracker = () => {
   const [output, setOutput] = useState("");
   const [solutionStatus, setSolutionStatus] = useState("pending");
   const [testResults, setTestResults] = useState([]);
+  const [isRunning, setIsRunning] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -40,6 +41,25 @@ const DSATracker = () => {
 
   const auth = getAuth();
   const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
+  // All available topics
+  const allTopicsForDropdown = [
+    "Arrays",
+    "Strings",
+    "Linked Lists",
+    "Stacks",
+    "Queues",
+    "Trees",
+    "Graphs",
+    "Dynamic Programming",
+    "Sorting",
+    "Searching",
+    "Hash Tables",
+    "Heaps",
+    "Greedy",
+    "Recursion",
+    "Backtracking",
+  ];
 
   useEffect(() => {
     fetchProblems();
@@ -75,7 +95,10 @@ const DSATracker = () => {
 
       if (!response.ok) throw new Error("Failed to fetch problems");
       const data = await response.json();
-      setTopics(data.topics || []);
+      
+      // Handle both array and object responses
+      const problemsData = Array.isArray(data) ? data : data.topics || [];
+      setTopics(problemsData);
     } catch (error) {
       console.error("Error fetching problems:", error);
       setTopics([]);
@@ -95,7 +118,7 @@ const DSATracker = () => {
 
       if (!response.ok) throw new Error("Failed to fetch stats");
       const data = await response.json();
-      setStats(data.stats);
+      setStats(data.stats || data);
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
@@ -116,6 +139,12 @@ const DSATracker = () => {
       });
 
       if (!response.ok) throw new Error("Failed to update problem");
+      
+      // Update local state
+      if (selectedProblem && selectedProblem._id === problemId) {
+        setSelectedProblem({ ...selectedProblem, ...problemData });
+      }
+      
       fetchProblems();
       fetchStats();
     } catch (error) {
@@ -163,6 +192,97 @@ const DSATracker = () => {
     }
   };
 
+  // ✅ RUN CODE - Execute JavaScript locally or call backend
+  const handleRunCode = async () => {
+    if (!code.trim()) {
+      setOutput("❌ Error: Code is empty. Please write some code first.");
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput("⏳ Running...\n");
+
+    try {
+      if (language === "javascript") {
+        // Execute JavaScript directly in browser
+        const capturedOutput = [];
+        
+        // Override console.log temporarily
+        const originalLog = console.log;
+        console.log = (...args) => {
+          capturedOutput.push(args.map(arg => {
+            if (typeof arg === 'object') {
+              return JSON.stringify(arg, null, 2);
+            }
+            return String(arg);
+          }).join(' '));
+        };
+
+        try {
+          // Create a function and execute it
+          const func = new Function(code);
+          const result = func();
+          
+          if (result !== undefined) {
+            capturedOutput.push(String(result));
+          }
+
+          const finalOutput = capturedOutput.length > 0 
+            ? capturedOutput.join('\n') 
+            : "✓ Code executed successfully (no output)";
+
+          setOutput(finalOutput);
+          setSolutionStatus("solved");
+          setTestResults([{ status: "passed", message: "Code executed successfully" }]);
+        } catch (err) {
+          setOutput(`❌ Error: ${err.message}\n\nStack: ${err.stack}`);
+          setSolutionStatus("pending");
+          setTestResults([{ status: "failed", message: err.message }]);
+        } finally {
+          console.log = originalLog;
+        }
+      } else {
+        // For other languages, call backend
+        const token = await getAuthToken();
+        if (!token) {
+          setOutput("❌ Authentication error. Please log in again.");
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/dsa/run-code`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            code,
+            language,
+            problemId: selectedProblem?._id,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setOutput(`❌ Error: ${data.error || "Failed to execute code"}`);
+          setSolutionStatus("pending");
+          setTestResults([{ status: "failed", message: data.error }]);
+        } else {
+          setOutput(data.output || "✓ Code executed successfully");
+          setSolutionStatus(data.status || "pending");
+          setTestResults(data.testResults || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error running code:", error);
+      setOutput(`❌ Error: ${error.message}`);
+      setSolutionStatus("pending");
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   const handleSaveCode = () => {
     if (!selectedProblem) {
       alert("❌ Error: No problem selected. Please select a problem first.");
@@ -191,7 +311,7 @@ const DSATracker = () => {
         output: outputContent,
         status,
         testResults: results,
-        solvedAt: status === "Solved" ? new Date() : null
+        solvedAt: status === "solved" ? new Date() : null
       };
 
       const response = await fetch(requestUrl, {
@@ -212,347 +332,223 @@ const DSATracker = () => {
       fetchProblems();
       fetchStats();
     } catch (error) {
-      console.error("❌ Error saving code:", error);
+      console.error("Error saving code:", error);
       alert(`Failed to save code: ${error.message}`);
     }
   };
 
-  const handleRunCode = async () => {
-    setOutput("Running tests...\n");
-    setSolutionStatus("pending");
+  const openProblemWorkspace = (problem) => {
+    setSelectedProblem(problem);
+    setCode("// Write your solution here...\n");
+    setOutput("");
+    setSolutionStatus(problem.status?.toLowerCase() === "solved" ? "solved" : "pending");
     setTestResults([]);
-
-    if (language === "javascript") {
-      try {
-        // Fetch test cases directly from the database problem object
-        const testCases = selectedProblem?.testCases;
-
-        if (!testCases || testCases.length === 0) {
-          setOutput("⚠️ No test cases found for this problem. Please ensure test cases exist in your database.");
-          setSolutionStatus("pending");
-          return;
-        }
-
-        let allTestsPassed = true;
-        let results = [];
-        let outputText = "";
-
-        // Extract function name dynamically
-        const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
-        const functionName = functionMatch ? functionMatch[1] : null;
-
-        if (!functionName) {
-          setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has a standard function wrapper (e.g., function mySolution() { ... })");
-          setSolutionStatus("pending");
-          return;
-        }
-
-        const contextCode = `${code}\nreturn ${functionName};`;
-        const userFunction = new Function(contextCode)();
-
-        for (let i = 0; i < testCases.length; i++) {
-          const testCase = testCases[i];
-          try {
-            // Dynamically grab all arguments from the input object 
-            const args = Object.values(testCase.input);
-            
-            // Execute the function dynamically with spread syntax
-            const result = userFunction(...args);
-            const passed = JSON.stringify(result) === JSON.stringify(testCase.expected);
-
-            results.push({
-              testNum: i + 1,
-              passed,
-              input: testCase.input,
-              expected: testCase.expected,
-              output: result
-            });
-
-            // Dynamically print the inputs without hardcoding names
-            const inputString = Object.entries(testCase.input)
-              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
-              .join(", ");
-
-            outputText += `Test ${i + 1}: ${passed ? "✓ PASSED" : "✗ FAILED"}\n`;
-            outputText += `  Input: ${inputString}\n`;
-            outputText += `  Expected: ${JSON.stringify(testCase.expected)}\n`;
-            outputText += `  Got: ${JSON.stringify(result)}\n\n`;
-
-            if (!passed) allTestsPassed = false;
-          } catch (err) {
-            allTestsPassed = false;
-            
-            const inputString = Object.entries(testCase.input)
-              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
-              .join(", ");
-
-            results.push({
-              testNum: i + 1,
-              passed: false,
-              input: testCase.input,
-              error: err.message
-            });
-
-            outputText += `Test ${i + 1}: ✗ ERROR\n`;
-            outputText += `  Input: ${inputString}\n`;
-            outputText += `  Error: ${err.message}\n\n`;
-          }
-        }
-
-        if (allTestsPassed) {
-          outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
-          setSolutionStatus("solved");
-          setOutput(outputText);
-          setTestResults(results);
-          
-          setTimeout(() => {
-            saveCodeToDatabase(code, outputText, "Solved", results);
-          }, 500);
-        } else {
-          outputText += "\n❌ Some tests failed. Please fix your solution.";
-          setSolutionStatus("pending");
-          setOutput(outputText);
-          setTestResults(results);
-        }
-      } catch (error) {
-        setOutput(`❌ Runtime Error:\n${error.message}`);
-        setSolutionStatus("pending");
-      }
-      return;
-    }
-
-    setOutput("To run Python, C++, or Java, you will need to connect a free API key (like JDoodle) to your backend. JavaScript runs natively in the browser!");
+    setShowModal("workspace");
   };
 
-  const resetFilters = () => {
-    setSearchQuery("");
-    setDifficulty("");
-    setStatus("");
-    setSelectedTopic("");
-    setOpenTopic(-1);
-  };
-
-  const filteredTopics = topics.filter(
-    (t) => !selectedTopic || t.topic === selectedTopic
-  );
-
-  const allTopicsForDropdown = [
-    "Arrays", "Linked List", "Stack", "Queue", "Trees", "Graphs",
-    "DP", "Greedy", "Backtracking", "Bit Manipulation",
-    "Math", "String", "Hash Table", "Heap", "Trie", "Binary Search", "Two Pointers", "Sliding Window"
-  ];
+  if (loading) {
+    return <div style={{ padding: "20px", textAlign: "center" }}>Loading DSA Tracker...</div>;
+  }
 
   return (
-    <div style={styles.body}>
-      <style>{`
-        :root{--b:#1769e0;--n:#10264a;--bg:#f3f2ef;--c:#fff;--t:#172033;--m:#68758a;--l:#dedbd5}*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui;background:var(--bg);color:var(--t)}body.dark{--bg:#171a1f;--c:#22262d;--t:#eef4ff;--n:#eef4ff;--m:#aab3c2;--l:#3b414b}button,input,select,textarea{font:inherit}.shell{max-width:1400px;margin:24px auto;padding:0 20px 70px;display:grid;grid-template-columns:1fr 280px;gap:18px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px}.hero{padding:25px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:30px;margin:4px 0;color:var(--n)}.hero p,.muted{color:var(--m)}.blue{color:var(--b);font-size:11px;font-weight:800;letter-spacing:.1em}.primary{border:0;background:var(--b);color:#fff;padding:11px 17px;border-radius:99px;font-weight:750;cursor:pointer}.primary:hover{opacity:0.9}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:13px 0}.stat{padding:18px}.stat strong{display:block;font-size:27px;color:var(--n);margin:6px 0}.filters{padding:14px;display:grid;grid-template-columns:1.5fr repeat(3,1fr) auto;gap:8px;margin-bottom:13px}.control,.reset{border:1px solid var(--l);background:var(--c);color:var(--t);padding:10px;border-radius:8px}.head{padding:19px}.head h2{margin:0;color:var(--n)}.topics{padding:0 12px 12px}.topic{border-top:1px solid var(--l)}.th{display:grid;grid-template-columns:220px 1fr 65px 190px 25px;gap:12px;align-items:center;padding:15px 8px;cursor:pointer}.name{font-weight:750}.icon{display:inline-grid;place-items:center;width:34px;height:34px;background:#eaf3ff;color:var(--b);border-radius:9px;margin-right:9px}.track{height:9px;background:#e8edf3;border-radius:9px;overflow:hidden}.fill{height:100%;background:var(--b)}.badge{font-size:10px;padding:4px 7px;border-radius:99px}.e{background:#e1f3ec;color:#20705d}.m{background:#fff0cb;color:#946315}.h{background:#fde3e3;color:#ad3f3f}.problems{display:none;padding:0 8px 15px;overflow:auto}.topic.open .problems{display:block}.topic.open .arrow{transform:rotate(180deg)}table{width:100%;border-collapse:collapse;min-width:800px;font-size:12px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--l)}.problem-link{color:var(--b);font-weight:700;text-decoration:none;cursor:pointer}.problem-link:hover{text-decoration:underline}.fab{position:fixed;right:28px;bottom:25px;width:58px;height:58px;border:0;border-radius:50%;background:var(--b);color:#fff;font-size:28px;cursor:pointer}.back{display:none;position:fixed;inset:0;background:#0d1725aa;z-index:50;align-items:center;justify-content:center;padding:18px}.back.show{display:flex}.modal{width:min(560px,100%);background:var(--c);border-radius:14px;padding:22px;max-height:85vh;overflow-y:auto}.workspace-modal{width:95vw;height:90vh;max-height:90vh;display:flex;flex-direction:row;gap:20px;padding:20px;overflow:hidden;background:var(--bg)}.workspace-panel{background:var(--c);border-radius:12px;border:1px solid var(--l);display:flex;flex-direction:column;overflow:hidden;flex:1}.panel-header{padding:15px 20px;border-bottom:1px solid var(--l);display:flex;justify-content:space-between;align-items:center;background:var(--c)}.panel-content{padding:20px;overflow-y:auto;flex:1}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.form label{display:block;font-size:11px;font-weight:700;margin-bottom:5px}.form .control{width:100%}textarea{min-height:90px}.actions{text-align:right;margin-top:15px}.loading{text-align:center;padding:40px;color:var(--m)}.side{position:sticky;top:96px;align-self:start}.side .card{padding:18px;margin-bottom:13px}.description{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--t)}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--m);line-height:1}.ide-toolbar{display:flex;gap:10px;padding:10px 15px;background:#1e1e1e;border-bottom:1px solid #333}.console-window{height:150px;background:#1e1e1e;color:#fff;padding:15px;font-family:monospace;overflow-y:auto;border-top:1px solid #333;font-size:12px}.status-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-weight:600;font-size:12px;margin-right:10px}.status-solved{background:#e1f3ec;color:#10b981}.status-pending{background:#fde3e3;color:#ef4444}
-        @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:static}.stats{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}.workspace-modal{flex-direction:column;height:95vh;overflow-y:auto}.workspace-panel{flex:none;height:500px}}@media(max-width:700px){.shell{padding:0 10px 70px}.stats,.filters{grid-template-columns:1fr}.th{grid-template-columns:1fr 60px 25px}.th .track,.badges{display:none}.hero{display:block}.hero button{margin-top:15px}.form{grid-template-columns:1fr}.full{grid-column:auto}}
-      `}</style>
-
-      <div className="shell">
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "20px", padding: "20px" }}>
         <main>
-          {/* Hero Section */}
-          <section className="card hero">
-            <div>
-              <span className="blue">STRUCTURED CODING PREPARATION</span>
-              <h1>DSA Tracker</h1>
-              <p>Track problems, write code, and build consistency one topic at a time.</p>
+          <section>
+            <h2>DSA Problems</h2>
+            
+            {/* Filters */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
+              <input
+                type="text"
+                placeholder="Search problems..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", flex: 1, minWidth: "200px" }}
+              />
+              <select
+                value={selectedTopic}
+                onChange={(e) => setSelectedTopic(e.target.value)}
+                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
+              >
+                <option value="">All Topics</option>
+                {allTopicsForDropdown.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
+              >
+                <option value="">All Levels</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
+              >
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Solved">Solved</option>
+                <option value="Revision Needed">Revision Needed</option>
+              </select>
+              <button 
+                onClick={fetchProblems}
+                style={{ padding: "8px 16px", background: "#667eea", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              >
+                Filter
+              </button>
             </div>
-            <button className="primary" onClick={() => setShowModal("add")}>
-              + Add new problem
-            </button>
-          </section>
 
-          {/* Stats Section */}
-          <section className="stats">
-            <div className="card stat">
-              <span className="muted">Total solved</span>
-              <strong>{stats.totalSolved}</strong>
-            </div>
-            <div className="card stat">
-              <span className="muted">Current streak</span>
-              <strong>{stats.currentStreak} days</strong>
-            </div>
-            <div className="card stat">
-              <span className="muted">Solved this week</span>
-              <strong>{stats.thisWeekSolved}</strong>
-            </div>
-            <div className="card stat">
-              <span className="muted">Total attempted</span>
-              <strong>{stats.totalAttempted}</strong>
-              <span>{stats.totalAttempted > 0 ? Math.round((stats.totalSolved / stats.totalAttempted) * 100) : 0}% completion</span>
-            </div>
-          </section>
-
-          {/* Filters Section */}
-          <section className="card filters">
-            <input
-              className="control"
-              placeholder="Search problems…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <select className="control" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-              <option value="">All difficulties</option>
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </select>
-            <select className="control" value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="">All statuses</option>
-              <option>Solved</option>
-              <option>Pending</option>
-              <option>Revision Needed</option>
-            </select>
-            <select className="control" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
-              <option value="">All topics</option>
-              {allTopicsForDropdown.map((topic) => (
-                <option key={topic} value={topic}>{topic}</option>
-              ))}
-            </select>
-            <button className="reset" onClick={resetFilters}>Reset</button>
-          </section>
-
-          {/* Topics Section */}
-          <section className="card">
-            <div className="head">
-              <h2>Topic-wise progress</h2>
-              <div className="muted">Expand a topic to solve or review individual problems.</div>
-            </div>
-            {loading ? (
-              <div className="loading">Loading problems...</div>
-            ) : filteredTopics.length === 0 ? (
-              <div className="loading">No problems found. Add one to get started!</div>
+            {/* Problems List */}
+            {topics.length === 0 ? (
+              <p>No problems found. Add one to get started!</p>
             ) : (
-              <div className="topics">
-                {filteredTopics.map((topicData, idx) => {
-                  const isOpen = openTopic === idx;
-                  const percentage = topicData.total > 0 ? Math.round((topicData.solved / topicData.total) * 100) : 0;
-
-                  return (
-                    <article key={topicData.topic} className={`topic ${isOpen ? "open" : ""}`}>
-                      <div className="th" onClick={() => setOpenTopic(isOpen ? -1 : idx)}>
-                        <div className="name">
-                          <span className="icon">{topicData.icon}</span>
-                          {topicData.topic}
+              <div style={{ display: "grid", gap: "15px" }}>
+                {topics.map(problem => (
+                  <div 
+                    key={problem._id}
+                    style={{
+                      padding: "15px",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "8px",
+                      background: "#f9f9f9"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                      <div>
+                        <h3 style={{ margin: "0 0 5px 0" }}>{problem.name}</h3>
+                        <div style={{ display: "flex", gap: "10px", fontSize: "12px", color: "#666" }}>
+                          <span>📚 {problem.topic}</span>
+                          <span>Level: {problem.difficulty}</span>
+                          <span>Status: {problem.status}</span>
                         </div>
-                        <div className="track">
-                          <div className="fill" style={{ width: `${percentage}%` }}></div>
-                        </div>
-                        <span>{topicData.solved}/{topicData.total}</span>
-                        <div className="badges">
-                          <span className="badge e">Easy</span>
-                          <span className="badge m">Medium</span>
-                          <span className="badge h">Hard</span>
-                        </div>
-                        <span className="arrow">⌄</span>
                       </div>
-                      {isOpen && (
-                        <div className="problems">
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>Problem</th>
-                                <th>Difficulty</th>
-                                <th>Last attempted</th>
-                                <th>Update Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {topicData.problems.map((problem) => (
-                                <tr key={problem._id}>
-                                  <td>
-                                    <a
-                                      className="problem-link"
-                                      onClick={() => {
-                                        setSelectedProblem(problem);
-                                        setCode(problem.code || "// Write your solution here...\n");
-                                        setOutput(problem.output || "");
-                                        setSolutionStatus(problem.status === "Solved" ? "solved" : "pending");
-                                        setTestResults(problem.testResults || []);
-                                        setShowModal("workspace");
-                                      }}
-                                    >
-                                      {problem.name} ↗
-                                    </a>
-                                  </td>
-                                  <td>
-                                    <span className={`badge ${problem.difficulty[0].toLowerCase()}`}>
-                                      {problem.difficulty}
-                                    </span>
-                                  </td>
-                                  <td>{problem.lastAttempted ? new Date(problem.lastAttempted).toLocaleDateString() : "Never"}</td>
-                                  <td>
-                                    <select
-                                      style={styles.button}
-                                      value={problem.status}
-                                      onChange={(e) => handleUpdateProblem(problem._id, { status: e.target.value })}
-                                    >
-                                      <option>Pending</option>
-                                      <option>Solved</option>
-                                      <option>Revision Needed</option>
-                                    </select>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                    </div>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <button
+                        onClick={() => openProblemWorkspace(problem)}
+                        style={{
+                          padding: "8px 16px",
+                          background: "#667eea",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer"
+                        }}
+                      >
+                        Open IDE
+                      </button>
+                      {problem.link && (
+                        <a
+                          href={problem.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: "8px 16px",
+                            background: "#f0f0f0",
+                            color: "#333",
+                            border: "1px solid #ccc",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            textDecoration: "none"
+                          }}
+                        >
+                          View on LeetCode
+                        </a>
                       )}
-                    </article>
-                  );
-                })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </section>
         </main>
 
-        <aside className="side">
-          <section className="card">
-            <span className="blue">QUICK STAT</span>
-            <h3>You've solved {stats.totalSolved} problems</h3>
-            <p>Keep pushing! 🚀</p>
-            <button className="primary" onClick={() => setShowModal("add")}>Add a problem</button>
-          </section>
+        {/* Sidebar */}
+        <aside>
+          <div style={{ padding: "15px", background: "#f9f9f9", borderRadius: "8px", border: "1px solid #e0e0e0" }}>
+            <h3>📊 Quick Stats</h3>
+            <p><strong>Solved:</strong> {stats.totalSolved}</p>
+            <p><strong>Attempted:</strong> {stats.totalAttempted}</p>
+            <p><strong>This Week:</strong> {stats.thisWeekSolved}</p>
+            <p><strong>Streak:</strong> {stats.currentStreak} 🔥</p>
+            <button
+              onClick={() => setShowModal("add")}
+              style={{
+                width: "100%",
+                padding: "10px",
+                background: "#667eea",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "600"
+              }}
+            >
+              + Add Problem
+            </button>
+          </div>
         </aside>
       </div>
 
-      <button className="fab" onClick={() => setShowModal("add")}>+</button>
-
-      {/* Add New Problem Modal */}
+      {/* Add Problem Modal */}
       {showModal === "add" && (
-        <div className="back show" onClick={() => setShowModal("")}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h2 style={{ margin: 0 }}>Add New Problem</h2>
-              <button className="close-btn" onClick={() => setShowModal("")}>×</button>
-            </div>
-            <form className="form" onSubmit={handleAddProblem}>
+        <div 
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000
+          }}
+          onClick={() => setShowModal("")}
+        >
+          <div 
+            style={{
+              background: "#fff",
+              borderRadius: "8px",
+              padding: "30px",
+              maxWidth: "500px",
+              width: "90%",
+              maxHeight: "90vh",
+              overflowY: "auto"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ margin: "0 0 20px 0" }}>Add New Problem</h2>
+            <form onSubmit={handleAddProblem} style={{ display: "grid", gap: "15px" }}>
               <div>
                 <label>Problem Name *</label>
                 <input 
                   required 
-                  className="control" 
                   value={formData.name} 
                   onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                  placeholder="e.g. Two Sum" 
+                  placeholder="e.g. Two Sum"
+                  style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
                 />
               </div>
               <div>
                 <label>Problem Link</label>
                 <input 
-                  className="control" 
                   value={formData.link} 
                   onChange={(e) => setFormData({...formData, link: e.target.value})} 
-                  placeholder="https://leetcode.com/..." 
+                  placeholder="https://leetcode.com/..."
+                  style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
                 />
               </div>
               <div>
                 <label>Topic *</label>
                 <select 
-                  className="control" 
                   value={formData.topic} 
                   onChange={(e) => setFormData({...formData, topic: e.target.value})}
+                  style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
                 >
                   {allTopicsForDropdown.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
@@ -560,82 +556,110 @@ const DSATracker = () => {
               <div>
                 <label>Difficulty *</label>
                 <select 
-                  className="control" 
                   value={formData.difficulty} 
                   onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                  style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
                 >
                   <option>Easy</option>
                   <option>Medium</option>
                   <option>Hard</option>
                 </select>
               </div>
-              <div className="full">
+              <div>
                 <label>Description (Optional)</label>
                 <textarea 
-                  className="control" 
                   value={formData.description} 
                   onChange={(e) => setFormData({...formData, description: e.target.value})} 
-                  placeholder="Paste problem description here..." 
+                  placeholder="Paste problem description here..."
+                  style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box", minHeight: "100px" }}
                 />
               </div>
-              <div className="full actions">
-                <button type="button" className="control" style={{ width: "auto", marginRight: "10px", display: "inline-block" }} onClick={() => setShowModal("")}>Cancel</button>
-                <button type="submit" className="primary">Add Problem</button>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowModal("")}
+                  style={{ flex: 1, padding: "10px", background: "#f0f0f0", border: "1px solid #ccc", borderRadius: "4px", cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  style={{ flex: 1, padding: "10px", background: "#667eea", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
+                >
+                  Add Problem
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Workspace / IDE Modal */}
+      {/* Code Workspace Modal */}
       {showModal === "workspace" && selectedProblem && (
-        <div className="back show" onClick={() => setShowModal("")}>
-          <div className="modal workspace-modal" onClick={(e) => e.stopPropagation()}>
-            
-            {/* Left Panel: Problem Description */}
-            <div className="workspace-panel">
-              <div className="panel-header">
-                <div>
-                  <h2 style={{ margin: "0 0 5px 0" }}>{selectedProblem.name}</h2>
-                  <span className={`badge ${selectedProblem.difficulty[0].toLowerCase()}`}>{selectedProblem.difficulty}</span>
-                  <span style={{ marginLeft: "10px", fontSize: "12px", color: "var(--m)" }}>{selectedProblem.topic}</span>
-                </div>
+        <div 
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000
+          }}
+          onClick={() => setShowModal("")}
+        >
+          <div 
+            style={{
+              background: "#1e1e1e",
+              borderRadius: "8px",
+              width: "95%",
+              height: "95vh",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              overflow: "hidden"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Problem Panel */}
+            <div style={{ padding: "20px", overflowY: "auto", borderRight: "1px solid #333", background: "#fff", color: "#000" }}>
+              <button 
+                onClick={() => setShowModal("")}
+                style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}
+              >
+                ×
+              </button>
+              <h2 style={{ margin: "0 0 10px 0" }}>{selectedProblem.name}</h2>
+              <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
+                <span style={{ background: "#667eea", color: "#fff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px" }}>
+                  {selectedProblem.difficulty}
+                </span>
+                <span style={{ background: "#f0f0f0", padding: "4px 8px", borderRadius: "4px", fontSize: "12px" }}>
+                  {selectedProblem.topic}
+                </span>
               </div>
-              <div className="panel-content">
-                <div className="description">{selectedProblem.description || "No description provided."}</div>
-                
-                <hr style={{ border: "0", borderTop: "1px solid var(--l)", margin: "20px 0" }} />
-                
-                <h3>Update Progress</h3>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                  <select
-                    className="control"
-                    style={{ width: "auto" }}
-                    value={selectedProblem.status}
-                    onChange={(e) => handleUpdateProblem(selectedProblem._id, { status: e.target.value })}
-                  >
-                    <option>Pending</option>
-                    <option>Solved</option>
-                    <option>Revision Needed</option>
-                  </select>
-                  <span style={{ fontSize: "12px", color: "var(--m)" }}>Time spent: {selectedProblem.timeSpent} min</span>
-                  {solutionStatus === "solved" && (
-                    <span className="status-badge status-solved">✓ SOLVED</span>
-                  )}
-                  {solutionStatus === "pending" && testResults.length > 0 && (
-                    <span className="status-badge status-pending">✗ ERROR</span>
-                  )}
-                </div>
-              </div>
+              <h3>Description</h3>
+              <p>{selectedProblem.description || "No description provided."}</p>
+
+              <h3>Update Status</h3>
+              <select
+                value={selectedProblem.status}
+                onChange={(e) => handleUpdateProblem(selectedProblem._id, { status: e.target.value })}
+                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", width: "100%", marginBottom: "10px" }}
+              >
+                <option>Pending</option>
+                <option>Solved</option>
+                <option>Revision Needed</option>
+              </select>
             </div>
 
-            {/* Right Panel: Code Editor */}
-            <div className="workspace-panel" style={{ border: "1px solid #333", background: "#1e1e1e" }}>
-              <div className="ide-toolbar">
+            {/* Code Panel */}
+            <div style={{ display: "grid", gridTemplateRows: "auto 1fr auto", background: "#1e1e1e", color: "#fff" }}>
+              {/* Toolbar */}
+              <div style={{ display: "flex", gap: "10px", padding: "10px", borderBottom: "1px solid #333", background: "#2d2d2d", alignItems: "center" }}>
                 <select 
-                  style={{ background: "#333", color: "#fff", border: "none", padding: "5px 10px", borderRadius: "4px" }}
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
+                  style={{ background: "#333", color: "#fff", border: "1px solid #555", padding: "5px 10px", borderRadius: "4px" }}
                 >
                   <option value="javascript">JavaScript</option>
                   <option value="python">Python</option>
@@ -644,27 +668,34 @@ const DSATracker = () => {
                 </select>
                 <div style={{ flex: 1 }}></div>
                 <button 
-                  style={{ background: "transparent", color: "#fff", border: "1px solid #555", padding: "5px 15px", borderRadius: "4px", cursor: "pointer" }}
                   onClick={handleSaveCode}
+                  style={{ background: "#555", color: "#fff", border: "none", padding: "6px 12px", borderRadius: "4px", cursor: "pointer" }}
                 >
-                  Save Code
+                  💾 Save Code
                 </button>
                 <button 
-                  style={{ background: "var(--b)", color: "#fff", border: "none", padding: "5px 15px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
                   onClick={handleRunCode}
+                  disabled={isRunning}
+                  style={{ background: "#667eea", color: "#fff", border: "none", padding: "6px 12px", borderRadius: "4px", cursor: isRunning ? "not-allowed" : "pointer", opacity: isRunning ? 0.6 : 1 }}
                 >
-                  Run Code
+                  {isRunning ? "⏳ Running..." : "▶ Run Code"}
                 </button>
-                <button className="close-btn" onClick={() => setShowModal("")}>×</button>
+                <button 
+                  onClick={() => setShowModal("")}
+                  style={{ background: "none", border: "none", color: "#fff", fontSize: "20px", cursor: "pointer" }}
+                >
+                  ×
+                </button>
               </div>
-              
-              <div style={{ flex: 1 }}>
+
+              {/* Editor */}
+              <div>
                 <Editor
                   height="100%"
                   language={language}
                   theme="vs-dark"
                   value={code}
-                  onChange={(value) => setCode(value)}
+                  onChange={(value) => setCode(value || "")}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 14,
@@ -674,26 +705,20 @@ const DSATracker = () => {
               </div>
 
               {/* Console Output */}
-              <div className="console-window">
+              <div style={{ padding: "10px", background: "#000", borderTop: "1px solid #333", maxHeight: "150px", overflowY: "auto", fontFamily: "monospace", fontSize: "12px" }}>
                 <div style={{ color: "#888", marginBottom: "5px" }}>
-                  Output:
-                  {solutionStatus === "solved" && <span style={{ color: "#10b981", marginLeft: "10px", fontWeight: "bold" }}>✓ SOLVED</span>}
-                  {solutionStatus === "pending" && testResults.length > 0 && <span style={{ color: "#ef4444", marginLeft: "10px", fontWeight: "bold" }}>✗ ERROR</span>}
+                  📤 Output:
+                  {solutionStatus === "solved" && <span style={{ color: "#10b981", marginLeft: "10px" }}>✓ SOLVED</span>}
+                  {solutionStatus === "pending" && testResults.length > 0 && <span style={{ color: "#ef4444", marginLeft: "10px" }}>✗ ERROR</span>}
                 </div>
-                <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>{output}</pre>
+                <pre style={{ margin: 0, color: "#0f0" }}>{output || "Click 'Run Code' to execute..."}</pre>
               </div>
             </div>
-
           </div>
         </div>
       )}
     </div>
   );
-};
-
-const styles = {
-  body: { margin: 0, background: "var(--bg)" },
-  button: { border: "1px solid var(--l)", background: "var(--c)", color: "var(--t)", padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", width: "100%" },
 };
 
 export default DSATracker;
