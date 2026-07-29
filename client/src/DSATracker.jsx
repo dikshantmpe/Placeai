@@ -224,105 +224,142 @@ const DSATracker = () => {
       return;
     }
 
-    setOutput("Running tests...\n");
+    setIsRunning(true);
     setSolutionStatus("pending");
     setTestResults([]);
-    setIsRunning(true);
 
     if (language === "javascript") {
       try {
-        // Fetch test cases directly from the database problem object
+        // Check if test cases exist
         const testCases = selectedProblem?.testCases;
+        const hasTestCases = testCases && testCases.length > 0;
 
-        if (!testCases || testCases.length === 0) {
-          setOutput("⚠️ No test cases found for this problem. Please ensure test cases exist in your database.");
-          setSolutionStatus("pending");
-          setIsRunning(false);
-          return;
-        }
-
-        let allTestsPassed = true;
-        let results = [];
-        let outputText = "";
-
-        // Extract function name dynamically
-        const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
-        const functionName = functionMatch ? functionMatch[1] : null;
-
-        if (!functionName) {
-          setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has a standard function wrapper (e.g., function mySolution() { ... })");
-          setSolutionStatus("pending");
-          setIsRunning(false);
-          return;
-        }
-
-        const contextCode = `${code}\nreturn ${functionName};`;
-        const userFunction = new Function(contextCode)();
-
-        for (let i = 0; i < testCases.length; i++) {
-          const testCase = testCases[i];
-          try {
-            // Dynamically grab all arguments from the input object 
-            const args = Object.values(testCase.input);
-            
-            // Execute the function dynamically with spread syntax
-            const result = userFunction(...args);
-            const passed = JSON.stringify(result) === JSON.stringify(testCase.expected);
-
-            results.push({
-              testNum: i + 1,
-              passed,
-              input: testCase.input,
-              expected: testCase.expected,
-              output: result
-            });
-
-            // Dynamically print the inputs without hardcoding names
-            const inputString = Object.entries(testCase.input)
-              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
-              .join(", ");
-
-            outputText += `Test ${i + 1}: ${passed ? "✓ PASSED" : "✗ FAILED"}\n`;
-            outputText += `  Input: ${inputString}\n`;
-            outputText += `  Expected: ${JSON.stringify(testCase.expected)}\n`;
-            outputText += `  Got: ${JSON.stringify(result)}\n\n`;
-
-            if (!passed) allTestsPassed = false;
-          } catch (err) {
-            allTestsPassed = false;
-            
-            const inputString = Object.entries(testCase.input)
-              .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
-              .join(", ");
-
-            results.push({
-              testNum: i + 1,
-              passed: false,
-              input: testCase.input,
-              error: err.message
-            });
-
-            outputText += `Test ${i + 1}: ✗ ERROR\n`;
-            outputText += `  Input: ${inputString}\n`;
-            outputText += `  Error: ${err.message}\n\n`;
-          }
-        }
-
-        if (allTestsPassed) {
-          outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
-          setSolutionStatus("solved");
-          setOutput(outputText);
-          setTestResults(results);
+        if (hasTestCases) {
+          // MODE 1: Run with test case validation
+          setOutput("Running tests...\n");
           
-          // AUTO-SAVE when all tests pass
-          setTimeout(() => {
-            saveCodeToDatabase(code, outputText, "Solved", results);
-          }, 500);
+          let allTestsPassed = true;
+          let results = [];
+          let outputText = "";
+
+          // Extract function name dynamically
+          const functionMatch = code.match(/(?:function|const)\s+(\w+)\s*(?:\(|=)/);
+          const functionName = functionMatch ? functionMatch[1] : null;
+
+          if (!functionName) {
+            setOutput("❌ ERROR: Could not find function definition.\nMake sure your code has a standard function wrapper (e.g., function mySolution() { ... })");
+            setSolutionStatus("pending");
+            setIsRunning(false);
+            return;
+          }
+
+          const contextCode = `${code}\nreturn ${functionName};`;
+          const userFunction = new Function(contextCode)();
+
+          for (let i = 0; i < testCases.length; i++) {
+            const testCase = testCases[i];
+            try {
+              const args = Object.values(testCase.input);
+              const result = userFunction(...args);
+              const passed = JSON.stringify(result) === JSON.stringify(testCase.expected);
+
+              results.push({
+                testNum: i + 1,
+                passed,
+                input: testCase.input,
+                expected: testCase.expected,
+                output: result
+              });
+
+              const inputString = Object.entries(testCase.input)
+                .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
+                .join(", ");
+
+              outputText += `Test ${i + 1}: ${passed ? "✓ PASSED" : "✗ FAILED"}\n`;
+              outputText += `  Input: ${inputString}\n`;
+              outputText += `  Expected: ${JSON.stringify(testCase.expected)}\n`;
+              outputText += `  Got: ${JSON.stringify(result)}\n\n`;
+
+              if (!passed) allTestsPassed = false;
+            } catch (err) {
+              allTestsPassed = false;
+              
+              const inputString = Object.entries(testCase.input)
+                .map(([key, val]) => `${key} = ${JSON.stringify(val)}`)
+                .join(", ");
+
+              results.push({
+                testNum: i + 1,
+                passed: false,
+                input: testCase.input,
+                error: err.message
+              });
+
+              outputText += `Test ${i + 1}: ✗ ERROR\n`;
+              outputText += `  Input: ${inputString}\n`;
+              outputText += `  Error: ${err.message}\n\n`;
+            }
+          }
+
+          if (allTestsPassed) {
+            outputText += "\n🎉 All tests passed! Your solution is CORRECT!";
+            setSolutionStatus("solved");
+            setOutput(outputText);
+            setTestResults(results);
+            
+            // AUTO-SAVE when all tests pass
+            setTimeout(() => {
+              saveCodeToDatabase(code, outputText, "Solved", results);
+            }, 500);
+          } else {
+            outputText += "\n❌ Some tests failed. Please fix your solution.";
+            setSolutionStatus("pending");
+            setOutput(outputText);
+            setTestResults(results);
+          }
         } else {
-          outputText += "\n❌ Some tests failed. Please fix your solution.";
-          setSolutionStatus("pending");
-          setOutput(outputText);
-          setTestResults(results);
+          // MODE 2: Run without test cases (just execute and show output)
+          setOutput("⏳ Running code...\n");
+          
+          const capturedOutput = [];
+          const originalLog = console.log;
+          
+          console.log = (...args) => {
+            capturedOutput.push(args.map(arg => {
+              if (typeof arg === 'object') {
+                return JSON.stringify(arg, null, 2);
+              }
+              return String(arg);
+            }).join(' '));
+          };
+
+          try {
+            const func = new Function(code);
+            const result = func();
+            
+            if (result !== undefined) {
+              capturedOutput.push(String(result));
+            }
+
+            const finalOutput = capturedOutput.length > 0 
+              ? capturedOutput.join('\n') 
+              : "✓ Code executed successfully (no output)";
+            
+            setOutput(finalOutput);
+            setSolutionStatus("solved");
+            setTestResults([{ status: "passed", message: "Code executed successfully" }]);
+
+            // Auto-save when running without test cases too
+            setTimeout(() => {
+              saveCodeToDatabase(code, finalOutput, "Solved", []);
+            }, 500);
+          } catch (err) {
+            setOutput(`❌ Error: ${err.message}\n\nStack: ${err.stack}`);
+            setSolutionStatus("pending");
+            setTestResults([{ status: "failed", message: err.message }]);
+          } finally {
+            console.log = originalLog;
+          }
         }
       } catch (error) {
         setOutput(`❌ Runtime Error:\n${error.message}`);
@@ -341,6 +378,8 @@ const DSATracker = () => {
         setIsRunning(false);
         return;
       }
+
+      setOutput("⏳ Executing code...\n");
 
       const response = await fetch(`${API_BASE_URL}/api/dsa/run-code`, {
         method: "POST",
