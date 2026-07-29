@@ -15,12 +15,18 @@ export default function Profile({ user, setUser }) {
   const defaultEmail = user?.email || "No email provided";
   const photoURL = user?.photoURL || user?.avatar || null;
 
-  // Form State for Editable Fields
-  const [formData, setFormData] = useState({
-    name: defaultName,
-    email: defaultEmail,
-    bio: "",
-    plan: "Free Tier"
+  // Form State for Editable Fields (Now checking localStorage first)
+  const [formData, setFormData] = useState(() => {
+    const savedProfile = localStorage.getItem("crackin-profile");
+    if (savedProfile) {
+      return JSON.parse(savedProfile);
+    }
+    return {
+      name: defaultName,
+      email: defaultEmail,
+      bio: "",
+      plan: "Free Tier"
+    };
   });
 
   useEffect(() => {
@@ -40,7 +46,22 @@ export default function Profile({ user, setUser }) {
   };
 
   const handleSave = () => {
-    // Here you would typically make an API call to save the user data to your backend/Firebase
+    // 1. Save locally so it survives a refresh immediately
+    localStorage.setItem("crackin-profile", JSON.stringify(formData));
+    
+    // 2. TODO: Send this to your Express/MongoDB backend
+    /*
+    fetch("http://localhost:5000/api/users/update", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user?.uid, // or however you identify the user
+        name: formData.name,
+        bio: formData.bio
+      })
+    })
+    */
+    
     setIsEditing(false);
   };
 
