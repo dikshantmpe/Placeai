@@ -65,12 +65,13 @@ export default function Profile({ user, setUser }) {
           border: 1px solid var(--l);
           border-radius: 12px;
           color: var(--t);
-          overflow: hidden;
+          overflow: hidden; /* Ensures contents don't bleed out */
         }
         .hero-banner {
           height: 100px;
           background: linear-gradient(135deg, var(--b) 0%, #438bf2 100%);
           position: relative;
+          border-radius: 11px 11px 0 0; /* Fixes the sharp corners bleeding out */
         }
         .avatar-container {
           width: 84px; height: 84px;
