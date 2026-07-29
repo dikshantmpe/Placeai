@@ -65,32 +65,38 @@ export default function Profile({ user, setUser }) {
           border: 1px solid var(--l);
           border-radius: 12px;
           color: var(--t);
-          
-          /* 1. Bulletproof corner clipping */
           overflow: hidden;
           position: relative;
-          
-          /* 2. Forces WebKit browsers to respect the overflow clipping */
           transform: translateZ(0); 
           -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
         
+        /* Restored your dark/red theme for the banner */
         .hero-banner {
           height: 100px;
-          /* If you prefer your original dark/red theme instead of blue, 
-             replace this background with your original linear-gradient! */
-          background: linear-gradient(135deg, var(--b) 0%, #438bf2 100%);
+          background: linear-gradient(135deg, #1a0505 0%, #2d0a0a 50%, #1a0a1a 100%);
           position: relative;
-          
-          /* 3. Exactly match the inner radius of the card (12px border-radius - 1px border) */
-          border-radius: 11px 11px 0 0; 
+          border-radius: 11px 11px 0 0;
+          overflow: hidden;
         }
+        .hero-banner::after {
+          content: '';
+          position: absolute;
+          right: 10%;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 150px;
+          height: 150px;
+          background: radial-gradient(circle, rgba(220,38,38,0.3) 0%, transparent 70%);
+          border-radius: 50%;
+        }
+
         .avatar-container {
           width: 84px; height: 84px;
           border-radius: 50%;
           border: 4px solid var(--c);
-          background: #e8edf3;
-          color: var(--b);
+          background: #111; /* Changed to match dark theme */
+          color: #dc2626;   /* Changed to match red theme */
           font-size: 28px;
           font-weight: 800;
           display: grid;
@@ -98,6 +104,8 @@ export default function Profile({ user, setUser }) {
           margin: -42px auto 16px;
           box-shadow: 0 4px 12px rgba(0,0,0,0.08);
           overflow: hidden;
+          position: relative;
+          z-index: 2;
         }
         .avatar-img {
           width: 100%; height: 100%;
@@ -109,14 +117,15 @@ export default function Profile({ user, setUser }) {
         }
         .user-name { font-size: 20px; font-weight: 750; color: var(--n); margin: 0 0 4px; }
         .user-email { font-size: 14px; color: var(--m); margin: 0 0 12px; }
+        
+        /* Restored your Placement Aspirant red pill badge */
         .badge-role {
-          display: inline-block;
-          background: #eaf3ff; color: var(--b);
+          display: inline-flex; align-items: center; gap: 6px;
+          background: rgba(220,38,38,0.1); 
+          border: 1px solid rgba(220,38,38,0.2);
           padding: 4px 12px; border-radius: 99px;
-          font-size: 12px; font-weight: 700;
-          border: 1px solid #c2dcfc;
+          font-size: 11px; font-weight: 700; color: #dc2626;
         }
-        body.dark .badge-role { background: rgba(23,105,224,0.15); border-color: rgba(23,105,224,0.3); }
         
         .section-title {
           font-size: 18px; font-weight: 700; color: var(--n);
@@ -185,7 +194,7 @@ export default function Profile({ user, setUser }) {
             <div className="user-info">
               <h1 className="user-name">{displayName}</h1>
               <p className="user-email">{displayEmail}</p>
-              <div className="badge-role">B.Tech · AI & ML</div>
+              <div className="badge-role">🎯 Placement Aspirant</div>
               
               <button className="btn-logout" onClick={handleLogout}>
                 Sign Out
