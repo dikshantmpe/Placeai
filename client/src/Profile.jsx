@@ -65,13 +65,25 @@ export default function Profile({ user, setUser }) {
           border: 1px solid var(--l);
           border-radius: 12px;
           color: var(--t);
-          overflow: hidden; /* Ensures contents don't bleed out */
+          
+          /* 1. Bulletproof corner clipping */
+          overflow: hidden;
+          position: relative;
+          
+          /* 2. Forces WebKit browsers to respect the overflow clipping */
+          transform: translateZ(0); 
+          -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
+        
         .hero-banner {
           height: 100px;
+          /* If you prefer your original dark/red theme instead of blue, 
+             replace this background with your original linear-gradient! */
           background: linear-gradient(135deg, var(--b) 0%, #438bf2 100%);
           position: relative;
-          border-radius: 11px 11px 0 0; /* Fixes the sharp corners bleeding out */
+          
+          /* 3. Exactly match the inner radius of the card (12px border-radius - 1px border) */
+          border-radius: 11px 11px 0 0; 
         }
         .avatar-container {
           width: 84px; height: 84px;
