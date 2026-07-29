@@ -22,11 +22,6 @@ export default function Profile({ user, setUser }) {
     bio: "",
     plan: "Free Tier"
   });
-  
-  // Stats from localStorage
-  const streak = parseInt(localStorage.getItem("streak") || "0");
-  const quizzesTaken = parseInt(localStorage.getItem("quizzesTaken") || "0");
-  const interviewsDone = parseInt(localStorage.getItem("interviewsDone") || "0");
 
   useEffect(() => {
     document.body.className = theme === "dark" ? "dark" : "";
@@ -60,12 +55,10 @@ export default function Profile({ user, setUser }) {
         :root {
           --b: #1769e0; --n: #10264a; --bg: #f3f2ef; --c: #fff;
           --t: #172033; --m: #68758a; --l: #dedbd5;
-          --danger-bg: #fee2e2; --danger-text: #dc2626; --danger-border: #fca5a5;
         }
         body.dark {
           --bg: #171a1f; --c: #22262d; --t: #eef4ff; --n: #eef4ff;
           --m: #aab3c2; --l: #3b414b;
-          --danger-bg: rgba(220, 38, 38, 0.1); --danger-text: #ef4444; --danger-border: rgba(220, 38, 38, 0.3);
         }
         * { box-sizing: border-box; }
         .profile-shell {
@@ -87,7 +80,6 @@ export default function Profile({ user, setUser }) {
           -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
         
-        /* Updated Blue Theme for Banner */
         .hero-banner {
           height: 100px;
           background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #020617 100%);
@@ -135,7 +127,6 @@ export default function Profile({ user, setUser }) {
         .user-email { font-size: 14px; color: var(--m); margin: 0 0 12px; }
         .user-bio-preview { font-size: 13px; color: var(--m); margin: 12px 0 0; line-height: 1.5; padding: 0 10px; }
         
-        /* Updated Blue Badge */
         .badge-role {
           display: inline-flex; align-items: center; gap: 6px;
           background: #eff6ff; 
@@ -155,22 +146,6 @@ export default function Profile({ user, setUser }) {
         .section-title {
           font-size: 18px; font-weight: 700; color: var(--n); margin: 0;
         }
-        
-        .stats-grid {
-          display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-        }
-        .stat-card {
-          padding: 20px; text-align: center;
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .stat-icon {
-          width: 40px; height: 40px;
-          border-radius: 10px;
-          display: grid; place-items: center;
-          margin-bottom: 12px;
-        }
-        .stat-val { font-size: 28px; font-weight: 800; color: var(--n); margin: 0 0 4px; }
-        .stat-label { font-size: 13px; color: var(--m); margin: 0; font-weight: 500; }
         
         .details-list { padding: 20px; }
         .detail-row {
@@ -209,13 +184,19 @@ export default function Profile({ user, setUser }) {
         /* Buttons */
         .btn-logout {
           width: 100%; margin-top: 16px;
-          background: var(--danger-bg); color: var(--danger-text);
-          border: 1px solid var(--danger-border);
+          background: #eff6ff; color: #1d4ed8;
+          border: 1px solid #bfdbfe;
           padding: 12px; border-radius: 8px;
           font-weight: 700; font-size: 14px;
           cursor: pointer; transition: all 0.2s;
         }
-        .btn-logout:hover { opacity: 0.8; }
+        .btn-logout:hover { background: #dbeafe; }
+        body.dark .btn-logout {
+          background: rgba(37,99,235,0.15); 
+          color: #60a5fa; 
+          border-color: rgba(37,99,235,0.3);
+        }
+        body.dark .btn-logout:hover { background: rgba(37,99,235,0.25); }
         
         .btn-edit {
           background: var(--bg); color: var(--t);
@@ -237,7 +218,6 @@ export default function Profile({ user, setUser }) {
 
         @media (max-width: 800px) {
           .profile-shell { grid-template-columns: 1fr; padding: 20px 15px 70px; }
-          .stats-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -269,37 +249,9 @@ export default function Profile({ user, setUser }) {
           </div>
         </aside>
 
-        {/* Right Column: Stats & Details */}
+        {/* Right Column: Account Details */}
         <main style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           
-          {/* Stats Section with new professional SVG Icons */}
-          <section>
-            <h2 className="section-title" style={{ marginBottom: "16px" }}>Your Progress</h2>
-            <div className="stats-grid">
-              <div className="card stat-card">
-                <div className="stat-icon" style={{ background: "#eef2ff", color: "#4f46e5" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                </div>
-                <h3 className="stat-val">{streak}</h3>
-                <p className="stat-label">Day Streak</p>
-              </div>
-              <div className="card stat-card">
-                <div className="stat-icon" style={{ background: "#fdf4ff", color: "#c026d3" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5A3 3 0 0 0 13.6 4"/><path d="M6.401 6.5A3 3 0 0 1 10.4 4"/></svg>
-                </div>
-                <h3 className="stat-val">{quizzesTaken}</h3>
-                <p className="stat-label">Quizzes Completed</p>
-              </div>
-              <div className="card stat-card">
-                <div className="stat-icon" style={{ background: "#e0f2fe", color: "#0284c7" }}>
-                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                </div>
-                <h3 className="stat-val">{interviewsDone}</h3>
-                <p className="stat-label">Mock Interviews</p>
-              </div>
-            </div>
-          </section>
-
           {/* Account Details Section */}
           <section>
             <div className="section-header">
@@ -376,7 +328,7 @@ export default function Profile({ user, setUser }) {
                 </div>
               </div>
 
-              {/* Plan (Disabled input logic since plan is usually handled via billing) */}
+              {/* Plan (Disabled input logic) */}
               <div className="detail-row">
                 <div className="detail-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
